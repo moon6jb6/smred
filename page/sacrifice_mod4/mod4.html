@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>祭祀大典 — 星空下的铭记</title>
+    <title>祭祀大典 — 黑暗中的铭记</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -22,20 +22,44 @@
             cursor: none;
         }
 
-        /* 自定义光标光晕 */
-        .cursor-light {
+        /* ========== 三层光晕 ========== */
+        .glow-outer {
             position: fixed;
-            width: 400px;
-            height: 400px;
+            width: 500px;
+            height: 500px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, rgba(255, 180, 0, 0.03) 30%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 9996;
+            transform: translate(-50%, -50%);
+            transition: left 0.4s ease-out, top 0.4s ease-out;
+        }
+
+        .glow-mid {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, rgba(255, 180, 0, 0.03) 40%, transparent 70%);
+            pointer-events: none;
+            z-index: 9997;
+            transform: translate(-50%, -50%);
+            transition: left 0.25s ease-out, top 0.25s ease-out;
+        }
+
+        .glow-inner {
+            position: fixed;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, rgba(255, 180, 0, 0.06) 40%, transparent 70%);
             pointer-events: none;
             z-index: 9998;
             transform: translate(-50%, -50%);
-            transition: opacity 0.3s;
+            transition: left 0.12s ease-out, top 0.12s ease-out;
         }
 
-        /* 提示文字 */
+        /* ========== 提示文字 ========== */
         .hint {
             position: fixed;
             top: 50%;
@@ -53,7 +77,7 @@
             opacity: 0;
         }
 
-        /* 导航按钮 */
+        /* ========== 导航 ========== */
         .nav-buttons {
             position: fixed;
             top: 20px;
@@ -84,34 +108,8 @@
             color: rgba(255, 215, 0, 0.8);
         }
 
-        /* 蜡烛计数 */
-        .candle-count {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1001;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255, 215, 0, 0.7);
-            font-size: 0.9rem;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 8px 14px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 215, 0, 0.15);
-        }
-
-        .candle-count i {
-            animation: candleFlicker 2s infinite alternate;
-        }
-
-        @keyframes candleFlicker {
-            0%, 100% { opacity: 0.7; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
-
-        /* 星星容器 */
-        .stars-container {
+        /* ========== 剪影容器 ========== */
+        .silhouettes-container {
             position: fixed;
             top: 0;
             left: 0;
@@ -120,246 +118,289 @@
             z-index: 2;
         }
 
-        /* 单个星星 */
-        .star {
+        /* ========== 单个剪影 ========== */
+        .silhouette {
             position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            width: 80px;
+            height: 120px;
             cursor: pointer;
-            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 1.2s ease, transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             z-index: 10;
         }
 
-        .star::after {
-            content: attr(data-name);
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-top: 8px;
-            font-size: 0.75rem;
-            color: transparent;
-            white-space: nowrap;
-            transition: color 0.6s;
-            letter-spacing: 1px;
+        .silhouette.visible {
+            opacity: 1;
+            transform: scale(1);
         }
 
-        .star.lit {
-            background: #ffd700;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.2);
-            transform: scale(1.8);
+        .silhouette.discovered {
+            animation: breathe 3s ease-in-out infinite;
         }
 
-        .star.lit::after {
-            color: rgba(255, 215, 0, 0.7);
+        @keyframes breathe {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.9; }
         }
 
-        .star.warm {
-            background: rgba(255, 180, 0, 0.5);
-            box-shadow: 0 0 8px rgba(255, 180, 0, 0.3);
-        }
-
-        /* 浮层 */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.92);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.6s;
-        }
-
-        .overlay.active {
-            display: flex;
+        .silhouette.glow {
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 30px rgba(255, 215, 0, 0.3));
             opacity: 1;
         }
 
-        .overlay-content {
-            max-width: 600px;
-            padding: 50px 40px;
+        /* 人形轮廓 */
+        .silhouette-shape {
+            width: 100%;
+            height: 100%;
+            clip-path: ellipse(22% 28% at 50% 22%);
+            background: rgba(255, 255, 255, 0.15);
+            transition: background 0.6s;
+            position: relative;
+        }
+
+        .silhouette-shape::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            height: 70%;
+            background: inherit;
+            clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+            border-radius: 50% 50% 0 0 / 30% 30% 0 0;
+        }
+
+        .silhouette.glow .silhouette-shape {
+            background: rgba(255, 215, 0, 0.5);
+        }
+
+        .silhouette.discovered .silhouette-shape {
+            background: rgba(255, 215, 0, 0.3);
+        }
+
+        /* 剪影标签 */
+        .silhouette-label {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
             text-align: center;
-            position: relative;
+            transition: opacity 0.6s;
+            pointer-events: none;
         }
 
-        .overlay-name {
-            font-size: 2rem;
-            color: #ffd700;
-            margin-bottom: 8px;
-            letter-spacing: 3px;
+        .silhouette-label .label-name {
+            font-size: 0.85rem;
+            color: rgba(255, 215, 0, 0);
+            letter-spacing: 2px;
+            transition: color 0.6s;
+            display: block;
         }
 
-        .overlay-years {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.4);
-            margin-bottom: 35px;
+        .silhouette-label .label-years {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0);
+            transition: color 0.6s;
+            margin-top: 3px;
+            display: block;
         }
 
-        .overlay-quote {
-            font-size: 1.25rem;
+        .silhouette.glow .silhouette-label .label-name,
+        .silhouette.discovered .silhouette-label .label-name {
+            color: rgba(255, 215, 0, 0.7);
+        }
+
+        .silhouette.glow .silhouette-label .label-years,
+        .silhouette.discovered .silhouette-label .label-years {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        /* ========== 浮现语录（无需弹层） ========== */
+        .quote-float {
+            position: absolute;
+            max-width: 500px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1s ease, transform 1s ease;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .quote-float.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .quote-float.fade-out {
+            opacity: 0;
+            transform: translateY(-15px);
+        }
+
+        .quote-float .qf-text {
+            font-size: 1.3rem;
             line-height: 2;
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 20px;
+            color: rgba(255, 215, 0, 0.85);
             font-style: italic;
-            position: relative;
             padding: 0 20px;
+            position: relative;
         }
 
-        .overlay-quote::before {
+        .quote-float .qf-text::before {
             content: "\201C";
             position: absolute;
-            top: -20px;
-            left: -10px;
+            top: -25px;
+            left: -5px;
             font-size: 4rem;
-            color: rgba(255, 215, 0, 0.15);
+            color: rgba(255, 215, 0, 0.12);
             font-family: serif;
             line-height: 1;
         }
 
-        .overlay-source {
-            font-size: 0.85rem;
+        .quote-float .qf-source {
+            font-size: 0.8rem;
             color: rgba(255, 255, 255, 0.3);
-            margin-bottom: 40px;
+            margin-top: 15px;
         }
 
-        /* 蜡烛按钮 */
-        .candle-btn {
-            background: none;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            color: rgba(255, 215, 0, 0.7);
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+        /* ========== 底部烛光汇聚 ========== */
+        .candle-gathering {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 3;
+            pointer-events: none;
         }
 
-        .candle-btn:hover {
-            background: rgba(255, 215, 0, 0.08);
-            border-color: rgba(255, 215, 0, 0.5);
-            color: #ffd700;
-        }
-
-        .candle-btn.lit {
-            border-color: rgba(255, 215, 0, 0.6);
-            color: #ffd700;
-        }
-
-        /* CSS火焰 */
-        .flame {
-            display: inline-block;
-            width: 12px;
-            height: 20px;
-            background: radial-gradient(ellipse at bottom, #ffd700 0%, #ff8c00 40%, transparent 70%);
+        .mini-flame {
+            width: 8px;
+            height: 14px;
+            background: radial-gradient(ellipse at bottom, #ffd700 0%, #ff8c00 50%, transparent 80%);
             border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            animation: flameDance 0.8s infinite alternate;
             opacity: 0;
-            transition: opacity 0.5s;
+            transform: scale(0);
+            transition: opacity 0.8s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .flame.on {
+        .mini-flame.on {
+            opacity: 1;
+            transform: scale(1);
+            animation: miniFlameDance 0.6s infinite alternate;
+        }
+
+        @keyframes miniFlameDance {
+            0% { transform: scale(1) rotate(-3deg); }
+            100% { transform: scale(1.1, 0.9) rotate(3deg); }
+        }
+
+        /* ========== 终极信息 ========== */
+        .final-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        .final-message.active {
             opacity: 1;
         }
 
-        @keyframes flameDance {
-            0% { transform: scaleY(1) scaleX(1) rotate(-2deg); }
-            50% { transform: scaleY(1.15) scaleX(0.9) rotate(2deg); }
-            100% { transform: scaleY(0.95) scaleX(1.05) rotate(-1deg); }
+        .final-message .fm-text {
+            font-size: 2rem;
+            color: #ffd700;
+            letter-spacing: 6px;
+            line-height: 2;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
         }
 
-        /* 关闭按钮 */
-        .overlay-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
+        .final-message .fm-sub {
+            font-size: 1rem;
             color: rgba(255, 255, 255, 0.4);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 10px;
-            transition: color 0.3s;
+            margin-top: 20px;
+            letter-spacing: 3px;
         }
 
-        .overlay-close:hover {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        /* 底部文字 */
+        /* ========== 底部文字 ========== */
         .bottom-text {
             position: fixed;
-            bottom: 30px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.1);
-            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.08);
+            font-size: 0.75rem;
             letter-spacing: 3px;
             z-index: 1;
             pointer-events: none;
         }
 
-        /* 移动端适配 */
+        /* ========== 底部导航 ========== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+
+        .bottom-nav a {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bottom-nav a:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* ========== 移动端 ========== */
         @media (max-width: 768px) {
-            body {
-                cursor: auto;
-            }
-            .cursor-light {
-                display: none;
-            }
-            .overlay-content {
-                padding: 30px 20px;
-            }
-            .overlay-name {
-                font-size: 1.5rem;
-            }
-            .overlay-quote {
-                font-size: 1.05rem;
-                line-height: 1.8;
-            }
-            .hint {
-                font-size: 0.95rem;
-                padding: 0 20px;
-                text-align: center;
-            }
-            .nav-buttons {
-                top: 10px;
-                left: 10px;
-            }
-            .nav-btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
-            }
+            body { cursor: auto; }
+            .glow-outer, .glow-mid, .glow-inner { display: none; }
+            .hint { font-size: 0.95rem; padding: 0 20px; text-align: center; }
+            .silhouette { width: 60px; height: 90px; }
+            .silhouette-label .label-name { font-size: 0.75rem; }
+            .quote-float .qf-text { font-size: 1.05rem; }
+            .final-message .fm-text { font-size: 1.4rem; letter-spacing: 3px; }
+            .nav-buttons { top: 10px; left: 10px; }
+            .nav-btn { padding: 6px 12px; font-size: 0.8rem; }
         }
 
         @media (max-width: 480px) {
-            .star {
-                width: 5px;
-                height: 5px;
-            }
-            .star.lit {
-                transform: scale(1.5);
-            }
+            .silhouette { width: 50px; height: 75px; }
+            .quote-float .qf-text { font-size: 0.95rem; }
+            .final-message .fm-text { font-size: 1.2rem; }
         }
     </style>
 </head>
 
 <body>
-    <!-- 自定义光标光晕 -->
-    <div class="cursor-light" id="cursorLight"></div>
+    <!-- 三层光晕 -->
+    <div class="glow-outer" id="glowOuter"></div>
+    <div class="glow-mid" id="glowMid"></div>
+    <div class="glow-inner" id="glowInner"></div>
 
-    <!-- 提示文字 -->
-    <div class="hint" id="hint">移动鼠标，照亮黑暗中的星</div>
+    <!-- 提示 -->
+    <div class="hint" id="hint">移动鼠标，照亮黑暗中的人</div>
 
     <!-- 导航 -->
     <div class="nav-buttons">
@@ -368,189 +409,152 @@
         </a>
     </div>
 
-    <!-- 蜡烛计数 -->
-    <div class="candle-count">
-        <i class="fas fa-fire"></i>
-        <span id="candleNum">0</span> 盏烛光
+    <!-- 剪影容器 -->
+    <div class="silhouettes-container" id="silContainer"></div>
+
+    <!-- 浮现语录 -->
+    <div class="quote-float" id="quoteFloat">
+        <div class="qf-text" id="qfText"></div>
+        <div class="qf-source" id="qfSource"></div>
     </div>
 
-    <!-- 星星容器 -->
-    <div class="stars-container" id="starsContainer"></div>
+    <!-- 底部烛光汇聚 -->
+    <div class="candle-gathering" id="candleGathering"></div>
 
-    <!-- 浮层 -->
-    <div class="overlay" id="overlay">
-        <button class="overlay-close" id="overlayClose"><i class="fas fa-times"></i></button>
-        <div class="overlay-content">
-            <div class="overlay-name" id="overlayName"></div>
-            <div class="overlay-years" id="overlayYears"></div>
-            <div class="overlay-quote" id="overlayQuote"></div>
-            <div class="overlay-source" id="overlaySource"></div>
-            <button class="candle-btn" id="candleBtn">
-                <span class="flame" id="flame"></span>
-                <span id="candleBtnText">点亮蜡烛</span>
-            </button>
-        </div>
+    <!-- 终极信息 -->
+    <div class="final-message" id="finalMessage">
+        <div class="fm-text">他们说，不要忘记我们。</div>
+        <div class="fm-sub">你已点亮全部 12 盏烛光</div>
     </div>
 
     <!-- 底部文字 -->
     <div class="bottom-text">英雄是民族最闪亮的坐标</div>
 
     <!-- 底部导航 -->
-    <div class="bottom-nav" style="text-align:center; padding:20px;">
-        <a href="../greatman_mod5/mod5.html" onclick="event.preventDefault(); filmstripTransition('../greatman_mod5/mod5.html');" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.6); padding:8px 16px; border-radius:20px; text-decoration:none; font-size:0.85rem; transition:all 0.3s;">
+    <div class="bottom-nav">
+        <a href="../greatman_mod5/mod5.html" onclick="event.preventDefault(); filmstripTransition('../greatman_mod5/mod5.html');">
             下一个穿越：新中国之父 <i class="fas fa-arrow-right"></i>
         </a>
     </div>
 
     <script src="../filmstrip.js"></script>
     <script>
-        // 人物数据：真实语录
+        // 人物数据
         const heroes = [
-            {
-                name: '钱学森',
-                years: '1911 — 2009',
-                quote: '我的事业在中国，我的成就在中国，我的归宿在中国。',
-                source: '—— 钱学森回国后接受采访时说'
-            },
-            {
-                name: '袁隆平',
-                years: '1930 — 2021',
-                quote: '我毕生的追求就是让所有人远离饥饿。',
-                source: '—— 袁隆平接受央视采访'
-            },
-            {
-                name: '黄旭华',
-                years: '1926 — 2020',
-                quote: '对国家的忠，就是对父母最大的孝。',
-                source: '—— 黄旭华谈隐姓埋名30年'
-            },
-            {
-                name: '张富清',
-                years: '1924 — 2022',
-                quote: '我是党培养的，我要永远听党话，跟党走。',
-                source: '—— 张富清在部队时说的话'
-            },
-            {
-                name: '邓稼先',
-                years: '1924 — 1986',
-                quote: '做好了这件事情，我这一生就过得很有意义，就是为它死了也值得。',
-                source: '—— 邓稼先接受核武器研制任务时说'
-            },
-            {
-                name: '焦裕禄',
-                years: '1922 — 1964',
-                quote: '我们不是人民的上司，我们都是人民的勤务员。',
-                source: '—— 焦裕禄在兰考工作时说'
-            },
-            {
-                name: '雷锋',
-                years: '1940 — 1962',
-                quote: '人的生命是有限的，可是，为人民服务是无限的，我要把有限的生命，投入到无限的为人民服务之中去。',
-                source: '—— 《雷锋日记》'
-            },
-            {
-                name: '孙家栋',
-                years: '1929 — 2023',
-                quote: '国家需要，我就去做。',
-                source: '—— 孙家栋谈一生航天事业'
-            },
-            {
-                name: '于敏',
-                years: '1926 — 2019',
-                quote: '一个人的名字，早晚是要没有的，能把微薄的力量融进祖国的强盛之中，便足以自慰了。',
-                source: '—— 于敏获国家最高科学技术奖后说'
-            },
-            {
-                name: '张自忠',
-                years: '1891 — 1940',
-                quote: '国家到了如此地步，除我等为其死，毫无其他办法。',
-                source: '—— 张自忠殉国前致战友书'
-            },
-            {
-                name: '赵一曼',
-                years: '1905 — 1936',
-                quote: '未惜头颅新故国，甘将热血沃中华。',
-                source: '—— 赵一曼就义前诗'
-            },
-            {
-                name: '杨靖宇',
-                years: '1905 — 1940',
-                quote: '我们中国人都投降了，还有中国吗？',
-                source: '—— 杨靖宇殉国前对劝降者说'
-            }
+            { name: '钱学森', years: '1911 — 2009', quote: '我的事业在中国，我的成就在中国，我的归宿在中国。', source: '—— 钱学森回国后接受采访时说' },
+            { name: '袁隆平', years: '1930 — 2021', quote: '我毕生的追求就是让所有人远离饥饿。', source: '—— 袁隆平接受央视采访' },
+            { name: '黄旭华', years: '1926 — 2020', quote: '对国家的忠，就是对父母最大的孝。', source: '—— 黄旭华谈隐姓埋名30年' },
+            { name: '张富清', years: '1924 — 2022', quote: '我是党培养的，我要永远听党话，跟党走。', source: '—— 张富清在部队时说的话' },
+            { name: '邓稼先', years: '1924 — 1986', quote: '做好了这件事情，我这一生就过得很有意义，就是为它死了也值得。', source: '—— 邓稼先接受核武器研制任务时说' },
+            { name: '焦裕禄', years: '1922 — 1964', quote: '我们不是人民的上司，我们都是人民的勤务员。', source: '—— 焦裕禄在兰考工作时说' },
+            { name: '雷锋', years: '1940 — 1962', quote: '人的生命是有限的，可是，为人民服务是无限的，我要把有限的生命，投入到无限的为人民服务之中去。', source: '—— 《雷锋日记》' },
+            { name: '孙家栋', years: '1929 — 2023', quote: '国家需要，我就去做。', source: '—— 孙家栋谈一生航天事业' },
+            { name: '于敏', years: '1926 — 2019', quote: '一个人的名字，早晚是没有的，能把微薄的力量融进祖国的强盛之中，便足以自慰了。', source: '—— 于敏获国家最高科学技术奖后说' },
+            { name: '张自忠', years: '1891 — 1940', quote: '国家到了如此地步，除我等为其死，毫无其他办法。', source: '—— 张自忠殉国前致战友书' },
+            { name: '赵一曼', years: '1905 — 1936', quote: '未惜头颅新故国，甘将热血沃中华。', source: '—— 赵一曼就义前诗' },
+            { name: '杨靖宇', years: '1905 — 1940', quote: '我们中国人都投降了，还有中国吗？', source: '—— 杨靖宇殉国前对劝降者说' }
         ];
 
-        // 星星位置（百分比，大致环形排列）
-        const starPositions = [
-            { x: 50, y: 18 },
-            { x: 72, y: 22 },
-            { x: 85, y: 35 },
-            { x: 88, y: 52 },
-            { x: 78, y: 67 },
-            { x: 62, y: 78 },
-            { x: 42, y: 80 },
-            { x: 25, y: 70 },
-            { x: 14, y: 55 },
-            { x: 14, y: 38 },
-            { x: 25, y: 25 },
-            { x: 38, y: 17 }
+        // 剪影位置（环形排列）
+        const positions = [
+            { x: 50, y: 15 }, { x: 72, y: 20 }, { x: 86, y: 34 },
+            { x: 88, y: 52 }, { x: 78, y: 68 }, { x: 62, y: 78 },
+            { x: 42, y: 80 }, { x: 25, y: 70 }, { x: 14, y: 55 },
+            { x: 14, y: 38 }, { x: 25, y: 24 }, { x: 38, y: 16 }
         ];
 
         // 状态
-        const litCandles = JSON.parse(localStorage.getItem('mod4_candles') || '{}');
-        const container = document.getElementById('starsContainer');
-        const cursorLight = document.getElementById('cursorLight');
+        const discovered = JSON.parse(localStorage.getItem('mod4_candles') || '{}');
+        const container = document.getElementById('silContainer');
+        const glowOuter = document.getElementById('glowOuter');
+        const glowMid = document.getElementById('glowMid');
+        const glowInner = document.getElementById('glowInner');
         const hint = document.getElementById('hint');
-        const overlay = document.getElementById('overlay');
-        const overlayName = document.getElementById('overlayName');
-        const overlayYears = document.getElementById('overlayYears');
-        const overlayQuote = document.getElementById('overlayQuote');
-        const overlaySource = document.getElementById('overlaySource');
-        const candleBtn = document.getElementById('candleBtn');
-        const candleBtnText = document.getElementById('candleBtnText');
-        const flame = document.getElementById('flame');
-        const overlayClose = document.getElementById('overlayClose');
-        const candleNum = document.getElementById('candleNum');
+        const quoteFloat = document.getElementById('quoteFloat');
+        const qfText = document.getElementById('qfText');
+        const qfSource = document.getElementById('qfSource');
+        const candleGathering = document.getElementById('candleGathering');
+        const finalMessage = document.getElementById('finalMessage');
 
-        let currentHero = null;
         let hintHidden = false;
+        let quoteTimer = null;
+        const discoveredSet = new Set(Object.keys(discovered).map(Number));
 
-        // 初始化星星
-        function createStars() {
-            heroes.forEach((hero, i) => {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.dataset.index = i;
-                star.dataset.name = hero.name;
-                star.style.left = starPositions[i].x + '%';
-                star.style.top = starPositions[i].y + '%';
-
-                if (litCandles[i]) {
-                    star.classList.add('warm');
-                }
-
-                star.addEventListener('click', () => openOverlay(i));
-                container.appendChild(star);
-            });
-            updateCandleCount();
+        // 创建底部烛光
+        for (let i = 0; i < 12; i++) {
+            const flame = document.createElement('div');
+            flame.className = 'mini-flame';
+            flame.dataset.index = i;
+            if (discovered[i]) flame.classList.add('on');
+            candleGathering.appendChild(flame);
         }
 
-        // 鼠标追踪
-        document.addEventListener('mousemove', (e) => {
-            cursorLight.style.left = e.clientX + 'px';
-            cursorLight.style.top = e.clientY + 'px';
+        // 创建剪影
+        function createSilhouettes() {
+            heroes.forEach((hero, i) => {
+                const el = document.createElement('div');
+                el.className = 'silhouette';
+                el.dataset.index = i;
+                el.style.left = positions[i].x + '%';
+                el.style.top = positions[i].y + '%';
+                el.style.transform = 'translate(-50%, -50%) scale(0.5)';
 
-            const stars = document.querySelectorAll('.star');
-            stars.forEach(star => {
-                const rect = star.getBoundingClientRect();
-                const starCx = rect.left + rect.width / 2;
-                const starCy = rect.top + rect.height / 2;
-                const dist = Math.sqrt(Math.pow(e.clientX - starCx, 2) + Math.pow(e.clientY - starCy, 2));
+                if (discoveredSet.has(i)) {
+                    el.classList.add('discovered');
+                }
+
+                el.innerHTML = `
+                    <div class="silhouette-shape"></div>
+                    <div class="silhouette-label">
+                        <span class="label-name">${hero.name}</span>
+                        <span class="label-years">${hero.years}</span>
+                    </div>
+                `;
+
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    revealQuote(i);
+                });
+
+                container.appendChild(el);
+            });
+        }
+
+        // 英雄找用户：依次自动亮起
+        function revealSilhouettes() {
+            const els = document.querySelectorAll('.silhouette');
+            els.forEach((el, i) => {
+                setTimeout(() => {
+                    el.classList.add('visible');
+                    if (el.classList.contains('discovered')) {
+                        el.style.transform = 'translate(-50%, -50%) scale(1)';
+                    } else {
+                        el.style.transform = 'translate(-50%, -50%) scale(1)';
+                    }
+                }, i * 400);
+            });
+        }
+
+        // 鼠标追踪：三层光晕 + 延迟跟随
+        document.addEventListener('mousemove', (e) => {
+            glowOuter.style.left = e.clientX + 'px';
+            glowOuter.style.top = e.clientY + 'px';
+            glowMid.style.left = e.clientX + 'px';
+            glowMid.style.top = e.clientY + 'px';
+            glowInner.style.left = e.clientX + 'px';
+            glowInner.style.top = e.clientY + 'px';
+
+            // 检测剪影距离
+            document.querySelectorAll('.silhouette').forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
 
                 if (dist < 180) {
-                    star.classList.add('lit');
-                } else if (!litCandles[star.dataset.index]) {
-                    star.classList.remove('lit');
+                    el.classList.add('glow');
+                } else {
+                    el.classList.remove('glow');
                 }
             });
 
@@ -560,92 +564,91 @@
             }
         });
 
-        // 触摸设备支持
+        // 触摸支持
         document.addEventListener('touchmove', (e) => {
-            const touch = e.touches[0];
-            const stars = document.querySelectorAll('.star');
-            stars.forEach(star => {
-                const rect = star.getBoundingClientRect();
-                const starCx = rect.left + rect.width / 2;
-                const starCy = rect.top + rect.height / 2;
-                const dist = Math.sqrt(Math.pow(touch.clientX - starCx, 2) + Math.pow(touch.clientY - starCy, 2));
-                if (dist < 100) {
-                    star.classList.add('lit');
-                } else if (!litCandles[star.dataset.index]) {
-                    star.classList.remove('lit');
+            const t = e.touches[0];
+            document.querySelectorAll('.silhouette').forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const dist = Math.hypot(t.clientX - cx, t.clientY - cy);
+                if (dist < 120) {
+                    el.classList.add('glow');
+                } else {
+                    el.classList.remove('glow');
                 }
             });
         });
 
-        // 打开浮层
-        function openOverlay(index) {
-            currentHero = index;
+        // 点击剪影 → 语录浮现（无需弹层）
+        function revealQuote(index) {
             const hero = heroes[index];
+            const el = document.querySelector(`.silhouette[data-index="${index}"]`);
 
-            overlayName.textContent = hero.name;
-            overlayYears.textContent = hero.years;
-            overlayQuote.textContent = hero.quote;
-            overlaySource.textContent = hero.source;
+            // 设置语录内容
+            qfText.textContent = hero.quote;
+            qfSource.textContent = hero.source;
 
-            if (litCandles[index]) {
-                candleBtn.classList.add('lit');
-                candleBtnText.textContent = '烛光不灭';
-                flame.classList.add('on');
-            } else {
-                candleBtn.classList.remove('lit');
-                candleBtnText.textContent = '点亮蜡烛';
-                flame.classList.remove('on');
-            }
+            // 定位语录到剪影附近
+            const rect = el.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            quoteFloat.style.left = Math.max(10, Math.min(rect.left - containerRect.left - 100, window.innerWidth - 520)) + 'px';
+            quoteFloat.style.top = (rect.top - containerRect.top - 60) + 'px';
 
-            overlay.style.display = 'flex';
+            // 显示语录
+            clearTimeout(quoteTimer);
+            quoteFloat.classList.remove('active', 'fade-out');
             requestAnimationFrame(() => {
-                overlay.classList.add('active');
+                quoteFloat.classList.add('active');
             });
-        }
 
-        // 关闭浮层
-        function closeOverlay() {
-            overlay.classList.remove('active');
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                currentHero = null;
-            }, 600);
-        }
+            // 标记已发现
+            if (!discoveredSet.has(index)) {
+                discoveredSet.add(index);
+                discovered[index] = true;
+                localStorage.setItem('mod4_candles', JSON.stringify(discovered));
 
-        overlayClose.addEventListener('click', closeOverlay);
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeOverlay();
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeOverlay();
-        });
+                el.classList.add('discovered');
 
-        // 点亮蜡烛
-        candleBtn.addEventListener('click', () => {
-            if (currentHero === null) return;
+                // 点亮底部烛光
+                const miniFlame = document.querySelector(`.mini-flame[data-index="${index}"]`);
+                if (miniFlame) miniFlame.classList.add('on');
 
-            if (!litCandles[currentHero]) {
-                litCandles[currentHero] = true;
-                localStorage.setItem('mod4_candles', JSON.stringify(litCandles));
-                candleBtn.classList.add('lit');
-                candleBtnText.textContent = '烛光不灭';
-                flame.classList.add('on');
-
-                const star = document.querySelector(`.star[data-index="${currentHero}"]`);
-                if (star) star.classList.add('warm');
-
-                updateCandleCount();
+                // 检查是否全部点亮
+                if (discoveredSet.size >= 12) {
+                    setTimeout(showFinalMessage, 3000);
+                }
             }
-        });
 
-        // 更新蜡烛计数
-        function updateCandleCount() {
-            const count = Object.keys(litCandles).length;
-            candleNum.textContent = count;
+            // 5秒后语录淡出
+            quoteTimer = setTimeout(() => {
+                quoteFloat.classList.add('fade-out');
+                setTimeout(() => {
+                    quoteFloat.classList.remove('active', 'fade-out');
+                }, 1000);
+            }, 5000);
+        }
+
+        // 全部点亮 → 终极信息
+        function showFinalMessage() {
+            // 先隐藏语录
+            quoteFloat.classList.remove('active');
+            finalMessage.classList.add('active');
+
+            // 8秒后淡出
+            setTimeout(() => {
+                finalMessage.classList.remove('active');
+            }, 8000);
         }
 
         // 初始化
-        createStars();
+        createSilhouettes();
+        setTimeout(revealSilhouettes, 3000);
+
+        // 如果全部已点亮，延迟显示终极信息
+        if (discoveredSet.size >= 12) {
+            setTimeout(showFinalMessage, 6000);
+        }
     </script>
 </body>
 
