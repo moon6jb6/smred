@@ -526,13 +526,13 @@
             <div class="map-center">中国</div>
 
             <!-- 关系线和端点由JS生成 -->
-        </div>
 
-        <!-- 弹窗 -->
-        <div class="map-popup" id="mapPopup">
-            <button class="map-popup-close" id="mapPopupClose">&times;</button>
-            <div class="map-popup-title" id="mapPopupTitle"></div>
-            <div id="mapPopupContent"></div>
+            <!-- 弹窗 -->
+            <div class="map-popup" id="mapPopup">
+                <button class="map-popup-close" id="mapPopupClose">&times;</button>
+                <div class="map-popup-title" id="mapPopupTitle"></div>
+                <div id="mapPopupContent"></div>
+            </div>
         </div>
     </div>
 
@@ -612,16 +612,16 @@
 
             relations.forEach(rel => {
                 const rad = (rel.angle * Math.PI) / 180;
+                // CSS坐标系：y轴向下，角度顺时针；math坐标系：y轴向上，角度逆时针
                 const ex = cx + Math.cos(rad) * rel.distance;
-                const ey = cy + Math.sin(rad) * rel.distance;
+                const ey = cy - Math.sin(rad) * rel.distance;
 
                 // 线
                 const line = document.createElement('div');
                 line.className = 'map-line';
                 const length = rel.distance;
-                const deg = rel.angle;
                 line.style.width = length + 'px';
-                line.style.transform = `rotate(${deg}deg)`;
+                line.style.transform = `rotate(${-rel.angle}deg)`;
                 mapContainer.appendChild(line);
 
                 // 端点
@@ -635,7 +635,7 @@
                     e.stopPropagation();
                     mapPopupTitle.textContent = rel.name + ' — ' + rel.trade;
                     mapPopupContent.textContent = rel.story;
-                    mapPopup.style.left = Math.min(ex + 20, window.innerWidth - 320) + 'px';
+                    mapPopup.style.left = Math.min(ex + 20, mapContainer.offsetWidth - 300) + 'px';
                     mapPopup.style.top = (ey - 30) + 'px';
                     mapPopup.classList.add('active');
                 });
@@ -647,7 +647,7 @@
                 label.className = 'map-label';
                 label.textContent = rel.name;
                 const lx = ex + Math.cos(rad) * 25;
-                const ly = ey + Math.sin(rad) * 25;
+                const ly = ey - Math.sin(rad) * 25;
                 label.style.left = lx + 'px';
                 label.style.top = ly + 'px';
                 label.style.transform = 'translate(-50%, -50%)';

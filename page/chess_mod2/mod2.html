@@ -7,8 +7,7 @@
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.4.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.4.1/core.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../timeriver_museum_mod3/mod3.css">
-<link rel="stylesheet" href="./mod2.css">
+    <link rel="stylesheet" href="./mod2.css">
 <script src="../filmstrip.js"></script>
 </head>
 <body>
@@ -39,7 +38,7 @@
         <div class="info-panel">
             <div class="level-info">
                 <h2>第 <span id="level-number">0</span> 关</h2>
-                <span id ="level_name">aaaa</span>
+                <span id ="level_name"></span>
                 <p>残局挑战</p>
             </div>
             
@@ -467,6 +466,9 @@
                 self.calculate_general_moves()
             elif self.name in ["兵", "卒"]:
                 self.calculate_pawn_moves()
+            elif self.name == "军":
+                self.calculate_rook_moves()
+            # "障" is immovable obstacle — no moves
         
         def calculate_rook_moves(self):
             # 车的移动规则：横向和纵向任意距离
@@ -855,6 +857,7 @@
         return True  # 将帅对脸
 
     def check_game_end():
+        global user_max_level
     # 检查是否有一方的将/帅被吃掉
         red_general_exists = any(piece.alive and piece.color == "red" and piece.name == "帅" for piece in chess_pieces)
         black_general_exists = any(piece.alive and piece.color == "black" and piece.name == "将" for piece in chess_pieces)

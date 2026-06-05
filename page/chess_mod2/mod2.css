@@ -78,6 +78,7 @@
             background-color: #deb887;
             border: 20px solid #8b4513;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            box-sizing: content-box;
         }
         /* 添加吃子动画 */
         
@@ -493,7 +494,7 @@
         /* 下一关按钮 */
         
         .next-level-btn {
-            display: none;
+            display: inline-flex;
             background-color: #2ecc71;
             color: white;
             border: none;
