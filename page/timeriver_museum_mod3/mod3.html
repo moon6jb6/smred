@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间博物馆 — 历史的温度</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0a0a 0%, #2d1515 50%, #1a0a0a 100%);
+            color: #f5f5f5;
+            font-family: 'Microsoft YaHei', 'SimHei', serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 导航 */
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* 页面标题 */
+        .page-header {
+            text-align: center;
+            padding: 80px 20px 30px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #ffd700;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+
+        /* 收集进度 */
+        .collect-bar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            padding: 8px 14px;
+            border-radius: 20px;
+            color: rgba(255, 215, 0, 0.7);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 物件容器 */
+        .objects-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            height: 70vh;
+            margin: 20px auto;
+            min-height: 500px;
+        }
+
+        /* 单个物件 */
+        .history-object {
+            position: absolute;
+            width: 120px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .history-object:hover {
+            transform: scale(1.15) translateY(-8px);
+        }
+
+        .object-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.4s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .history-object:hover .object-icon {
+            border-color: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+            background: rgba(255, 215, 0, 0.08);
+        }
+
+        .history-object.explored .object-icon {
+            border-color: rgba(255, 215, 0, 0.5);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .object-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            transition: color 0.4s;
+            line-height: 1.4;
+        }
+
+        .history-object:hover .object-label {
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        .object-year {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.25);
+            margin-top: 3px;
+        }
+
+        /* 浮层 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .overlay-card {
+            max-width: 550px;
+            width: 90%;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .overlay-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: rgba(255, 215, 0, 0.08);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .overlay-title {
+            font-size: 1.8rem;
+            color: #ffd700;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .overlay-year {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 25px;
+        }
+
+        .overlay-story {
+            font-size: 1.05rem;
+            line-height: 2;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .overlay-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px;
+            transition: color 0.3s;
+        }
+
+        .overlay-close:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 底部总结 */
+        .summary {
+            text-align: center;
+            padding: 40px 20px 60px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .summary-text {
+            font-size: 1.15rem;
+            line-height: 2;
+            color: rgba(255, 255, 255, 0.3);
+            font-style: italic;
+            transition: all 1s;
+        }
+
+        .summary-text.unlocked {
+            color: rgba(255, 215, 0, 0.7);
+        }
+
+        .summary-hint {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.15);
+            margin-top: 15px;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .bottom-nav a {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .bottom-nav a:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* 移动端 */
+        @media (max-width: 768px) {
+            .objects-container {
+                height: auto;
+                min-height: auto;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px 20px;
+                padding: 20px;
+                max-width: 400px;
+            }
+
+            .history-object {
+                position: relative;
+                width: 100%;
+                top: auto !important;
+                left: auto !important;
+            }
+
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .overlay-card {
+                padding: 25px;
+            }
+
+            .overlay-title {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 导航 -->
+    <div class="nav-buttons">
+        <a href="../../index.html" class="nav-btn" onclick="event.preventDefault(); filmstripTransition('../../index.html');">
+            <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+    </div>
+
+    <!-- 收集进度 -->
+    <div class="collect-bar">
+        <i class="fas fa-compass"></i>
+        <span id="collectNum">0</span>/10 已探索
+    </div>
+
+    <!-- 页面标题 -->
+    <div class="page-header">
+        <h1>时间博物馆</h1>
+        <p>点击历史物件，触摸那个年代的温度</p>
+    </div>
+
+    <!-- 物件容器 -->
+    <div class="objects-container" id="objectsContainer"></div>
+
+    <!-- 底部总结 -->
+    <div class="summary">
+        <div class="summary-text" id="summaryText">
+            历史不是课本上的文字，是这些人、这些事、这些选择汇聚成的河流。<br>
+            你触摸过的每一个物件，都是河流中的一滴水。
+        </div>
+        <div class="summary-hint" id="summaryHint">探索全部 10 个历史瞬间，解锁完整寄语</div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <a href="../sacrifice_mod4/mod4.html" onclick="event.preventDefault(); filmstripTransition('../sacrifice_mod4/mod4.html');">
+            下一个穿越：祭祀大典 <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- 浮层 -->
+    <div class="overlay" id="overlay">
+        <button class="overlay-close" id="overlayClose"><i class="fas fa-times"></i></button>
+        <div class="overlay-card">
+            <div class="overlay-icon" id="overlayIcon"></div>
+            <div class="overlay-title" id="overlayTitle"></div>
+            <div class="overlay-year" id="overlayYear"></div>
+            <div class="overlay-story" id="overlayStory"></div>
+        </div>
+    </div>
+
+    <script src="../filmstrip.js"></script>
+    <script>
+        // 10个历史物件
+        const objects = [
+            {
+                name: '南京条约',
+                year: '1842年',
+                icon: '📜',
+                label: '一纸条约',
+                story: '1842年，清政府被迫签订《南京条约》，割让香港岛，开放五处通商口岸。这是中国近代史上第一个不平等条约，从此，中国开始沦为半殖民地半封建社会。一纸条约，压弯了一个民族的脊梁。',
+                x: 50, y: 10, rotate: -5
+            },
+            {
+                name: '太平天国旗帜',
+                year: '1851年',
+                icon: '🚩',
+                label: '一面旗帜',
+                story: '1851年，洪秀全在广西金田起义，建号太平天国。这是中国历史上规模最大的农民起义，席卷半个中国，坚持了14年。虽然最终失败，但它动摇了清王朝的根基，也唤醒了后来者。',
+                x: 78, y: 18, rotate: 8
+            },
+            {
+                name: '戊戌变法奏折',
+                year: '1898年',
+                icon: '📃',
+                label: '一道奏折',
+                story: '1898年，康有为、梁启超推动光绪帝进行变法，历时103天即告失败。谭嗣同拒绝逃亡，说："各国变法，无不从流血而成。"从容就义。百日维新虽短，却播下了变革的种子。',
+                x: 15, y: 28, rotate: -3
+            },
+            {
+                name: '辛亥革命手枪',
+                year: '1911年',
+                icon: '🔫',
+                label: '一声枪响',
+                story: '1911年10月10日，武昌起义一声枪响，两千多年的封建帝制轰然倒塌。孙中山说："革命尚未成功，同志仍须努力。"这一枪，打碎了一个旧世界，也开启了一个充满动荡的新时代。',
+                x: 82, y: 38, rotate: 12
+            },
+            {
+                name: '五四传单',
+                year: '1919年',
+                icon: '🗞',
+                label: '一张传单',
+                story: '1919年5月4日，北京学生走上街头，高喊"外争主权，内除国贼"。这一天，中国青年第一次以一个群体的姿态登上历史舞台。五四运动不仅是一场爱国运动，更是一场思想启蒙。',
+                x: 25, y: 50, rotate: -8
+            },
+            {
+                name: '中共一大会议桌',
+                year: '1921年',
+                icon: '🪑',
+                label: '一张桌子',
+                story: '1921年7月，13位代表在上海法租界的一张桌子旁，召开了中国共产党第一次全国代表大会。他们平均年龄28岁。谁也不知道，这张桌子旁诞生的组织，将改变中国的命运。',
+                x: 60, y: 52, rotate: 3
+            },
+            {
+                name: '南昌起义军旗',
+                year: '1927年',
+                icon: '🏴',
+                label: '一面军旗',
+                story: '1927年8月1日，南昌城头一声枪响，中国共产党有了自己的武装力量。这面军旗，从南昌升起，经过长征、抗日、解放战争，最终插遍了全中国。',
+                x: 40, y: 68, rotate: -6
+            },
+            {
+                name: '遵义会议桌',
+                year: '1935年',
+                icon: '🪑',
+                label: '一张会议桌',
+                story: '1935年1月，在遵义的一间小屋里，中国共产党做出了一个改变命运的决定：确立毛泽东的领导地位。这张桌子旁的争论，挽救了红军，挽救了党，挽救了中国革命。',
+                x: 75, y: 70, rotate: 5
+            },
+            {
+                name: '开国大典话筒',
+                year: '1949年',
+                icon: '🎙',
+                label: '一个话筒',
+                story: '1949年10月1日，毛泽东站在天安门城楼上，对着这个话筒说："中华人民共和国中央人民政府今天成立了！"这句话，传遍了全中国，也传遍了全世界。一个新时代，从这个话筒开始。',
+                x: 20, y: 82, rotate: -4
+            },
+            {
+                name: '改革开放红头文件',
+                year: '1978年',
+                icon: '📋',
+                label: '一份文件',
+                story: '1978年12月，十一届三中全会召开，中国开始了改革开放。这份文件，让中国从封闭走向开放，从贫穷走向富裕。40多年后的今天，中国已经成为世界第二大经济体。一切，从这份文件开始。',
+                x: 58, y: 85, rotate: 7
+            }
+        ];
+
+        // 状态
+        const explored = JSON.parse(localStorage.getItem('mod3_explored') || '{}');
+        const container = document.getElementById('objectsContainer');
+        const overlay = document.getElementById('overlay');
+        const overlayIcon = document.getElementById('overlayIcon');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayYear = document.getElementById('overlayYear');
+        const overlayStory = document.getElementById('overlayStory');
+        const overlayClose = document.getElementById('overlayClose');
+        const collectNum = document.getElementById('collectNum');
+        const summaryText = document.getElementById('summaryText');
+        const summaryHint = document.getElementById('summaryHint');
+
+        let currentObject = null;
+
+        // 创建物件
+        function createObjects() {
+            objects.forEach((obj, i) => {
+                const el = document.createElement('div');
+                el.className = 'history-object';
+                el.dataset.index = i;
+                el.style.left = obj.x + '%';
+                el.style.top = obj.y + '%';
+                el.style.transform = `rotate(${obj.rotate}deg)`;
+
+                if (explored[i]) {
+                    el.classList.add('explored');
+                }
+
+                el.innerHTML = `
+                    <div class="object-icon">${obj.icon}</div>
+                    <div class="object-label">${obj.label}</div>
+                    <div class="object-year">${obj.year}</div>
+                `;
+
+                el.addEventListener('click', () => openOverlay(i));
+                container.appendChild(el);
+            });
+            updateCollect();
+        }
+
+        // 打开浮层
+        function openOverlay(index) {
+            currentObject = index;
+            const obj = objects[index];
+
+            overlayIcon.textContent = obj.icon;
+            overlayTitle.textContent = obj.name;
+            overlayYear.textContent = obj.year;
+            overlayStory.textContent = obj.story;
+
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => {
+                overlay.classList.add('active');
+            });
+
+            // 标记已探索
+            if (!explored[index]) {
+                explored[index] = true;
+                localStorage.setItem('mod3_explored', JSON.stringify(explored));
+                const el = document.querySelector(`.history-object[data-index="${index}"]`);
+                if (el) el.classList.add('explored');
+                updateCollect();
+            }
+        }
+
+        // 关闭浮层
+        function closeOverlay() {
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                currentObject = null;
+            }, 500);
+        }
+
+        overlayClose.addEventListener('click', closeOverlay);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeOverlay();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeOverlay();
+        });
+
+        // 更新收集计数
+        function updateCollect() {
+            const count = Object.keys(explored).length;
+            collectNum.textContent = count;
+
+            if (count >= 10) {
+                summaryText.classList.add('unlocked');
+                summaryHint.style.display = 'none';
+            }
+        }
+
+        // 初始化
+        createObjects();
+    </script>
+</body>
+
+</html>

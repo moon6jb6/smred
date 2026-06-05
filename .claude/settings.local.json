@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mv \"a正式作品文件_QQ浏览器解压压缩包_\\(5\\)/a正式作品文件/page/chess_mod2/old\" \"a正式作品文件_QQ浏览器解压压缩包_\\(5\\)/trash/cleanup-2026-06-04/chess_mod2-old\")",
+      "Bash(mv \"a正式作品文件_QQ浏览器解压压缩包_\\(5\\)/a正式作品文件/page/longfight_rouit_mod1/old\" \"a正式作品文件_QQ浏览器解压压缩包_\\(5\\)/trash/cleanup-2026-06-04/longfight_rouit_mod1-old\")",
+      "Bash(cp \"a正式作品文件_QQ浏览器解压压缩包_\\(5\\)/a正式作品文件/1.jpg\" .)",
+      "Bash(cp \"a正式作品文件_QQ浏览器解压压缩包_\\(5\\)/a正式作品文件/2.jpg\" .)",
+      "Bash(cp \"a正式作品文件_QQ浏览器解压压缩包_\\(5\\)/a正式作品文件/3.jpg\" .)",
+      "Bash(cp \"a正式作品文件_QQ浏览器解压压缩包_\\(5\\)/a正式作品文件/4.jpg\" .)",
+      "Bash(cp \"a正式作品文件_QQ浏览器解压压缩包_\\(5\\)/a正式作品文件/drawelement.css\" .)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git add *)",
+      "Bash(git rm *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

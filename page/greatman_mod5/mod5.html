@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三次选择 — 毛泽东</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(180deg, #1a0a00 0%, #2d1500 50%, #1a0a00 100%);
+            color: #f5f5f5;
+            font-family: 'Microsoft YaHei', 'SimHei', serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* 导航 */
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* 标题 */
+        .page-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .page-title h1 {
+            font-size: 2.5rem;
+            color: #ffd700;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+
+        .page-title p {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+
+        /* 卡片容器 */
+        .cards-container {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1100px;
+            width: 100%;
+            perspective: 1000px;
+        }
+
+        /* 卡片翻转容器 */
+        .card-flip {
+            width: 300px;
+            height: 400px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform-style: preserve-3d;
+        }
+
+        .card-flip.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        /* 卡片正面 */
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .card-front {
+            background: linear-gradient(145deg, #2a1a0a, #1a0a00);
+            border: 2px solid rgba(255, 215, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .card-flip:hover .card-front {
+            border-color: rgba(255, 215, 0, 0.4);
+        }
+
+        .card-year {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .card-event {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .card-choice {
+            font-size: 1.05rem;
+            color: rgba(255, 215, 0, 0.7);
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .card-hint {
+            position: absolute;
+            bottom: 15px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 1px;
+        }
+
+        /* 卡片背面 */
+        .card-back {
+            background: linear-gradient(145deg, #1a0a00, #2a1a0a);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .back-context {
+            font-size: 0.95rem;
+            line-height: 1.9;
+            color: rgba(255, 255, 255, 0.75);
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .back-quote {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: #ffd700;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            position: relative;
+            padding: 0 15px;
+        }
+
+        .back-quote::before {
+            content: "\201C";
+            position: absolute;
+            top: -15px;
+            left: -5px;
+            font-size: 3rem;
+            color: rgba(255, 215, 0, 0.15);
+            font-family: serif;
+        }
+
+        .back-data {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 10px;
+        }
+
+        .back-hint {
+            position: absolute;
+            bottom: 15px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 1px;
+        }
+
+        /* 底部总结 */
+        .summary {
+            text-align: center;
+            margin-top: 60px;
+            max-width: 600px;
+        }
+
+        .summary-line {
+            font-size: 1.2rem;
+            color: rgba(255, 215, 0, 0.6);
+            letter-spacing: 3px;
+            line-height: 2;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+
+        .bottom-nav a {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bottom-nav a:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* 移动端 */
+        @media (max-width: 768px) {
+            .cards-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 30px;
+            }
+
+            .card-flip {
+                width: 280px;
+                height: 380px;
+            }
+
+            .page-title h1 {
+                font-size: 1.8rem;
+            }
+
+            .card-year {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 导航 -->
+    <div class="nav-buttons">
+        <a href="../../index.html" class="nav-btn" onclick="event.preventDefault(); filmstripTransition('../../index.html');">
+            <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+    </div>
+
+    <!-- 标题 -->
+    <div class="page-title">
+        <h1>三次选择</h1>
+        <p>一个人的三次选择，改变了一个国家的命运</p>
+    </div>
+
+    <!-- 卡片 -->
+    <div class="cards-container">
+        <!-- 第一次选择 -->
+        <div class="card-flip" onclick="this.classList.toggle('flipped')">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="card-year">1927</div>
+                    <div class="card-event">秋收起义</div>
+                    <div class="card-choice">他选择了农村，<br>而不是城市</div>
+                    <div class="card-hint">点击翻转</div>
+                </div>
+                <div class="card-back">
+                    <div class="back-context">
+                        1927年，大革命失败。按照苏联经验，革命应该从城市开始。但毛泽东做出了一个当时所有人都不理解的决定：放弃攻打大城市，转向农村，建立井冈山革命根据地。
+                    </div>
+                    <div class="back-quote">
+                        "农村包围城市，武装夺取政权。"
+                    </div>
+                    <div class="back-data">秋收起义部队：5000人 → 井冈山会师后：10000人</div>
+                    <div class="back-hint">点击翻回</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第二次选择 -->
+        <div class="card-flip" onclick="this.classList.toggle('flipped')">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="card-year">1935</div>
+                    <div class="card-event">遵义会议</div>
+                    <div class="card-choice">他选择了实事求是，<br>而不是教条</div>
+                    <div class="card-hint">点击翻转</div>
+                </div>
+                <div class="card-back">
+                    <div class="back-context">
+                        第五次反"围剿"失败，红军从8.6万人锐减到3万人。博古、李德坚持"御敌于国门之外"的教条主义。遵义会议上，毛泽东力主改变战略方针，灵活机动作战。这是他人生的最低谷，也是转折点。
+                    </div>
+                    <div class="back-quote">
+                        "打得赢就打，打不赢就走。"
+                    </div>
+                    <div class="back-data">遵义会议后四渡赤水：3万人跳出40万敌军包围</div>
+                    <div class="back-hint">点击翻回</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三次选择 -->
+        <div class="card-flip" onclick="this.classList.toggle('flipped')">
+            <div class="card-inner">
+                <div class="card-front">
+                    <div class="card-year">1949</div>
+                    <div class="card-event">天安门城楼</div>
+                    <div class="card-choice">他选择了宣告，<br>而不是沉默</div>
+                    <div class="card-hint">点击翻转</div>
+                </div>
+                <div class="card-back">
+                    <div class="back-context">
+                        1949年10月1日下午3时，毛泽东站在天安门城楼上。28年的奋斗，无数人的牺牲，都凝聚在这一刻。他按下话筒的那一刻，一个旧时代结束了，一个新时代开始了。
+                    </div>
+                    <div class="back-quote">
+                        "中华人民共和国中央人民政府今天成立了！"
+                    </div>
+                    <div class="back-data">开国大典当天，天安门广场30万军民</div>
+                    <div class="back-hint">点击翻回</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部总结 -->
+    <div class="summary">
+        <div class="summary-line">
+            农村包围城市 → 实事求是 → 站起来<br>
+            一个人的三次选择，改变了一个国家的命运
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <a href="../china_power_mod6/mod6.html" onclick="event.preventDefault(); filmstripTransition('../china_power_mod6/mod6.html');">
+            下一个穿越：中国力量 <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <script src="../filmstrip.js"></script>
+</body>
+
+</html>

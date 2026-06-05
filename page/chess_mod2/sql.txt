@@ -1,0 +1,50 @@
+-- 创建象棋游戏数据库
+CREATE DATABASE IF NOT EXISTS chess_game;
+USE chess_game;
+
+-- 创建用户表
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(50) NOT NULL,
+    current_level INT NOT NULL DEFAULT 0,
+    max_level INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 创建关卡数据表
+CREATE TABLE IF NOT EXISTS level_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    level_number INT NOT NULL UNIQUE,
+    level_name VARCHAR(100) NOT NULL,
+    ground_color VARCHAR(20) NOT NULL DEFAULT '#deb887',
+    pieces_layout TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 插入测试用户数据
+INSERT INTO users (username, password, current_level, max_level) VALUES 
+('useradmin', 'useradmin', 0, 100),  -- 管理员账户，可以访问所有关卡
+('testuser', 'test123', 0, 0);       -- 普通测试用户，初始只能访问第0关
+
+-- 插入第0关数据
+INSERT INTO level_data (level_number, level_name, pieces_layout) VALUES (
+  0,
+  '测试关卡',
+  '[
+    {"name": "帅", "color": "red", "col": 4, "row": 9},
+    {"name": "炮", "color": "red", "col": 1, "row": 7},
+    {"name": "将", "color": "black", "col": 4, "row": 0},
+    {"name": "兵", "color": "black", "col": 4, "row": 3}
+  ]'
+);
+
+-- 插入更多关卡数据
+INSERT INTO level_data (level_number, level_name, pieces_layout) VALUES 
+(1, '第一关', '[{"name": "帅", "color": "red", "col": 4, "row": 9}, {"name": "将", "color": "black", "col": 4, "row": 0}]'),
+(2, '第二关', '[{"name": "帅", "color": "red", "col": 4, "row": 9}, {"name": "将", "color": "black", "col": 4, "row": 0}]'),
+(3, '第三关', '[{"name": "帅", "color": "red", "col": 4, "row": 9}, {"name": "将", "color": "black", "col": 4, "row": 0}]'),
+(4, '第四关', '[{"name": "帅", "color": "red", "col": 4, "row": 9}, {"name": "将", "color": "black", "col": 4, "row": 0}]'),
+(5, '第五关', '[{"name": "帅", "color": "red", "col": 4, "row": 9}, {"name": "将", "color": "black", "col": 4, "row": 0}]');

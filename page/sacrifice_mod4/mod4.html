@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>祭祀大典 — 星空下的铭记</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #f5f5f5;
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* 自定义光标光晕 */
+        .cursor-light {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, rgba(255, 180, 0, 0.03) 30%, transparent 70%);
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+        }
+
+        /* 提示文字 */
+        .hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            z-index: 1;
+            pointer-events: none;
+            transition: opacity 2s;
+        }
+
+        .hint.hidden {
+            opacity: 0;
+        }
+
+        /* 导航按钮 */
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* 蜡烛计数 */
+        .candle-count {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 215, 0, 0.7);
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .candle-count i {
+            animation: candleFlicker 2s infinite alternate;
+        }
+
+        @keyframes candleFlicker {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* 星星容器 */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        /* 单个星星 */
+        .star {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 10;
+        }
+
+        .star::after {
+            content: attr(data-name);
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: transparent;
+            white-space: nowrap;
+            transition: color 0.6s;
+            letter-spacing: 1px;
+        }
+
+        .star.lit {
+            background: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.2);
+            transform: scale(1.8);
+        }
+
+        .star.lit::after {
+            color: rgba(255, 215, 0, 0.7);
+        }
+
+        .star.warm {
+            background: rgba(255, 180, 0, 0.5);
+            box-shadow: 0 0 8px rgba(255, 180, 0, 0.3);
+        }
+
+        /* 浮层 */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.6s;
+        }
+
+        .overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .overlay-content {
+            max-width: 600px;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .overlay-name {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 8px;
+            letter-spacing: 3px;
+        }
+
+        .overlay-years {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 35px;
+        }
+
+        .overlay-quote {
+            font-size: 1.25rem;
+            line-height: 2;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 20px;
+            font-style: italic;
+            position: relative;
+            padding: 0 20px;
+        }
+
+        .overlay-quote::before {
+            content: "\201C";
+            position: absolute;
+            top: -20px;
+            left: -10px;
+            font-size: 4rem;
+            color: rgba(255, 215, 0, 0.15);
+            font-family: serif;
+            line-height: 1;
+        }
+
+        .overlay-source {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 40px;
+        }
+
+        /* 蜡烛按钮 */
+        .candle-btn {
+            background: none;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.7);
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .candle-btn:hover {
+            background: rgba(255, 215, 0, 0.08);
+            border-color: rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .candle-btn.lit {
+            border-color: rgba(255, 215, 0, 0.6);
+            color: #ffd700;
+        }
+
+        /* CSS火焰 */
+        .flame {
+            display: inline-block;
+            width: 12px;
+            height: 20px;
+            background: radial-gradient(ellipse at bottom, #ffd700 0%, #ff8c00 40%, transparent 70%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flameDance 0.8s infinite alternate;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .flame.on {
+            opacity: 1;
+        }
+
+        @keyframes flameDance {
+            0% { transform: scaleY(1) scaleX(1) rotate(-2deg); }
+            50% { transform: scaleY(1.15) scaleX(0.9) rotate(2deg); }
+            100% { transform: scaleY(0.95) scaleX(1.05) rotate(-1deg); }
+        }
+
+        /* 关闭按钮 */
+        .overlay-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px;
+            transition: color 0.3s;
+        }
+
+        .overlay-close:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 底部文字 */
+        .bottom-text {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.1);
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            body {
+                cursor: auto;
+            }
+            .cursor-light {
+                display: none;
+            }
+            .overlay-content {
+                padding: 30px 20px;
+            }
+            .overlay-name {
+                font-size: 1.5rem;
+            }
+            .overlay-quote {
+                font-size: 1.05rem;
+                line-height: 1.8;
+            }
+            .hint {
+                font-size: 0.95rem;
+                padding: 0 20px;
+                text-align: center;
+            }
+            .nav-buttons {
+                top: 10px;
+                left: 10px;
+            }
+            .nav-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .star {
+                width: 5px;
+                height: 5px;
+            }
+            .star.lit {
+                transform: scale(1.5);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 自定义光标光晕 -->
+    <div class="cursor-light" id="cursorLight"></div>
+
+    <!-- 提示文字 -->
+    <div class="hint" id="hint">移动鼠标，照亮黑暗中的星</div>
+
+    <!-- 导航 -->
+    <div class="nav-buttons">
+        <a href="../../index.html" class="nav-btn" onclick="event.preventDefault(); filmstripTransition('../../index.html');">
+            <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+    </div>
+
+    <!-- 蜡烛计数 -->
+    <div class="candle-count">
+        <i class="fas fa-fire"></i>
+        <span id="candleNum">0</span> 盏烛光
+    </div>
+
+    <!-- 星星容器 -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- 浮层 -->
+    <div class="overlay" id="overlay">
+        <button class="overlay-close" id="overlayClose"><i class="fas fa-times"></i></button>
+        <div class="overlay-content">
+            <div class="overlay-name" id="overlayName"></div>
+            <div class="overlay-years" id="overlayYears"></div>
+            <div class="overlay-quote" id="overlayQuote"></div>
+            <div class="overlay-source" id="overlaySource"></div>
+            <button class="candle-btn" id="candleBtn">
+                <span class="flame" id="flame"></span>
+                <span id="candleBtnText">点亮蜡烛</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 底部文字 -->
+    <div class="bottom-text">英雄是民族最闪亮的坐标</div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav" style="text-align:center; padding:20px;">
+        <a href="../greatman_mod5/mod5.html" onclick="event.preventDefault(); filmstripTransition('../greatman_mod5/mod5.html');" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.6); padding:8px 16px; border-radius:20px; text-decoration:none; font-size:0.85rem; transition:all 0.3s;">
+            下一个穿越：新中国之父 <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <script src="../filmstrip.js"></script>
+    <script>
+        // 人物数据：真实语录
+        const heroes = [
+            {
+                name: '钱学森',
+                years: '1911 — 2009',
+                quote: '我的事业在中国，我的成就在中国，我的归宿在中国。',
+                source: '—— 钱学森回国后接受采访时说'
+            },
+            {
+                name: '袁隆平',
+                years: '1930 — 2021',
+                quote: '我毕生的追求就是让所有人远离饥饿。',
+                source: '—— 袁隆平接受央视采访'
+            },
+            {
+                name: '黄旭华',
+                years: '1926 — 2020',
+                quote: '对国家的忠，就是对父母最大的孝。',
+                source: '—— 黄旭华谈隐姓埋名30年'
+            },
+            {
+                name: '张富清',
+                years: '1924 — 2022',
+                quote: '我是党培养的，我要永远听党话，跟党走。',
+                source: '—— 张富清在部队时说的话'
+            },
+            {
+                name: '邓稼先',
+                years: '1924 — 1986',
+                quote: '做好了这件事情，我这一生就过得很有意义，就是为它死了也值得。',
+                source: '—— 邓稼先接受核武器研制任务时说'
+            },
+            {
+                name: '焦裕禄',
+                years: '1922 — 1964',
+                quote: '我们不是人民的上司，我们都是人民的勤务员。',
+                source: '—— 焦裕禄在兰考工作时说'
+            },
+            {
+                name: '雷锋',
+                years: '1940 — 1962',
+                quote: '人的生命是有限的，可是，为人民服务是无限的，我要把有限的生命，投入到无限的为人民服务之中去。',
+                source: '—— 《雷锋日记》'
+            },
+            {
+                name: '孙家栋',
+                years: '1929 — 2023',
+                quote: '国家需要，我就去做。',
+                source: '—— 孙家栋谈一生航天事业'
+            },
+            {
+                name: '于敏',
+                years: '1926 — 2019',
+                quote: '一个人的名字，早晚是要没有的，能把微薄的力量融进祖国的强盛之中，便足以自慰了。',
+                source: '—— 于敏获国家最高科学技术奖后说'
+            },
+            {
+                name: '张自忠',
+                years: '1891 — 1940',
+                quote: '国家到了如此地步，除我等为其死，毫无其他办法。',
+                source: '—— 张自忠殉国前致战友书'
+            },
+            {
+                name: '赵一曼',
+                years: '1905 — 1936',
+                quote: '未惜头颅新故国，甘将热血沃中华。',
+                source: '—— 赵一曼就义前诗'
+            },
+            {
+                name: '杨靖宇',
+                years: '1905 — 1940',
+                quote: '我们中国人都投降了，还有中国吗？',
+                source: '—— 杨靖宇殉国前对劝降者说'
+            }
+        ];
+
+        // 星星位置（百分比，大致环形排列）
+        const starPositions = [
+            { x: 50, y: 18 },
+            { x: 72, y: 22 },
+            { x: 85, y: 35 },
+            { x: 88, y: 52 },
+            { x: 78, y: 67 },
+            { x: 62, y: 78 },
+            { x: 42, y: 80 },
+            { x: 25, y: 70 },
+            { x: 14, y: 55 },
+            { x: 14, y: 38 },
+            { x: 25, y: 25 },
+            { x: 38, y: 17 }
+        ];
+
+        // 状态
+        const litCandles = JSON.parse(localStorage.getItem('mod4_candles') || '{}');
+        const container = document.getElementById('starsContainer');
+        const cursorLight = document.getElementById('cursorLight');
+        const hint = document.getElementById('hint');
+        const overlay = document.getElementById('overlay');
+        const overlayName = document.getElementById('overlayName');
+        const overlayYears = document.getElementById('overlayYears');
+        const overlayQuote = document.getElementById('overlayQuote');
+        const overlaySource = document.getElementById('overlaySource');
+        const candleBtn = document.getElementById('candleBtn');
+        const candleBtnText = document.getElementById('candleBtnText');
+        const flame = document.getElementById('flame');
+        const overlayClose = document.getElementById('overlayClose');
+        const candleNum = document.getElementById('candleNum');
+
+        let currentHero = null;
+        let hintHidden = false;
+
+        // 初始化星星
+        function createStars() {
+            heroes.forEach((hero, i) => {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.dataset.index = i;
+                star.dataset.name = hero.name;
+                star.style.left = starPositions[i].x + '%';
+                star.style.top = starPositions[i].y + '%';
+
+                if (litCandles[i]) {
+                    star.classList.add('warm');
+                }
+
+                star.addEventListener('click', () => openOverlay(i));
+                container.appendChild(star);
+            });
+            updateCandleCount();
+        }
+
+        // 鼠标追踪
+        document.addEventListener('mousemove', (e) => {
+            cursorLight.style.left = e.clientX + 'px';
+            cursorLight.style.top = e.clientY + 'px';
+
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => {
+                const rect = star.getBoundingClientRect();
+                const starCx = rect.left + rect.width / 2;
+                const starCy = rect.top + rect.height / 2;
+                const dist = Math.sqrt(Math.pow(e.clientX - starCx, 2) + Math.pow(e.clientY - starCy, 2));
+
+                if (dist < 180) {
+                    star.classList.add('lit');
+                } else if (!litCandles[star.dataset.index]) {
+                    star.classList.remove('lit');
+                }
+            });
+
+            if (!hintHidden) {
+                hint.classList.add('hidden');
+                hintHidden = true;
+            }
+        });
+
+        // 触摸设备支持
+        document.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            const stars = document.querySelectorAll('.star');
+            stars.forEach(star => {
+                const rect = star.getBoundingClientRect();
+                const starCx = rect.left + rect.width / 2;
+                const starCy = rect.top + rect.height / 2;
+                const dist = Math.sqrt(Math.pow(touch.clientX - starCx, 2) + Math.pow(touch.clientY - starCy, 2));
+                if (dist < 100) {
+                    star.classList.add('lit');
+                } else if (!litCandles[star.dataset.index]) {
+                    star.classList.remove('lit');
+                }
+            });
+        });
+
+        // 打开浮层
+        function openOverlay(index) {
+            currentHero = index;
+            const hero = heroes[index];
+
+            overlayName.textContent = hero.name;
+            overlayYears.textContent = hero.years;
+            overlayQuote.textContent = hero.quote;
+            overlaySource.textContent = hero.source;
+
+            if (litCandles[index]) {
+                candleBtn.classList.add('lit');
+                candleBtnText.textContent = '烛光不灭';
+                flame.classList.add('on');
+            } else {
+                candleBtn.classList.remove('lit');
+                candleBtnText.textContent = '点亮蜡烛';
+                flame.classList.remove('on');
+            }
+
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => {
+                overlay.classList.add('active');
+            });
+        }
+
+        // 关闭浮层
+        function closeOverlay() {
+            overlay.classList.remove('active');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                currentHero = null;
+            }, 600);
+        }
+
+        overlayClose.addEventListener('click', closeOverlay);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeOverlay();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeOverlay();
+        });
+
+        // 点亮蜡烛
+        candleBtn.addEventListener('click', () => {
+            if (currentHero === null) return;
+
+            if (!litCandles[currentHero]) {
+                litCandles[currentHero] = true;
+                localStorage.setItem('mod4_candles', JSON.stringify(litCandles));
+                candleBtn.classList.add('lit');
+                candleBtnText.textContent = '烛光不灭';
+                flame.classList.add('on');
+
+                const star = document.querySelector(`.star[data-index="${currentHero}"]`);
+                if (star) star.classList.add('warm');
+
+                updateCandleCount();
+            }
+        });
+
+        // 更新蜡烛计数
+        function updateCandleCount() {
+            const count = Object.keys(litCandles).length;
+            candleNum.textContent = count;
+        }
+
+        // 初始化
+        createStars();
+    </script>
+</body>
+
+</html>

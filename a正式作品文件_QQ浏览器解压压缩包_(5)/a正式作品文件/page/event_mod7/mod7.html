@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>国家大事记 - 中国近期成就与动态</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../common.css">
+    <style>
+        * {
+            font-family: "Microsoft YaHei", "SimHei", sans-serif;
+        }
+        
+        body {
+            background-color: #f9f3f3;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* 页眉样式 */
+        
+        header {
+            background: linear-gradient(to right, #d50000, #b71c1c);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .date {
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+        }
+        /* 返回按钮样式 */
+        
+        .back-to-home {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #b71c1c;
+            padding: 10px 18px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        
+        .back-to-home:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        /* 新闻网格布局 */
+        
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        /* 新闻卡片样式 */
+        
+        .news-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border-left: 5px solid #d50000;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            background: #f44336;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-header i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .card-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        /* 图片占位区域 */
+        
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 1/1;
+            /* 正方形 */
+            background: linear-gradient(135deg, #ffcdd2, #f44336);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .image-placeholder::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient( 45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1) 10px, rgba(255, 255, 255, 0.05) 10px, rgba(255, 255, 255, 0.05) 20px);
+        }
+        
+        .image-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            z-index: 1;
+        }
+        
+        .image-placeholder span {
+            font-size: 1.1rem;
+            font-weight: bold;
+            z-index: 1;
+            text-align: center;
+            padding: 0 10px;
+        }
+        
+        .image-caption {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        
+        h2 {
+            color: #b71c1c;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #ffebee;
+            padding-bottom: 8px;
+        }
+        
+        h3 {
+            color: #d32f2f;
+            margin: 15px 0 10px;
+            font-size: 1.4rem;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        ul,
+        ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #d50000;
+        }
+        
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            flex: 1;
+            min-width: 200px;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #d50000;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+        }
+        /* 页脚样式 */
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        /* 响应式设计 */
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+                padding-right: 100px;
+            }
+            .back-to-home {
+                top: 15px;
+                right: 15px;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats {
+                flex-direction: column;
+            }
+            .stat-item {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="button-container">
+        <a href="../../mainpage.html" class="nav-button">
+            <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+        <a href="../timeriver_museum_mod3/bingqi_mod8/mod8.html" class="nav-button">
+            <i class="fas fa-shield-alt"></i> 兵器进化史
+        </a>
+    </div>
+    <div class="container">
+        <!-- <header>
+            <h1>国家大事记</h1>
+            <div class="subtitle">中国近期重要成就与动态</div>
+            <div class="date">2025年9月更新</div>
+            <a href="https://www.example.com" class="back-to-home">返回首页</a>
+        </header> -->
+
+        <div class="news-grid">
+            <!-- 新闻卡片 1 -->
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-plane"></i>
+                    <h2>大国重器多维突破</h2>
+                </div>
+                <div class="card-content">
+                    <div class="image-placeholder">
+                        <img src="mod7_images/img_00_48a55c45.webp" alt="大国重器多维突破">
+                    </div>
+                    <p>"十四五"期间，我国在多个空间维度实现了重大技术突破。C919大飞机已累计交付22架，安全运送旅客超300万人次；大型水陆两栖灭火飞机AG600已取得中国民航局的型号合格证和生产许可证，预计年底前将交付3架使用；长征七号运载天舟九号仅用3小时完成太空物资闪送。</p>
+
+                    <h3>深地深海探索</h3>
+                    <ul>
+                        <li>"深地塔科1井"完成地下<strong>10910米</strong>钻探</li>
+                        <li>"沧渊号"超大直径盾构机不断刷新工程掘进纪录</li>
+                        <li>大型邮轮"爱达·魔都号"运营140余航次，接待旅客超53万人次</li>
+                        <li>大洋钻探船"梦想号"正式入列，最大钻探深度达<strong>1.1万米</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 新闻卡片 2 -->
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-flask"></i>
+                    <h2>科技创新成果丰硕</h2>
+                </div>
+                <div class="card-content">
+                    <div class="image-placeholder">
+                        <img src="mod7_images/img_01_0426aa8d.webp" alt="科技创新成果">
+                    </div>
+                    <p>我国科学家<strong>首次确证火星存在固态内核</strong>，半径约600千米，主要成分可能是富含轻元素的结晶铁镍合金。</p>
+
+                    <p>在植物基因研究方面，我国科学家揭示了一个全新功能基因可以"从零诞生"的机制，这项研究为从头设计新基因、改良生物性状开辟了新思路。</p>
+
+                    <p>我国探月工程也取得新进展，科研团队成功构建<strong>国际上首个月球轨道VLBI系统</strong>（LOVEX），并在月-地长基线上成功检测到天体射电辐射与航天器信号的干涉条纹。</p>
+                </div>
+            </div>
+
+            <!-- 新闻卡片 3 -->
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-handshake"></i>
+                    <h2>国际投资与合作</h2>
+                </div>
+                <div class="card-content">
+                    <div class="image-placeholder">
+                        <img src="mod7_images/img_02_5257787c.jpg" alt="国际投资与合作">
+                    </div>
+                    <p>第二十五届中国国际投资贸易洽谈会在厦门举行，习近平主席向大会发来贺信，强调中国将坚定不移扩大高水平对外开放。</p>
+
+                    <div class="highlight">
+                        <p>2024年，中国对外直接投资流量1922亿美元，比上年增长8.4%，占全球份额11.9%，<strong>连续13年列全球前三</strong>。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 新闻卡片 4 -->
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-robot"></i>
+                    <h2>人工智能安全治理</h2>
+                </div>
+                <div class="card-content">
+                    <div class="image-placeholder">
+                        <img src="mod7_images/img_03_a4381ad0.webp" alt="人工智能安全治理">
+                    </div>
+                    <p>2025年国家网络安全宣传周将于9月15日至21日在云南昆明举办。期间将发布三项人工智能安全治理标志性成果:</p>
+                    <ol>
+                        <li>《人工智能安全治理框架》2.0版</li>
+                        <li>《政务大模型应用安全规范》</li>
+                        <li>2025年人工智能技术赋能网络安全应用测试结果</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 新闻卡片 5 -->
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-car"></i>
+                    <h2>新能源汽车发展强劲</h2>
+                </div>
+                <div class="card-content">
+                    <div class="image-placeholder">
+                        <img src="mod7_images/img_04_bd80c33b.jpg" alt="新能源汽车发展">
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">300万辆</div>
+                            <div class="stat-label">2025年上半年产量</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">280万辆</div>
+                            <div class="stat-label">2025年上半年销量</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">1800万辆</div>
+                            <div class="stat-label">新能源汽车保有量</div>
+                        </div>
+                    </div>
+
+                    <p>2025年上半年，我国新能源汽车产量达300万辆，销量达280万辆，同比分别增长40%和38%。新能源汽车保有量超过1800万辆，<strong>占全球比重超过50%</strong>。</p>
+                </div>
+            </div>
+
+            <!-- 新闻卡片 6 -->
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-bolt"></i>
+                    <h2>战略性新兴产业进展</h2>
+                </div>
+                <div class="card-content">
+                    <div class="image-placeholder">
+                        <img src="mod7_images/img_05_c4d94d43.jpg" alt="战略性新兴产业">
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-value">380万个</div>
+                            <div class="stat-label">5G基站总数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">8亿户</div>
+                            <div class="stat-label">5G用户数</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">1.57万亿元</div>
+                            <div class="stat-label">2024年大数据产业规模</div>
+                        </div>
+                    </div>
+
+                    <p>我国5G基站总数已突破380万个，5G用户数超过8亿户。2024年我国大数据产业规模达1.57万亿元，预计2025年将突破1.8万亿元。</p>
+
+                    <p>在新能源领域，2025年上半年我国新增风电装机容量1500万千瓦，其中海上风电新增装机容量500万千瓦；新增光伏发电装机容量2000万千瓦。</p>
+                </div>
+            </div>
+
+            <!-- 新闻卡片 7 -->
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-medal"></i>
+                    <h2>抗战胜利80周年阅兵</h2>
+                </div>
+                <div class="card-content">
+                    <div class="image-placeholder">
+                        <img src="mod7_images/img_06_6f94dcc4.webp" alt="抗战胜利80周年阅兵">
+                    </div>
+                    <p>2025年9月3日，北京天安门广场举行纪念中国人民抗日战争暨世界反法西斯战争胜利80周年大会及阅兵式。阅兵活动包括阅兵式和分列式两个步骤，总时长约70分钟。</p>
+
+                    <p>此次阅兵首次邀请国民党抗战老兵与大陆老兵共同观礼，实现两岸英雄跨越时空的"团圆"。阅兵集中展示中国现役主战装备的"顶配阵容"，涵盖无人智能作战、水下攻防、高超声速导弹等尖端领域。</p>
+
+                    <div class="highlight">
+                        <p>在全球冲突频发、国际形势复杂的背景下，此次阅兵彰显了中国捍卫历史真相、维护和平的决心与能力。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 新闻卡片 8 -->
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h2>贸易反制措施</h2>
+                </div>
+                <div class="card-content">
+                    <div class="image-placeholder">
+                        <img src="mod7_images/img_07_6c26b8ad.webp" alt="贸易反制措施">
+                    </div>
+                    <p>九三阅兵结束后，中国商务部宣布对美欧采取一系列反制措施：</p>
+
+                    <h3>对美国光纤产品的反制</h3>
+                    <p>针对美国规避反倾销税的光纤产品祭出最高78.2%的反制税率。涉事企业被区别对待：</p>
+                    <ul>
+                        <li>康宁公司面临37.9%的税率</li>
+                        <li>OFS-费特有限责任公司适用33.3%的税率</li>
+                        <li>德拉克通信美国公司被课以78.2%的重税</li>
+                        <li>不配合调查的企业一律适用78.2%的税率</li>
+                    </ul>
+
+                    <h3>对欧盟猪肉的反倾销调查</h3>
+                    <p>对欧盟进口猪肉启动反倾销调查初裁，以保证金形式筑起产业防火墙。设定差异化保证金率：</p>
+                    <ul>
+                        <li>西班牙、丹麦等龙头企业被征15.6%-32.7%</li>
+                        <li>未配合调查企业则面临62.4%的高门槛</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 新闻卡片 9 -->
+            <div class="news-card">
+                <div class="card-header">
+                    <i class="fas fa-users"></i>
+                    <h2>中国—东盟建设部长圆桌会议</h2>
+                </div>
+                <div class="card-content">
+                    <div class="image-placeholder">
+                        <img src="mod7_images/img_08_2470227a.jpg" alt="中国—东盟建设部长圆桌会议">
+                    </div>
+                    <p>2025中国—东盟建设部长圆桌会议及配套活动将于9月15日至16日在广西桂林举办。本届圆桌会议及配套活动主要包括"一会一展两论坛"：</p>
+
+                    <ul>
+                        <li>2025中国—东盟建设部长圆桌会议</li>
+                        <li>中国—东盟建筑科技展</li>
+                        <li>中国—东盟市长论坛</li>
+                        <li>中国—东盟建筑业合作与发展论坛</li>
+                    </ul>
+
+                    <p>会议围绕"数智赋能 文化传承 推动中国—东盟建设领域高质量发展"和推动建设安全、舒适、绿色、智慧的"好房子"等议题交流经验、探讨合作。会上将发布《中国—东盟建设部长圆桌会议桂林倡议》。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模块导航 -->
+        <div style="display:flex; justify-content:center; gap:15px; margin:30px 0; flex-wrap:wrap;">
+            <a href="../greatman_mod5/mod5.html" class="nav-button">
+                <i class="fas fa-arrow-left"></i> 上一个：毛泽东生平
+            </a>
+            <a href="../timeriver_museum_mod3/bingqi_mod8/mod8.html" class="nav-button">
+                下一个：兵器进化史 <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <footer>
+            <p>以上信息基于2025年9月初的公开报道整理，展示了中国在科技、工业、国际合作等领域的最新成就。</p>
+            <p>© 2025 国家大事记 | 中国成就报道</p>
+        </footer>
+    </div>
+
+    <script>
+        // 返回首页功能
+        document.querySelector('.back-to-home').addEventListener('click', function(e) {
+            e.preventDefault();
+            // 这里使用固定首页URL，实际应用中可以根据需要调整
+            window.location.href = '../../mainpage.html';
+        });
+
+        // 图片占位区域的交互效果
+        const imagePlaceholders = document.querySelectorAll('.image-placeholder');
+        imagePlaceholders.forEach(placeholder => {
+            placeholder.addEventListener('click', function() {
+                alert('此处将显示新闻相关图片。实际应用中这里会替换为真实图片。');
+            });
+        });
+    </script>
+</body>
+
+</html>

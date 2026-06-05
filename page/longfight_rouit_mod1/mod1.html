@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重走长征路</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            color: #fff;
+            background: #1a0000;
+        }
+
+        /* 每个阶段占满一屏 */
+        .stage {
+            height: 100vh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 1.5s ease;
+        }
+
+        /* 阶段内容 */
+        .stage-inner {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .stage.active .stage-inner {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 日期标签 */
+        .stage-date {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+
+        /* 阶段标题 */
+        .stage-title {
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            letter-spacing: 4px;
+        }
+
+        /* 阶段描述 */
+        .stage-desc {
+            font-size: 1.15rem;
+            line-height: 2;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 30px;
+        }
+
+        /* 阶段图片 */
+        .stage-img {
+            max-width: 500px;
+            width: 90%;
+            border-radius: 8px;
+            margin: 20px auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 数据展示 */
+        .stage-number {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stage-number-label {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        /* 引用文字 */
+        .stage-quote {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: rgba(255, 215, 0, 0.7);
+            border-left: 3px solid rgba(255, 215, 0, 0.3);
+            padding-left: 20px;
+            margin: 30px auto;
+            max-width: 600px;
+            text-align: left;
+            line-height: 1.8;
+        }
+
+        /* 滚动提示 */
+        .scroll-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            z-index: 100;
+            animation: hintPulse 2s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        /* 导航按钮 */
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(to right, #8b0000, #ffd700);
+            z-index: 1002;
+            transition: width 0.3s;
+        }
+
+        /* 阶段指示器 */
+        .stage-indicator {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .indicator-dot.active {
+            background: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            transform: scale(1.5);
+        }
+
+        /* 湘江震动效果 */
+        .shake {
+            animation: shakeAnim 0.1s infinite;
+        }
+
+        @keyframes shakeAnim {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            50% { transform: translateX(2px); }
+            75% { transform: translateX(-1px); }
+            100% { transform: translateX(1px); }
+        }
+
+        /* 强制停顿遮罩 */
+        .pause-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .pause-overlay.active {
+            display: flex;
+        }
+
+        .pause-number {
+            font-size: 8rem;
+            font-weight: bold;
+            color: #ff3333;
+            text-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+        }
+
+        .pause-text {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 20px;
+            letter-spacing: 3px;
+        }
+
+        /* 各阶段背景色 */
+        .stage-1 { background: linear-gradient(180deg, #2d0a0a 0%, #4a1515 100%); }
+        .stage-2 { background: linear-gradient(180deg, #1a0000 0%, #3d0000 100%); }
+        .stage-3 { background: linear-gradient(180deg, #2d1500 0%, #4a2500 100%); }
+        .stage-4 { background: linear-gradient(180deg, #3d1a00 0%, #5a2d00 100%); }
+        .stage-5 { background: linear-gradient(180deg, #1a1a2e 0%, #2d2d44 100%); }
+        .stage-6 { background: linear-gradient(180deg, #2d2000 0%, #4a3500 100%); }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+
+        .bottom-nav a {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bottom-nav a:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .stage-title {
+                font-size: 2rem;
+            }
+            .stage-desc {
+                font-size: 1rem;
+            }
+            .stage-number {
+                font-size: 3.5rem;
+            }
+            .pause-number {
+                font-size: 5rem;
+            }
+            .stage-indicator {
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stage-title {
+                font-size: 1.6rem;
+                letter-spacing: 2px;
+            }
+            .stage-number {
+                font-size: 2.8rem;
+            }
+            .pause-number {
+                font-size: 4rem;
+            }
+            .stage {
+                padding: 30px 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 进度条 -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- 导航 -->
+    <div class="nav-buttons">
+        <a href="../../index.html" class="nav-btn" onclick="event.preventDefault(); filmstripTransition('../../index.html');">
+            <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+    </div>
+
+    <!-- 阶段指示器 -->
+    <div class="stage-indicator" id="stageIndicator">
+        <div class="indicator-dot active" data-stage="0"></div>
+        <div class="indicator-dot" data-stage="1"></div>
+        <div class="indicator-dot" data-stage="2"></div>
+        <div class="indicator-dot" data-stage="3"></div>
+        <div class="indicator-dot" data-stage="4"></div>
+        <div class="indicator-dot" data-stage="5"></div>
+    </div>
+
+    <!-- 阶段1：出发 -->
+    <div class="stage stage-1 active" data-index="0">
+        <div class="stage-inner">
+            <div class="stage-date">1934年10月 · 江西瑞金</div>
+            <h1 class="stage-title">出发</h1>
+            <div class="stage-number" id="startNumber">86000</div>
+            <div class="stage-number-label">名红军战士，踏上了征途</div>
+            <p class="stage-desc">
+                由于第五次反"围剿"失败，中央红军主力被迫实行战略转移。
+                从江西瑞金出发，没有人知道这条路有多长。
+            </p>
+            <img src="mod1_images/img_00_e2cd12fc.jpg" alt="长征出发" class="stage-img" loading="eager">
+        </div>
+    </div>
+
+    <!-- 阶段2：湘江战役 -->
+    <div class="stage stage-2" data-index="1">
+        <div class="stage-inner">
+            <div class="stage-date">1934年11月 · 广西湘江</div>
+            <h1 class="stage-title">湘江</h1>
+            <div class="stage-number" id="xiangNumber">86000</div>
+            <div class="stage-number-label">出发时的人数</div>
+            <p class="stage-desc">
+                湘江战役，红军长征以来最惨烈的一仗。
+                江水被鲜血染红，三天三夜，阵地反复争夺。
+            </p>
+            <div class="stage-quote">
+                "三年不饮湘江水，十年不食湘江鱼。"<br>
+                —— 当地民谣
+            </div>
+            <img src="mod1_images/img_01_385e32a4.jpg" alt="湘江战役" class="stage-img" loading="lazy">
+        </div>
+    </div>
+
+    <!-- 阶段3：遵义会议 -->
+    <div class="stage stage-3" data-index="2">
+        <div class="stage-inner">
+            <div class="stage-date">1935年1月 · 贵州遵义</div>
+            <h1 class="stage-title">转折</h1>
+            <p class="stage-desc">
+                遵义会议，确立了毛泽东在党和红军中的领导地位。
+                这是党的历史上一个生死攸关的转折点。
+                从此，红军有了方向。
+            </p>
+            <div class="stage-quote">
+                "遵义会议后，红军好像忽然活过来了。"<br>
+                —— 周恩来
+            </div>
+            <img src="mod1_images/img_02_a7191f11.jpg" alt="遵义会议" class="stage-img" loading="lazy">
+        </div>
+    </div>
+
+    <!-- 阶段4：飞夺泸定桥 -->
+    <div class="stage stage-4" data-index="3">
+        <div class="stage-inner">
+            <div class="stage-date">1935年5月 · 四川泸定</div>
+            <h1 class="stage-title">飞夺泸定桥</h1>
+            <p class="stage-desc">
+                22名突击队员冒着枪林弹雨，攀着13根铁链冲过泸定桥。
+                对岸是敌人的机枪和被拆掉桥板的铁索。
+                脚下是湍急的大渡河。
+            </p>
+            <div class="stage-quote">
+                "同志们，为了党的事业，冲啊！"
+            </div>
+            <img src="mod1_images/img_03_96c11b86.webp" alt="飞夺泸定桥" class="stage-img" loading="lazy">
+        </div>
+    </div>
+
+    <!-- 阶段5：雪山草地 -->
+    <div class="stage stage-5" data-index="4">
+        <div class="stage-inner">
+            <div class="stage-date">1935年6月—8月 · 夹金山·松潘草地</div>
+            <h1 class="stage-title">雪山 草地</h1>
+            <p class="stage-desc">
+                翻越夹金山时，海拔4000米，空气稀薄，许多战士坐下去就再也没站起来。
+                松潘草地，一望无际的沼泽，每一步都可能是最后一步。
+                没有粮食，就吃草根、煮皮带。
+            </p>
+            <div class="stage-quote">
+                "我们翻过的不是雪山，是一个民族的脊梁。"
+            </div>
+        </div>
+    </div>
+
+    <!-- 阶段6：到达延安 -->
+    <div class="stage stage-6" data-index="5">
+        <div class="stage-inner">
+            <div class="stage-date">1936年10月 · 甘肃会宁</div>
+            <h1 class="stage-title">到达</h1>
+            <div class="stage-number" id="endNumber">7000</div>
+            <div class="stage-number-label">人，走到了最后</div>
+            <p class="stage-desc">
+                红一、红二、红四方面军在甘肃会宁胜利会师。
+                两年，两万五千里，翻越18座山脉，渡过24条河流。
+                出发时86000人，到达时7000人。
+            </p>
+            <div class="stage-quote">
+                "长征是宣言书，长征是宣传队，长征是播种机。"<br>
+                —— 毛泽东
+            </div>
+            <img src="mod1_images/img_05_0e300b7c.jpg" alt="会师" class="stage-img" loading="lazy">
+        </div>
+    </div>
+
+    <!-- 滚动提示 -->
+    <div class="scroll-hint" id="scrollHint">向下滚动 · 继续前进</div>
+
+    <!-- 强制停顿遮罩 -->
+    <div class="pause-overlay" id="pauseOverlay">
+        <div class="pause-number">30000</div>
+        <div class="pause-text">湘江一役，56000人再也没有回来</div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <a href="../timeriver_museum_mod3/mod3.html" onclick="event.preventDefault(); filmstripTransition('../timeriver_museum_mod3/mod3.html');">
+            下一个穿越：时间博物馆 <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <script src="../filmstrip.js"></script>
+    <script>
+        // 状态
+        const stages = document.querySelectorAll('.stage');
+        const indicators = document.querySelectorAll('.indicator-dot');
+        const progressBar = document.getElementById('progressBar');
+        const scrollHint = document.getElementById('scrollHint');
+        const pauseOverlay = document.getElementById('pauseOverlay');
+
+        let currentStage = 0;
+        let xiangAnimated = false;
+        let pauseShown = false;
+
+        // IntersectionObserver 检测当前阶段
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = parseInt(entry.target.dataset.index);
+                    setActiveStage(index);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        stages.forEach(stage => observer.observe(stage));
+
+        function setActiveStage(index) {
+            currentStage = index;
+
+            // 更新阶段样式
+            stages.forEach((stage, i) => {
+                stage.classList.toggle('active', i === index);
+            });
+
+            // 更新指示器
+            indicators.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            // 更新进度条
+            const progress = ((index + 1) / stages.length) * 100;
+            progressBar.style.width = progress + '%';
+
+            // 湘江阶段动画
+            if (index === 1 && !xiangAnimated) {
+                xiangAnimated = true;
+                animateXiang();
+            }
+
+            // 隐藏滚动提示（到达最后一屏）
+            if (index === stages.length - 1) {
+                scrollHint.style.opacity = '0';
+            }
+        }
+
+        // 湘江数字递减动画
+        function animateXiang() {
+            const xiangNum = document.getElementById('xiangNumber');
+            const start = 86000;
+            const end = 30000;
+            const duration = 4000; // 4秒
+            const startTime = performance.now();
+
+            function update(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // easeOutExpo
+                const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                const current = Math.round(start - (start - end) * eased);
+                xiangNum.textContent = current.toLocaleString();
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    // 数字到30000后，震动 + 强制停顿
+                    triggerPause();
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        // 强制停顿
+        function triggerPause() {
+            if (pauseShown) return;
+            pauseShown = true;
+
+            // 先震动
+            document.body.classList.add('shake');
+
+            setTimeout(() => {
+                document.body.classList.remove('shake');
+                // 显示停顿遮罩
+                pauseOverlay.classList.add('active');
+
+                // 2秒后自动关闭
+                setTimeout(() => {
+                    pauseOverlay.classList.remove('active');
+                }, 2500);
+            }, 1500);
+        }
+
+        // 指示器点击跳转
+        indicators.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const index = parseInt(dot.dataset.stage);
+                stages[index].scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // 进度条初始
+        progressBar.style.width = (1 / stages.length * 100) + '%';
+    </script>
+</body>
+
+</html>

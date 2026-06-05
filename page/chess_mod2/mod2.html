@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纸上谈兵——象棋</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.4.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.4.1/core.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../timeriver_museum_mod3/mod3.css">
+<link rel="stylesheet" href="./mod2.css">
+<script src="../filmstrip.js"></script>
+</head>
+<body>
+    <div class="button-container">
+        <a href="../../index.html" class="nav-button" onclick="event.preventDefault(); filmstripTransition('../../index.html');">
+            <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+
+    </div>
+
+    
+    <h1>纸上谈兵——中国象棋</h1>
+    
+    <button class="login-btn" id="login-btn">登录</button>
+    
+    <button class="select-level-btn" id="select-level-btn">
+        <i class="fas fa-list"></i> 选择关卡
+    </button>
+    
+    <div class="piece-counter">
+        <h3>棋子存活统计</h3>
+        <div class="piece-list" id="piece-counter-list">
+            <!-- 动态生成棋子统计 -->
+        </div>
+    </div>
+    
+    <div class="game-container">
+        <div class="info-panel">
+            <div class="level-info">
+                <h2>第 <span id="level-number">0</span> 关</h2>
+                <span id ="level_name">aaaa</span>
+                <p>残局挑战</p>
+            </div>
+            
+            <div class="turn-indicator red-turn" id="turn-indicator">
+                红方回合
+            </div>
+            
+            <div class="controls">
+                <button id="prev-btn">上一关</button>
+                <button id="next-btn">下一关</button>
+                <button id="reset-btn">重置棋盘</button>
+                <button id="undo-btn">悔棋</button>
+            </div>
+            
+            <div class="status-message" id="status-msg">
+                请登录开始游戏
+            </div>
+        </div>
+        
+        <div id="chess-board">
+            <div id="level-display">第 0 关</div>
+            <svg id="diagonal-lines" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+
+        <div id="victory-modal" class="victory-modal">
+            <div class="modal-content victory-content">
+                <div class="victory-header">
+                    <h2>🎉 胜利！</h2>
+                    <div class="level-badge">第 <span id="victory-level">0</span> 关</div>
+                </div>
+                <div class="victory-body">
+                    <h3 id="victory-tips">关卡提示</h3>
+                    <p id="victory-tit">历史背景描述</p>
+                </div>
+                <div class="victory-footer">
+                    <button id="next-level-btn" class="next-level-btn">
+                        下一关 <i class="fas fa-arrow-right"></i>
+                    </button>
+
+
+                </div>
+            </div>
+        </div>
+
+        </div>
+    </div>
+
+    <!-- 终局冲击：胜利 -->
+    <div class="ending-overlay" id="endingWin">
+        <div class="ending-text" id="endingWinText"></div>
+        <div class="ending-sub" id="endingWinSub"></div>
+        <button class="ending-btn" id="endingWinBtn">继续</button>
+    </div>
+
+    <!-- 终局冲击：失败 -->
+    <div class="ending-overlay" id="endingLose">
+        <div class="ending-text" style="color: #ff4444;">历史没有重来</div>
+        <div class="ending-sub">但你可以再试一次</div>
+        <button class="ending-btn" id="endingLoseBtn">再来一次</button>
+    </div>
+
+    <div id="loading">正在加载象棋...</div>
+
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <h2>用户登录</h2>
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="请输入密码">
+            </div>
+            <div class="modal-buttons">
+                <button id="login-submit">登录</button>
+                <button id="login-cancel">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="level-select-modal" id="level-select-modal">
+        <div class="level-select-content">
+            <button class="close-level-select" id="close-level-select">&times;</button>
+            <h2>选择关卡</h2>
+            <div class="levels-grid" id="levels-grid">
+                <!-- 动态生成关卡按钮 -->
+            </div>
+        </div>
+    </div>
+    <py-script>
+    import js
+    from pyodide.ffi import create_proxy
+    import math
+
+    # 棋盘配置
+    CELL_SIZE = 70
+    BOARD_WIDTH = 9
+    BOARD_HEIGHT = 10
+
+    # 游戏状态
+    current_level = 0
+    total_levels = 100  # 总共100关
+    selected_piece = None
+    chess_pieces = []  # 存储所有棋子对象
+    move_hints = []    # 存储移动提示元素
+    current_turn = "red"  # 当前回合，红方先行
+    move_history = []  # 移动历史，用于悔棋
+    is_logged_in = False
+    current_user = None
+    user_max_level = 0  # 用户已通过的最大关卡
+
+    # 数据库模拟数据（实际应用中应从数据库获取）
+    user_data = {
+        "useradmin": {
+            "password": "useradmin",  # 修改为useradmin
+            "level": 0,
+            "max_level": 100  # 管理员可以访问所有关卡
+        },
+        "testuser": {
+            "password": "test123",
+            "level": 0,
+            "max_level": 5  # 测试用户只能访问前5关
+        }
+    }
+
+        # 修改第0关数据
+    level_data = {
+        0: {
+            "ground": "#deb887",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                # 红方棋子
+                ("帅", "red", 4, 9),
+                ("炮", "red", 1, 7),
+                # 黑方棋子
+                ("将", "black", 4, 0),
+                ("兵", "black", 4, 3)
+            ],
+            "tips": "基础教学",
+            "tit": "学习象棋基本规则和走法"
+        },
+        1: {
+            "ground": "#deb887",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                ("帅", "red", 4, 9),
+                ("炮", "red", 1, 7),
+                ("兵", "red", 4, 6),
+                ("将", "black", 4, 0),
+                ("车", "black", 4, 3)
+            ],
+            "tips": "第一战：血战湘江",
+            "tit": "1934年11月——红军突破国民党军第四道封锁线，虽损失惨重但粉碎敌人围歼企图，为长征保留核心力量"
+        },
+        2: {
+            "ground": "#deb887",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                ("帅", "red", 4, 9),
+                ("马", "red", 3, 7),
+                ("炮", "red", 4, 8),
+                ("将", "black", 4, 0),
+                ("车", "black", 8, 8)
+            ],
+            "tips": "第二战：强渡乌江",
+            "tit": "1935年1月——红军击溃黔军防线，突破天险乌江，为占领遵义创造关键条件，是长征首次大胜"
+        },
+        3: {
+            "ground": "#deb887",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                # 红方（红军）：集中中路，左右翼配合
+                ("帅", "red", 4, 9),  # 核心指挥
+                ("军", "red", 3, 7),  # 自定义棋子（代表主力军团）
+                ("军", "red", 5, 7),
+                ("炮", "red", 1, 8),  # 远程支援
+                ("炮", "red", 7, 8),
+                # 黑方（黔军）：分散防御，中路空虚
+                ("将", "black", 4, 0),  # 敌军指挥
+                ("兵", "black", 2, 2),  # 左翼防御
+                ("兵", "black", 6, 2),  # 右翼防御
+                ("车", "black", 0, 1),  # 侧翼机动部队
+                ("车", "black", 8, 1)
+            ],
+            "tips": "第三战：遵义战役",
+            "tit": "1935年1月——红军集中兵力击溃黔军，歼敌3000余人，是长征以来首次大规模胜仗，巩固了遵义根据地"
+        },
+        4: {
+            "ground": "#deb887",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                # 红方：中路隐蔽，两翼机动
+                ("帅", "red", 4, 8),  # 指挥中枢隐蔽
+                ("马", "red", 2, 9),  # 骑兵机动（马代表快速部队）
+                ("马", "red", 6, 9),
+                ("兵", "red", 4, 6),  # 后卫掩护
+                # 黑方：多层包围，核心在右
+                ("将", "black", 7, 1),  # 敌军主力位置
+                ("车", "black", 1, 3),  # 左翼封锁
+                ("车", "black", 5, 2),  # 中路追击
+                ("炮", "black", 8, 4),  # 远程封锁
+                ("兵", "black", 3, 1), ("兵", "black", 5, 1)  # 内层包围
+            ],
+            "tips": "第四战：四渡赤水",
+            "tit": "1935年2-3月——红军灵活机动，四渡赤水河，巧妙摆脱国民党军围追堵截，是毛泽东军事指挥的经典战例"
+        },
+        # 5-10关保持不变...
+        5: {
+            "ground": "#aqua",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                # 红方：分路渡江
+                ("帅", "red", 4, 9),  # 需抵达 row ≤3
+                ("兵", "red", 2, 8),  # 左路渡江部队
+                ("兵", "red", 6, 8),  # 右路渡江部队
+                ("炮", "red", 0, 7),  # 掩护炮火
+                # 黑方：沿江布防
+                ("将", "black", 4, 0),  # 敌军指挥部
+                ("兵", "black", 1, 4), ("兵", "black", 3, 4),  # 江防据点
+                ("兵", "black", 5, 4), ("兵", "black", 7, 4),
+                ("车", "black", 4, 2)  # 机动增援部队
+            ],
+            "tips": "第五战：巧渡金沙江",
+            "tit": "1935年5月——红军声东击西，趁敌军调防空隙，七日七夜渡过金沙江，彻底跳出国民党军包围圈"
+        },
+        6: {
+            "ground": "#aqua",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                # 红方：突击队在前，主力在后
+                ("帅", "red", 4, 9),  # 需抵达 row ≤5
+                ("兵", "red", 2, 7),  # 突击队（可过河）
+                ("兵", "red", 4, 8),  # 主力部队
+                ("炮", "red", 6, 9),  # 对岸掩护
+                # 黑方：渡口死守
+                ("将", "black", 2, 3),  # 渡口指挥
+                ("兵", "black", 2, 5),  # 河防前沿
+                ("车", "black", 0, 2), ("车", "black", 4, 2)  # 增援部队
+            ],
+            "tips": "第六战：强渡大渡河",
+            "tit": "1935年5月——红军在安顺场以22人突击队强渡大渡河，打破蒋介石'让红军成为石达开第二'的妄想"
+        },
+        7: {
+            "ground": "#deb887",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                # 红方：沿桥突击（列4为桥身）
+                ("帅", "red", 4, 9),
+                ("兵", "red", 4, 7), ("兵", "red", 4, 8),  # 突击队员
+                ("兵", "red", 3, 9), ("军", "red", 5, 9),  # 掩护部队
+                # 黑方：桥对岸防御
+                ("将", "black", 4, 0),  # 桥头指挥
+                ("兵", "black", 4, 1), ("兵", "black", 4, 2),  # 桥上火力
+                ("炮", "black", 3, 0), ("炮", "black", 5, 0)  # 两侧封锁
+            ],
+            "tips": "第七战：飞夺泸定桥",
+            "tit": "1935年5月——红军昼夜奔袭240里，22名勇士攀爬铁索突破泸定桥，粉碎敌人火攻封锁，打开北上通道"
+        },
+        8: {
+            "ground": "#e6e6fa",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                # 红方：精简兵力，保护核心
+                ("帅", "red", 4, 9),  # 必须存活到 row=0
+                ("军", "red", 2, 8), ("军", "red", 6, 8),  # 护卫部队
+                # 黑方：环境障碍（不可吃，接触即红方棋子被移除）
+                ("障", "black", 1, 6), ("障", "black", 3, 6),  # “障”为自定义障碍
+                ("障", "black", 5, 6), ("障", "black", 7, 6),
+                ("障", "black", 4, 4)  # 中路核心障碍
+            ],
+            "tips": "第八战：过雪山草地",
+            "tit": "1935年6-8月——红军翻越夹金山、跋涉松潘草地，以顽强意志克服高寒缺氧、缺衣少食，保存革命火种"
+        },
+        9: {
+            "ground": "#8b4513",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                # 红方：正面牵制+侧翼迂回
+                ("帅", "red", 4, 9),
+                ("马", "red", 0, 7),  # 迂回部队（绕后）
+                ("炮", "red", 4, 8),  # 正面攻击
+                ("兵", "red", 8, 7),  # 右翼配合
+                # 黑方：隘口死守
+                ("将", "black", 4, 1),  # 隘口指挥
+                ("车", "black", 4, 3),  # 正面防御
+                ("兵", "black", 2, 2), ("兵", "black", 6, 2)  # 两侧防御
+            ],
+            "tips": "第九战：腊子口战役",
+            "tit": "1935年9月——红军以正面强攻+侧翼迂回战术突破天险腊子口，粉碎敌人最后一道封锁线，为北上陕甘打开通道"
+        },
+        10: {
+            "ground": "#deb887",
+            "hengxian": 10,
+            "shuxian": 9,
+            "pieces": [
+                # 红方：多方向会师
+                ("帅", "red", 4, 9),  # 红一方面军
+                ("兵", "red", 1, 5),  # 红二方面军（需到4,4）
+                ("兵", "red", 7, 5),  # 红四方面军（需到4,4）
+                ("兵", "red", 2, 8), ("兵", "red", 6, 8),
+                # 黑方：最后的阻击
+                ("将", "black", 3, 3), ("将", "black", 5, 3),  # 残余敌军
+                ("兵", "black", 4, 6)  # 中路骚扰
+            ],
+            "tips": "会宁会师",
+            "tit": "1936年10月——红一、二、四方面军在甘肃会宁胜利会师，标志着长征胜利结束，开启中国革命新局面"
+        }
+    }
+        
+    
+
+    # 为演示添加更多关卡数据（实际应从数据库获取）
+    for i in range(10, 101):
+
+            level_data[i] = {
+                "ground": "#deb887",
+                "hengxian": 10,
+                "shuxian": 9,
+                "pieces": [
+                    # 默认布局（实际应根据具体关卡设置）
+                    ("帅", "red", 4, 9),
+                    ("将", "black", 4, 0)
+                ]
+            }
+
+    class Chess:
+        def __init__(self, name, color, col, row, id):
+            self.name = name
+            self.color = color
+            self.col = col
+            self.row = row
+            self.id = id
+            self.alive = True
+            self.element = None
+            self.possible_moves = []
+            self.create_element()
+        
+        def create_element(self):
+            board = js.document.getElementById("chess-board")
+            piece = js.document.createElement("div")
+            piece.id = f"piece-{self.id}"
+            piece.className = f"chess-piece {self.color}-piece"
+            piece.textContent = self.name
+            
+            # 棋子位置在交叉点上
+            left = self.col * CELL_SIZE
+            top = self.row * CELL_SIZE
+            piece.style.left = f"{left}px"
+            piece.style.top = f"{top}px"
+            
+            piece.addEventListener("click", create_proxy(lambda e: self.on_click()))
+            self.element = piece
+            board.appendChild(piece)
+        
+        def on_click(self):
+            global selected_piece, current_turn
+            
+            # 检查是否轮到该颜色走棋（吃子前也要检查）
+            if selected_piece and selected_piece.color != self.color:
+                if selected_piece.color != current_turn:
+                    js.document.getElementById("status-msg").textContent = f"现在是{'红' if current_turn == 'red' else '黑'}方回合"
+                    return
+                for col, row, is_capture in selected_piece.possible_moves:
+                    if col == self.col and row == self.row and is_capture:
+                        selected_piece.move_to(self.col, self.row)
+                        return
+
+            # 检查是否轮到该颜色走棋
+            if self.color != current_turn:
+                js.document.getElementById("status-msg").textContent = f"现在是{'红' if current_turn == 'red' else '黑'}方回合"
+                return
+            
+            # 如果已经选中了这个棋子，取消选择
+            if selected_piece == self:
+                self.deselect()
+                selected_piece = None
+                return
+            
+            # 取消之前选中的棋子
+            if selected_piece:
+                selected_piece.deselect()
+            
+            # 选中当前棋子
+            selected_piece = self
+            self.select()
+            
+            # 计算并显示可能的移动位置
+            self.calculate_moves()
+            self.show_move_hints()
+            
+            js.document.getElementById("status-msg").textContent = f"已选中{'红' if self.color == 'red' else '黑'}方{self.name}"
+        
+        def select(self):
+            self.element.classList.add("selected")
+        
+        def deselect(self):
+            self.element.classList.remove("selected")
+            self.hide_move_hints()
+        
+        def calculate_moves(self):
+            self.possible_moves = []
+            
+            # 根据棋子类型计算可能的移动
+            if self.name in ["车", "俥"]:
+                self.calculate_rook_moves()
+            elif self.name in ["马", "傌"]:
+                self.calculate_knight_moves()
+            elif self.name in ["炮", "砲"]:
+                self.calculate_cannon_moves()
+            elif self.name in ["相", "象"]:
+                self.calculate_elephant_moves()
+            elif self.name in ["仕", "士"]:
+                self.calculate_advisor_moves()
+            elif self.name in ["帅", "将"]:
+                self.calculate_general_moves()
+            elif self.name in ["兵", "卒"]:
+                self.calculate_pawn_moves()
+        
+        def calculate_rook_moves(self):
+            # 车的移动规则：横向和纵向任意距离
+            directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # 下、右、上、左
+            
+            for dx, dy in directions:
+                for i in range(1, max(BOARD_WIDTH, BOARD_HEIGHT)):
+                    new_col = self.col + dx * i
+                    new_row = self.row + dy * i
+                    
+                    if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
+                        break
+                    
+                    # 检查目标位置是否有棋子
+                    piece_at_pos = get_piece_at(new_col, new_row)
+                    if piece_at_pos:
+                        if piece_at_pos.color != self.color:  # 可以吃子
+                            self.possible_moves.append((new_col, new_row, True))
+                        break
+                    else:
+                        self.possible_moves.append((new_col, new_row, False))
+        
+        def calculate_knight_moves(self):
+            # 马的移动规则：日字型，有蹩马腿限制
+            moves = [
+                (1, 2), (2, 1), (2, -1), (1, -2),
+                (-1, -2), (-2, -1), (-2, 1), (-1, 2)
+            ]
+            
+            block_positions = [
+                (0, 1), (1, 0), (1, 0), (0, -1),
+                (0, -1), (-1, 0), (-1, 0), (0, 1)
+            ]
+            
+            for i, (dx, dy) in enumerate(moves):
+                new_col = self.col + dx
+                new_row = self.row + dy
+                
+                # 检查是否在棋盘内
+                if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
+                    continue
+                
+                # 检查蹩马腿
+                block_dx, block_dy = block_positions[i]
+                block_col = self.col + block_dx
+                block_row = self.row + block_dy
+                
+                if get_piece_at(block_col, block_row):
+                    continue  # 马腿被蹩
+                
+                # 检查目标位置
+                piece_at_pos = get_piece_at(new_col, new_row)
+                if piece_at_pos:
+                    if piece_at_pos.color != self.color:  # 可以吃子
+                        self.possible_moves.append((new_col, new_row, True))
+                else:
+                    self.possible_moves.append((new_col, new_row, False))
+        
+        def calculate_cannon_moves(self):
+            # 炮的移动规则：横向和纵向移动，吃子需要隔一个棋子
+            directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # 下、右、上、左
+            
+            for dx, dy in directions:
+                found_piece = False
+                for i in range(1, max(BOARD_WIDTH, BOARD_HEIGHT)):
+                    new_col = self.col + dx * i
+                    new_row = self.row + dy * i
+                    
+                    if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
+                        break
+                    
+                    piece_at_pos = get_piece_at(new_col, new_row)
+                    
+                    if not found_piece:
+                        if not piece_at_pos:
+                            self.possible_moves.append((new_col, new_row, False))
+                        else:
+                            found_piece = True
+                    else:
+                        if piece_at_pos:
+                            if piece_at_pos.color != self.color:
+                                self.possible_moves.append((new_col, new_row, True))
+                            break
+        
+        def calculate_elephant_moves(self):
+            # 相/象的移动规则：田字型，不能过河，有塞象眼限制
+            moves = [(2, 2), (2, -2), (-2, -2), (-2, 2)]
+            block_positions = [(1, 1), (1, -1), (-1, -1), (-1, 1)]
+            
+            for i, (dx, dy) in enumerate(moves):
+                new_col = self.col + dx
+                new_row = self.row + dy
+                
+                # 检查是否在棋盘内
+                if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
+                    continue
+                
+                # 检查是否过河
+                if self.color == "red" and new_row < 5:
+                    continue
+                if self.color == "black" and new_row > 4:
+                    continue
+                
+                # 检查塞象眼
+                block_dx, block_dy = block_positions[i]
+                block_col = self.col + block_dx
+                block_row = self.row + block_dy
+                
+                if get_piece_at(block_col, block_row):
+                    continue  # 象眼被塞
+                
+                # 检查目标位置
+                piece_at_pos = get_piece_at(new_col, new_row)
+                if piece_at_pos:
+                    if piece_at_pos.color != self.color:  # 可以吃子
+                        self.possible_moves.append((new_col, new_row, True))
+                else:
+                    self.possible_moves.append((new_col, new_row, False))
+        
+        def calculate_advisor_moves(self):
+            # 仕/士的移动规则：九宫格内斜线移动
+            moves = [(1, 1), (1, -1), (-1, -1), (-1, 1)]
+            
+            for dx, dy in moves:
+                new_col = self.col + dx
+                new_row = self.row + dy
+                
+                # 检查是否在九宫格内
+                if not (3 <= new_col <= 5):
+                    continue
+                
+                if self.color == "red" and not (7 <= new_row <= 9):
+                    continue
+                if self.color == "black" and not (0 <= new_row <= 2):
+                    continue
+                
+                # 检查目标位置
+                piece_at_pos = get_piece_at(new_col, new_row)
+                if piece_at_pos:
+                    if piece_at_pos.color != self.color:  # 可以吃子
+                        self.possible_moves.append((new_col, new_row, True))
+                else:
+                    self.possible_moves.append((new_col, new_row, False))
+        
+        def calculate_general_moves(self):
+            # 帅/将的移动规则：九宫格内横竖移动
+            moves = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+            
+            for dx, dy in moves:
+                new_col = self.col + dx
+                new_row = self.row + dy
+                
+                # 检查是否在九宫格内
+                if not (3 <= new_col <= 5):
+                    continue
+                
+                if self.color == "red" and not (7 <= new_row <= 9):
+                    continue
+                if self.color == "black" and not (0 <= new_row <= 2):
+                    continue
+                
+                # 检查目标位置
+                piece_at_pos = get_piece_at(new_col, new_row)
+                if piece_at_pos:
+                    if piece_at_pos.color != self.color:  # 可以吃子
+                        self.possible_moves.append((new_col, new_row, True))
+                else:
+                    self.possible_moves.append((new_col, new_row, False))
+        
+        def calculate_pawn_moves(self):
+            # 兵/卒的移动规则：过河前只能前进，过河后可以左右移动
+            moves = []
+            
+            # 前进方向
+            if self.color == "red":
+                moves.append((0, -1))  # 红方向前是向上(行数减小)
+            else:
+                moves.append((0, 1))   # 黑方向前是向下(行数增加)
+            
+            # 如果已过河，可以左右移动
+            if (self.color == "red" and self.row < 5) or (self.color == "black" and self.row > 4):
+                moves.extend([(1, 0), (-1, 0)])
+            
+            for dx, dy in moves:
+                new_col = self.col + dx
+                new_row = self.row + dy
+                
+                # 检查是否在棋盘内
+                if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
+                    continue
+                
+                # 检查目标位置
+                piece_at_pos = get_piece_at(new_col, new_row)
+                if piece_at_pos:
+                    if piece_at_pos.color != self.color:  # 可以吃子
+                        self.possible_moves.append((new_col, new_row, True))
+                else:
+                    self.possible_moves.append((new_col, new_row, False))
+        
+        def show_move_hints(self):
+            board = js.document.getElementById("chess-board")
+            
+            for col, row, is_capture in self.possible_moves:
+                if is_capture:
+                    hint = js.document.createElement("div")
+                    hint.className = "capture-hint"
+                else:
+                    hint = js.document.createElement("div")
+                    hint.className = "move-hint"
+                
+                left = col * CELL_SIZE
+                top = row * CELL_SIZE
+                hint.style.left = f"{left}px"
+                hint.style.top = f"{top}px"
+                
+                # 添加点击事件
+                hint.addEventListener("click", create_proxy(lambda e, c=col, r=row: self.move_to(c, r)))
+                hint.style.pointerEvents = "auto"
+                hint.style.cursor = "pointer"
+                
+                board.appendChild(hint)
+                move_hints.append(hint)
+        
+        def hide_move_hints(self):
+            for hint in move_hints:
+                if hint.parentNode:
+                    hint.parentNode.removeChild(hint)
+            move_hints.clear()
+        
+        def move_to(self, col, row):
+            global selected_piece, current_turn, move_history
+            
+            # 保存移动前的状态用于悔棋
+            old_col, old_row = self.col, self.row
+            captured_piece = get_piece_at(col, row)
+            
+            # 移动棋子到新位置
+            left = col * CELL_SIZE
+            top = row * CELL_SIZE
+            self.element.style.left = f"{left}px"
+            self.element.style.top = f"{top}px"
+            
+            # 检查是否需要吃子
+            if captured_piece:
+                captured_piece.capture()
+                move_history.append({
+                    "piece": self,
+                    "from": (old_col, old_row),
+                    "to": (col, row),
+                    "captured": captured_piece
+                })
+            else:
+                move_history.append({
+                    "piece": self,
+                    "from": (old_col, old_row),
+                    "to": (col, row),
+                    "captured": None
+                })
+            
+            # 更新棋子位置
+            self.col = col
+            self.row = row
+            
+            # 取消选择和隐藏提示
+            self.deselect()
+            selected_piece = None
+            
+            # 切换回合
+            current_turn = "black" if current_turn == "red" else "red"
+            update_turn_indicator()
+            
+            # 更新棋子统计
+            update_piece_counter()
+            
+            # 检查游戏是否结束
+            check_game_end()
+            
+            status_text = f"{'红' if self.color == 'red' else '黑'}方{self.name}已移动"
+            if captured_piece:
+                status_text += f"，吃掉了{'红' if captured_piece.color == 'red' else '黑'}方{captured_piece.name}"
+            js.document.getElementById("status-msg").textContent = status_text
+        
+        def capture(self):
+            self.alive = False
+            self.element.style.display = "none"
+            js.document.getElementById("status-msg").textContent = f"{'红' if self.color == 'red' else '黑'}方{self.name}被吃"
+        
+        def restore(self, col, row):
+            self.alive = True
+            self.element.style.display = "flex"
+            self.col = col
+            self.row = row
+            left = col * CELL_SIZE
+            top = row * CELL_SIZE
+            self.element.style.left = f"{left}px"
+            self.element.style.top = f"{top}px"
+
+    def get_piece_at(col, row):
+        for piece in chess_pieces:
+            if piece.alive and piece.col == col and piece.row == row:
+                return piece
+        return None
+
+    def update_piece_counter():
+        counter_list = js.document.getElementById("piece-counter-list")
+        counter_list.innerHTML = ""
+        
+        # 统计每种棋子的存活数量
+        piece_counts = {}
+        for piece in chess_pieces:
+            if piece.alive:
+                key = f"{piece.color}-{piece.name}"
+                if key not in piece_counts:
+                    piece_counts[key] = {"red": 0, "black": 0}
+                piece_counts[key][piece.color] += 1
+        
+        # 创建统计项
+        for key, counts in piece_counts.items():
+            color, name = key.split("-")
+            item = js.document.createElement("div")
+            item.className = "piece-item"
+            
+            name_span = js.document.createElement("span")
+            name_span.className = "piece-name"
+            name_span.textContent = name
+            
+            count_span = js.document.createElement("span")
+            if counts["red"] > 0:
+                red_text = js.document.createElement("span")
+                red_text.className = "red-count"
+                red_text.textContent = f"红:{counts['red']} "
+                count_span.appendChild(red_text)
+            if counts["black"] > 0:
+                black_text = js.document.createElement("span")
+                black_text.className = "black-count"
+                black_text.textContent = f"黑:{counts['black']}"
+                count_span.appendChild(black_text)
+            
+            item.appendChild(name_span)
+            item.appendChild(count_span)
+            counter_list.appendChild(item)
+
+    def update_turn_indicator():
+        indicator = js.document.getElementById("turn-indicator")
+        if current_turn == "red":
+            indicator.textContent = "红方回合"
+            indicator.className = "turn-indicator red-turn"
+        else:
+            indicator.textContent = "黑方回合"
+            indicator.className = "turn-indicator black-turn"
+    def next_level():
+        global current_level
+        # 隐藏胜利弹窗
+        victory_modal = js.document.getElementById("victory-modal")
+        victory_modal.style.display = "none"
+        
+        # 切换到下一关
+        if current_level < total_levels - 1:
+            current_level += 1
+            reset_board()  # 重置棋盘加载下一关
+        else:
+            # 如果是最后一关，显示通关提示
+            js.alert("恭喜完成所有关卡！")
+    def check_flying_general():
+        """检查将帅是否对脸（在同一列且中间无棋子）"""
+        red_general = None
+        black_general = None
+        for piece in chess_pieces:
+            if not piece.alive:
+                continue
+            if piece.color == "red" and piece.name == "帅":
+                red_general = piece
+            elif piece.color == "black" and piece.name == "将":
+                black_general = piece
+        if not red_general or not black_general:
+            return False
+        if red_general.col != black_general.col:
+            return False
+        # 同一列，检查中间是否有棋子
+        col = red_general.col
+        min_row = min(red_general.row, black_general.row)
+        max_row = max(red_general.row, black_general.row)
+        for piece in chess_pieces:
+            if piece.alive and piece.col == col and min_row < piece.row < max_row:
+                return False  # 中间有棋子，不算对脸
+        return True  # 将帅对脸
+
+    def check_game_end():
+    # 检查是否有一方的将/帅被吃掉
+        red_general_exists = any(piece.alive and piece.color == "red" and piece.name == "帅" for piece in chess_pieces)
+        black_general_exists = any(piece.alive and piece.color == "black" and piece.name == "将" for piece in chess_pieces)
+
+        if not red_general_exists:
+            # 红方失败 - 显示终局冲击
+            ending = js.document.getElementById("endingLose")
+            ending.style.display = "flex"
+            js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
+        elif check_flying_general():
+            loser = "黑" if current_turn == "red" else "红"
+            js.document.getElementById("status-msg").textContent = f"将帅对脸！{loser}方违规判负"
+        elif not black_general_exists:
+            # 红方胜利 - 显示终局冲击
+            level_info = level_data[current_level]
+            tips = level_info.get("tips", "完成关卡")
+            tit = level_info.get("tit", "")
+
+            ending = js.document.getElementById("endingWin")
+            js.document.getElementById("endingWinText").textContent = tips
+            js.document.getElementById("endingWinSub").textContent = tit
+            ending.style.display = "flex"
+            js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
+
+            # 更新用户进度
+            if is_logged_in and current_user != "useradmin" and current_level == user_max_level:
+                user_max_level += 1
+                user_data[current_user]["max_level"] = user_max_level
+    def undo_move():
+        global current_turn, move_history
+        
+        if not move_history:
+            js.document.getElementById("status-msg").textContent = "没有可悔棋的步骤"
+            return
+        
+        last_move = move_history.pop()
+        piece = last_move["piece"]
+        from_col, from_row = last_move["from"]
+        captured = last_move["captured"]
+        
+        # 移动棋子回原位置
+        piece.col, piece.row = from_col, from_row
+        left = from_col * CELL_SIZE
+        top = from_row * CELL_SIZE
+        piece.element.style.left = f"{left}px"
+        piece.element.style.top = f"{top}px"
+        
+        # 恢复被吃的棋子
+        if captured:
+            to_col, to_row = last_move["to"]
+            captured.restore(to_col, to_row)
+        
+        # 切换回原来的回合
+        current_turn = "red" if current_turn == "black" else "red"
+        update_turn_indicator()
+        
+        # 更新棋子统计
+        update_piece_counter()
+        
+        js.document.getElementById("status-msg").textContent = "已悔棋"
+
+    class Ground:
+        def __init__(self, numx, coler, line, row, gap, block_length):
+            self.line = line
+            self.row = row
+            self.ground = numx
+            self.gap = gap
+            self.ground_coler = coler
+            self.block_length = block_length
+        
+        def draw(self):
+            board = js.document.getElementById("chess-board")
+            board_width = (self.line - 1) * self.block_length
+            board_height = (self.row - 1) * self.block_length
+            board.style.width = f"{board_width}px"
+            board.style.height = f"{board_height}px"
+            board.style.border = "2px solid #8B4513"
+            board.style.backgroundColor = self.ground_coler
+            
+            # 绘制横线
+            for i in range(self.row):
+                line = js.document.createElement("div")
+                line.className = "board-line horizontal-line"
+                line.style.top = f"{i * self.block_length}px"
+                board.appendChild(line)
+            
+            # 绘制竖线
+            for i in range(self.line):
+                # 创建上半部分竖线
+                line_top = js.document.createElement("div")
+                line_top.className = "board-line vertical-line"
+                line_top.style.left = f"{i * self.block_length}px"
+                line_top.style.height = "45%"
+                board.appendChild(line_top)
+                
+                # 创建下半部分竖线
+                line_bottom = js.document.createElement("div")
+                line_bottom.className = "board-line vertical-line"
+                line_bottom.style.left = f"{i * self.block_length}px"
+                line_bottom.style.height = "45%"
+                line_bottom.style.bottom = "0px"
+                board.appendChild(line_bottom)
+            
+            # 使用SVG绘制斜线
+            self.draw_diagonal_lines()
+        
+        def draw_diagonal_lines(self):
+            # 获取SVG容器
+            svg = js.document.getElementById("diagonal-lines")
+            svg.setAttribute("width", f"{(self.line - 1) * self.block_length}px")
+            svg.setAttribute("height", f"{(self.row - 1) * self.block_length}px")
+            
+            # 红方九宫格斜线坐标 (x1, y1, x2, y2)
+            red_palace = [
+                (3, 7, 5, 9),  # 第一条对角线：从(3,7)到(5,9)
+                (5, 7, 3, 9)   # 第二条对角线：从(5,7)到(3,9)
+            ]
+            
+            # 黑方九宫格斜线坐标
+            black_palace = [
+                (3, 0, 5, 2),  # 第一条对角线：从(3,0)到(5,2)
+                (5, 0, 3, 2)   # 第二条对角线：从(5,0)到(3,2)
+            ]
+            
+            # 遍历所有斜线坐标（红方+黑方共4条斜线）
+            for (x1, y1, x2, y2) in red_palace + black_palace:
+                # 创建SVG线段元素
+                line = js.document.createElementNS("http://www.w3.org/2000/svg", "line")
+                
+                # 计算起点像素坐标：格子索引 × 格子大小
+                start_x = x1 * self.block_length
+                start_y = y1 * self.block_length
+                
+                # 计算终点像素坐标
+                end_x = x2 * self.block_length
+                end_y = y2 * self.block_length
+                
+                # 设置线段起点和终点属性
+                line.setAttribute("x1", f"{start_x}")
+                line.setAttribute("y1", f"{start_y}")
+                line.setAttribute("x2", f"{end_x}")
+                line.setAttribute("y2", f"{end_y}")
+                
+                # 设置线段样式
+                line.setAttribute("stroke", "#000")
+                line.setAttribute("stroke-width", "1")
+                
+                # 将线段添加到SVG容器中
+                svg.appendChild(line)
+
+    def init_pieces(pieces_layout):
+        global chess_pieces, move_history
+        
+        # 清除现有棋子
+        board = js.document.getElementById("chess-board")
+        pieces = board.querySelectorAll(".chess-piece")
+        for piece in pieces:
+            board.removeChild(piece)
+        
+        # 清除移动历史
+        move_history.clear()
+        chess_pieces.clear()
+        
+        # 创建棋子对象
+        for i, (name, color, col, row) in enumerate(pieces_layout):
+            chess_pieces.append(Chess(name, color, col, row, i))
+        
+        # 更新棋子统计
+        update_piece_counter()
+        
+        # 重置回合
+        global current_turn
+        current_turn = "red"
+        update_turn_indicator()
+        
+        js.document.getElementById("loading").style.display = "none"
+
+    def change_level(direction):
+        global current_level
+        
+        if direction == "next" and current_level < total_levels - 1:
+            # 检查是否有权限进入下一关
+            if current_user != "useradmin" and current_level + 1 > user_max_level:
+                js.document.getElementById("status-msg").textContent = "请先通过当前关卡"
+                return
+            
+            current_level += 1
+        elif direction == "prev" and current_level > 0:
+            current_level -= 1
+        else:
+            return
+        
+        # 更新界面显示
+        js.document.getElementById("level-number").textContent = str(current_level)
+        js.document.getElementById("level-display").textContent = f"第 {current_level} 关"
+        
+        # 初始化棋盘和棋子
+        reset_board()
+        
+        js.document.getElementById("status-msg").textContent = f"已切换到第 {current_level} 关"
+
+    def reset_board():
+        # 使用当前关卡数据初始化棋子
+        if current_level in level_data:
+            level_info = level_data[current_level]
+            init_pieces(level_info["pieces"])
+            js.document.getElementById("status-msg").textContent = "棋盘已重置"
+            tips = level_info.get("tips", "")
+            js.document.getElementById("level_name").textContent = str(tips)
+        else:
+            js.document.getElementById("status-msg").textContent = "关卡数据不存在"
+
+    def login(username, password):
+        global is_logged_in, current_user, current_level, user_max_level
+        
+        # 模拟数据库验证
+        if username in user_data and user_data[username]["password"] == password:
+            is_logged_in = True
+            current_user = username
+            current_level = user_data[username]["level"]
+            user_max_level = user_data[username]["max_level"]
+            
+            # 更新界面显示
+            js.document.getElementById("level-number").textContent = str(current_level)
+            js.document.getElementById("level-display").textContent = f"第 {current_level} 关"
+            
+            # 初始化棋盘
+            reset_board()
+            
+            js.document.getElementById("status-msg").textContent = f"欢迎回来，{username}！"
+            js.document.getElementById("login-modal").style.display = "none"
+            
+            return True
+        else:
+            js.document.getElementById("status-msg").textContent = "用户名或密码错误"
+            return False
+
+    def show_login_modal():
+        js.document.getElementById("login-modal").style.display = "flex"
+
+    def hide_login_modal():
+        js.document.getElementById("login-modal").style.display = "none"
+
+    def show_level_select():
+        modal = js.document.getElementById("level-select-modal")
+        modal.style.display = "flex"
+        
+        # 生成关卡按钮
+        levels_grid = js.document.getElementById("levels-grid")
+        levels_grid.innerHTML = ""
+        
+        for i in range(total_levels):
+            btn = js.document.createElement("button")
+            btn.className = "level-btn"
+            btn.textContent = str(i)
+            
+            # 检查关卡是否解锁
+            if current_user == "useradmin" or i <= user_max_level:
+                btn.classList.add("unlocked")
+                btn.addEventListener("click", create_proxy(lambda e, level=i: select_level(level)))
+            else:
+                btn.classList.add("locked")
+                btn.title = "请先通过前置关卡"
+            
+            levels_grid.appendChild(btn)
+
+    def hide_level_select():
+        js.document.getElementById("level-select-modal").style.display = "none"
+
+    def select_level(level):
+        global current_level
+        
+        # 检查是否有权限选择该关卡
+        if current_user != "useradmin" and level > user_max_level:
+            js.document.getElementById("status-msg").textContent = "请先通过前置关卡"
+            hide_level_select()
+            return
+        
+        current_level = level
+        
+        # 更新界面显示
+        js.document.getElementById("level-number").textContent = str(current_level)
+        js.document.getElementById("level-display").textContent = f"第 {current_level} 关"
+        
+        # 初始化棋盘和棋子
+        reset_board()
+        
+        js.document.getElementById("status-msg").textContent = f"已切换到第 {current_level} 关"
+        hide_level_select()
+
+    # 初始化游戏
+    if __name__ == "__main__":
+        # 创建棋盘
+        ground = Ground(1, "#deb887", 9, 10, 0, CELL_SIZE)
+        ground.draw()
+        
+        # 绑定按钮事件
+        js.document.getElementById("prev-btn").addEventListener("click", create_proxy(lambda e: change_level("prev")))
+        js.document.getElementById("next-btn").addEventListener("click", create_proxy(lambda e: change_level("next")))
+        js.document.getElementById("reset-btn").addEventListener("click", create_proxy(lambda e: reset_board()))
+        js.document.getElementById("undo-btn").addEventListener("click", create_proxy(lambda e: undo_move()))
+        js.document.getElementById("login-btn").addEventListener("click", create_proxy(lambda e: show_login_modal()))
+        js.document.getElementById("login-cancel").addEventListener("click", create_proxy(lambda e: hide_login_modal()))
+        js.document.getElementById("select-level-btn").addEventListener("click", create_proxy(lambda e: show_level_select()))
+        js.document.getElementById("close-level-select").addEventListener("click", create_proxy(lambda e: hide_level_select()))
+        js.document.getElementById("next-level-btn").addEventListener("click", create_proxy(lambda e: next_level()))
+
+        # 终局冲击按钮
+        def close_ending_win(e):
+            ending = js.document.getElementById("endingWin")
+            ending.classList.remove("active")
+            ending.style.display = "none"
+            # 显示原来的胜利弹窗（带下一关按钮）
+            victory_modal = js.document.getElementById("victory-modal")
+            level_info = level_data[current_level]
+            js.document.getElementById("victory-level").textContent = str(current_level)
+            js.document.getElementById("victory-tips").textContent = level_info.get("tips", "完成关卡")
+            js.document.getElementById("victory-tit").textContent = level_info.get("tit", "")
+            victory_modal.style.display = "flex"
+
+        def close_ending_lose(e):
+            ending = js.document.getElementById("endingLose")
+            ending.classList.remove("active")
+            ending.style.display = "none"
+            reset_board()
+
+        js.document.getElementById("endingWinBtn").addEventListener("click", create_proxy(close_ending_win))
+        js.document.getElementById("endingLoseBtn").addEventListener("click", create_proxy(close_ending_lose))
+        # 重玩本关按钮事件
+# 定义一个普通函数来包含赋值操作和逻辑
+        def handle_restart_click(e):
+            js.document.getElementById("victory-modal").style.display = "none"
+            reset_board()
+
+        # 绑定事件监听器时使用这个函数
+        #js.document.getElementById("restart-level-btn").addEventListener("click", create_proxy(handle_restart_click))
+        
+        # 登录表单提交
+        js.document.getElementById("login-submit").addEventListener("click", create_proxy(lambda e: 
+            login(
+                js.document.getElementById("username").value,
+                js.document.getElementById("password").value
+            )
+        ))
+        
+        # 初始状态显示登录提示
+        js.document.getElementById("status-msg").textContent = "请登录开始游戏"
+</py-script>
+
+    <!-- 模块导航 -->
+    <div style="display:flex; justify-content:center; gap:15px; margin:20px 0; flex-wrap:wrap; padding:0 20px;">
+        <a href="../../index.html" class="nav-button" style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3);" onclick="event.preventDefault(); filmstripTransition('../../index.html');">
+            <i class="fas fa-home"></i> 返回首页
+        </a>
+    </div>
+
+</body>
+</html>

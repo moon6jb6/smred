@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国力量</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(180deg, #0a0a1a 0%, #1a0a00 50%, #0a0a1a 100%);
+            color: #f5f5f5;
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            line-height: 1.6;
+        }
+
+        /* 导航 */
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* 区块通用 */
+        .section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: #ffd700;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.95rem;
+            margin-bottom: 50px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        /* 区块一：数据线 */
+        .data-line-container {
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+            padding: 40px 0;
+        }
+
+        .line-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            position: relative;
+            margin: 60px 0;
+        }
+
+        .line-progress {
+            height: 100%;
+            background: linear-gradient(to right, #8b0000, #ffd700);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .line-node {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #ffd700;
+            border: 3px solid #0a0a1a;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .line-node:hover {
+            transform: translate(-50%, -50%) scale(1.5);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .line-node-label {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .line-node:hover .line-node-label {
+            opacity: 1;
+        }
+
+        .line-node-story {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.75rem;
+            color: rgba(255, 215, 0, 0.6);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .line-node:hover .line-node-story {
+            opacity: 1;
+        }
+
+        .data-number {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .data-number .number {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ffd700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .data-number .unit {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-left: 10px;
+        }
+
+        .data-number .label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 5px;
+        }
+
+        /* 区块二：对比表 */
+        .compare-section {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .compare-container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .compare-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+
+        .compare-item {
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .compare-item .name {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 15px;
+        }
+
+        .compare-item .value {
+            font-size: 3rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .compare-item .value.weak {
+            color: #888;
+        }
+
+        .compare-item .value.strong {
+            color: #ffd700;
+        }
+
+        .compare-item .unit {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .compare-vs {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .compare-caption {
+            text-align: center;
+            font-size: 1rem;
+            color: rgba(255, 215, 0, 0.6);
+            font-style: italic;
+            margin-top: -20px;
+            margin-bottom: 40px;
+        }
+
+        .compare-divider {
+            width: 60%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 0 auto 60px;
+        }
+
+        /* 区块三：关系图 */
+        .map-section {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .map-container {
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            height: 500px;
+        }
+
+        .map-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffd700, #8b0000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 3;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .map-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 2px;
+            background: linear-gradient(to right, rgba(255, 215, 0, 0.6), rgba(255, 215, 0, 0.1));
+            transform-origin: left center;
+            z-index: 1;
+            transition: height 0.3s, background 0.3s;
+        }
+
+        .map-line:hover {
+            height: 4px;
+            background: linear-gradient(to right, rgba(255, 215, 0, 0.9), rgba(255, 215, 0, 0.3));
+        }
+
+        .map-endpoint {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffd700;
+            border: 2px solid #0a0a1a;
+            z-index: 2;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .map-endpoint:hover {
+            transform: scale(1.8);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .map-label {
+            position: absolute;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .map-endpoint:hover + .map-label,
+        .map-label:hover {
+            color: #ffd700;
+        }
+
+        .map-popup {
+            display: none;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 280px;
+            z-index: 100;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .map-popup.active {
+            display: block;
+        }
+
+        .map-popup-title {
+            color: #ffd700;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .map-popup-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* 底部 */
+        .bottom-nav {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .bottom-nav a {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .bottom-nav a:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        /* 移动端 */
+        @media (max-width: 768px) {
+            .section {
+                padding: 60px 15px;
+            }
+            .section-title {
+                font-size: 1.5rem;
+            }
+            .compare-row {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .compare-vs {
+                transform: rotate(90deg);
+            }
+            .map-container {
+                height: 400px;
+            }
+            .data-number .number {
+                font-size: 2.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 导航 -->
+    <div class="nav-buttons">
+        <a href="../../index.html" class="nav-btn" onclick="event.preventDefault(); filmstripTransition('../../index.html');">
+            <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+    </div>
+
+    <!-- 区块一：一条线 -->
+    <div class="section" id="sectionLine">
+        <h2 class="section-title">一条线</h2>
+        <p class="section-subtitle">从0到45000公里，中国高铁走过的路</p>
+
+        <div class="data-line-container">
+            <div class="line-track">
+                <div class="line-progress" id="lineProgress"></div>
+                <div class="line-node" data-km="0" style="left: 0%">
+                    <div class="line-node-label">2008年<br>京津城际</div>
+                    <div class="line-node-story">中国第一条高铁</div>
+                </div>
+                <div class="line-node" data-km="9300" style="left: 20%">
+                    <div class="line-node-label">2012年<br>9300公里</div>
+                    <div class="line-node-story">超越日本成为世界第一</div>
+                </div>
+                <div class="line-node" data-km="19000" style="left: 42%">
+                    <div class="line-node-label">2016年<br>19000公里</div>
+                    <div class="line-node-story">覆盖全国主要城市</div>
+                </div>
+                <div class="line-node" data-km="35000" style="left: 78%">
+                    <div class="line-node-label">2020年<br>35000公里</div>
+                    <div class="line-node-story">超过世界其他国家总和</div>
+                </div>
+                <div class="line-node" data-km="45000" style="left: 100%">
+                    <div class="line-node-label">2025年<br>45000公里</div>
+                    <div class="line-node-story">连接每一个省会城市</div>
+                </div>
+            </div>
+
+            <div class="data-number">
+                <span class="number" id="kmNumber">0</span>
+                <span class="unit">公里</span>
+                <div class="label">中国高铁运营里程</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 区块二：一张表 -->
+    <div class="section compare-section" id="sectionCompare">
+        <h2 class="section-title">一张表</h2>
+        <p class="section-subtitle">300年的差距，是多少人的命填回来的</p>
+
+        <div class="compare-container">
+            <!-- 对比1：射速 -->
+            <div class="compare-row">
+                <div class="compare-item">
+                    <div class="name">清·火绳枪</div>
+                    <div class="value weak" data-target="1">0</div>
+                    <div class="unit">发/分钟</div>
+                </div>
+                <div class="compare-vs">VS</div>
+                <div class="compare-item">
+                    <div class="name">95式自动步枪</div>
+                    <div class="value strong" data-target="650">0</div>
+                    <div class="unit">发/分钟</div>
+                </div>
+            </div>
+            <div class="compare-caption">射速提升了650倍</div>
+            <div class="compare-divider"></div>
+
+            <!-- 对比2：射程 -->
+            <div class="compare-row">
+                <div class="compare-item">
+                    <div class="name">清·火绳枪</div>
+                    <div class="value weak" data-target="50">0</div>
+                    <div class="unit">米</div>
+                </div>
+                <div class="compare-vs">VS</div>
+                <div class="compare-item">
+                    <div class="name">95式自动步枪</div>
+                    <div class="value strong" data-target="400">0</div>
+                    <div class="unit">米</div>
+                </div>
+            </div>
+            <div class="compare-caption">射程提升了8倍</div>
+            <div class="compare-divider"></div>
+
+            <!-- 对比3：导弹 -->
+            <div class="compare-row">
+                <div class="compare-item">
+                    <div class="name">1960年·东风-1</div>
+                    <div class="value weak" data-target="600">0</div>
+                    <div class="unit">公里</div>
+                </div>
+                <div class="compare-vs">VS</div>
+                <div class="compare-item">
+                    <div class="name">2019年·东风-41</div>
+                    <div class="value strong" data-target="14000">0</div>
+                    <div class="unit">公里</div>
+                </div>
+            </div>
+            <div class="compare-caption">射程从600公里到覆盖全球</div>
+        </div>
+    </div>
+
+    <!-- 区块三：一张图 -->
+    <div class="section map-section" id="sectionMap">
+        <h2 class="section-title">一张图</h2>
+        <p class="section-subtitle">中国与世界的连接</p>
+
+        <div class="map-container" id="mapContainer">
+            <!-- 中国（中心） -->
+            <div class="map-center">中国</div>
+
+            <!-- 关系线和端点由JS生成 -->
+        </div>
+
+        <!-- 弹窗 -->
+        <div class="map-popup" id="mapPopup">
+            <button class="map-popup-close" id="mapPopupClose">&times;</button>
+            <div class="map-popup-title" id="mapPopupTitle"></div>
+            <div id="mapPopupContent"></div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <a href="../chess_mod2/mod2.html" onclick="event.preventDefault(); filmstripTransition('../chess_mod2/mod2.html');">
+            下一个穿越：象棋之战 <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <script src="../filmstrip.js"></script>
+    <script>
+        // 区块一：数据线滚动动画
+        const lineProgress = document.getElementById('lineProgress');
+        const kmNumber = document.getElementById('kmNumber');
+        const sectionLine = document.getElementById('sectionLine');
+
+        function animateDataLine() {
+            const rect = sectionLine.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+
+            if (rect.top < windowHeight && rect.bottom > 0) {
+                const progress = Math.min(1, Math.max(0, (windowHeight - rect.top) / (windowHeight + rect.height)));
+                lineProgress.style.width = (progress * 100) + '%';
+                const km = Math.round(progress * 45000);
+                kmNumber.textContent = km.toLocaleString();
+            }
+        }
+
+        // 区块二：对比数字动画
+        const compareValues = document.querySelectorAll('.compare-item .value');
+        let compareAnimated = false;
+
+        function animateCompare() {
+            if (compareAnimated) return;
+            const section = document.getElementById('sectionCompare');
+            const rect = section.getBoundingClientRect();
+
+            if (rect.top < window.innerHeight * 0.7) {
+                compareAnimated = true;
+                compareValues.forEach(el => {
+                    const target = parseInt(el.dataset.target);
+                    const duration = 2000;
+                    const start = performance.now();
+
+                    function tick(now) {
+                        const elapsed = now - start;
+                        const p = Math.min(elapsed / duration, 1);
+                        const eased = 1 - Math.pow(1 - p, 3);
+                        el.textContent = Math.round(target * eased).toLocaleString();
+                        if (p < 1) requestAnimationFrame(tick);
+                    }
+                    requestAnimationFrame(tick);
+                });
+            }
+        }
+
+        // 区块三：关系地图
+        const relations = [
+            { name: '东盟', angle: 150, distance: 160, trade: '9800亿美元', story: '2025年，中国与东盟贸易额突破9800亿美元，连续5年互为最大贸易伙伴。' },
+            { name: '非洲', angle: 210, distance: 180, trade: '2800亿美元', story: '中国在非洲建设了超过1万公里铁路、近10万公里公路、近千座桥梁。' },
+            { name: '欧盟', angle: 310, distance: 170, trade: '7800亿美元', story: '中欧班列累计开行超过8万列，连接中国与欧洲25个国家200多个城市。' },
+            { name: '俄罗斯', angle: 350, distance: 150, trade: '2400亿美元', story: '中俄贸易额创历史新高，能源、农业、科技合作持续深化。' },
+            { name: '拉美', angle: 250, distance: 190, trade: '4500亿美元', story: '中国是拉美第二大贸易伙伴，在基础设施、能源、通信领域深度合作。' },
+            { name: '中亚', angle: 40, distance: 140, trade: '700亿美元', story: '中国-中亚天然气管道累计输气超过4000亿立方米，惠及中国5亿居民。' }
+        ];
+
+        const mapContainer = document.getElementById('mapContainer');
+        const mapPopup = document.getElementById('mapPopup');
+        const mapPopupTitle = document.getElementById('mapPopupTitle');
+        const mapPopupContent = document.getElementById('mapPopupContent');
+        const mapPopupClose = document.getElementById('mapPopupClose');
+
+        function createMap() {
+            const cx = mapContainer.offsetWidth / 2;
+            const cy = mapContainer.offsetHeight / 2;
+
+            relations.forEach(rel => {
+                const rad = (rel.angle * Math.PI) / 180;
+                const ex = cx + Math.cos(rad) * rel.distance;
+                const ey = cy + Math.sin(rad) * rel.distance;
+
+                // 线
+                const line = document.createElement('div');
+                line.className = 'map-line';
+                const length = rel.distance;
+                const deg = rel.angle;
+                line.style.width = length + 'px';
+                line.style.transform = `rotate(${deg}deg)`;
+                mapContainer.appendChild(line);
+
+                // 端点
+                const endpoint = document.createElement('div');
+                endpoint.className = 'map-endpoint';
+                endpoint.style.left = ex + 'px';
+                endpoint.style.top = ey + 'px';
+                endpoint.style.transform = 'translate(-50%, -50%)';
+
+                endpoint.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    mapPopupTitle.textContent = rel.name + ' — ' + rel.trade;
+                    mapPopupContent.textContent = rel.story;
+                    mapPopup.style.left = Math.min(ex + 20, window.innerWidth - 320) + 'px';
+                    mapPopup.style.top = (ey - 30) + 'px';
+                    mapPopup.classList.add('active');
+                });
+
+                mapContainer.appendChild(endpoint);
+
+                // 标签
+                const label = document.createElement('div');
+                label.className = 'map-label';
+                label.textContent = rel.name;
+                const lx = ex + Math.cos(rad) * 25;
+                const ly = ey + Math.sin(rad) * 25;
+                label.style.left = lx + 'px';
+                label.style.top = ly + 'px';
+                label.style.transform = 'translate(-50%, -50%)';
+                mapContainer.appendChild(label);
+            });
+        }
+
+        mapPopupClose.addEventListener('click', () => {
+            mapPopup.classList.remove('active');
+        });
+
+        document.addEventListener('click', () => {
+            mapPopup.classList.remove('active');
+        });
+
+        // 滚动监听
+        window.addEventListener('scroll', () => {
+            animateDataLine();
+            animateCompare();
+        });
+
+        // 初始化
+        animateDataLine();
+        animateCompare();
+        createMap();
+    </script>
+</body>
+
+</html>

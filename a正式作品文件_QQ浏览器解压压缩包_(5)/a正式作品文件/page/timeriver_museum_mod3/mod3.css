@@ -1,0 +1,295 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "SimSun", "STSong", "Microsoft YaHei", serif;
+}
+
+body {
+    /* 红色渐变背景，营造热烈且有冲击力的视觉效果 */
+    background: linear-gradient(135deg, #9b0000 0%, #d32f2f 50%, #9b0000 100%);
+    background-attachment: fixed;
+    color: #333;
+    line-height: 1.7;
+    min-height: 100vh;
+    padding-bottom: 60px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+
+/* 按钮容器 - 用于放置两个按钮 */
+
+.button-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* 页眉样式 - 保持不变 */
+
+.header {
+    background: linear-gradient(to right, #8b2323, #601111);
+    color: #f5e8d3;
+    text-align: center;
+    padding: 30px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid #4a0f0f;
+    margin-bottom: 40px;
+}
+
+.header h1 {
+    font-size: 2.6rem;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    font-family: "STZhongsong", "SimSun", serif;
+}
+
+.header p {
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin: 0 auto;
+    opacity: 0.9;
+    font-style: italic;
+}
+
+
+/* 垂直时间轴容器 */
+
+.vertical-timeline {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+
+/* 时间轴中轴线 - 增强历史感 */
+
+.vertical-timeline::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    background: linear-gradient(to bottom, #8b0000, #a52a2a, #8b0000);
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    margin-left: -3px;
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), inset 0 0 5px rgba(255, 255, 255, 0.1);
+}
+
+
+/* 事件项容器 */
+
+.timeline-item {
+    padding: 10px 40px;
+    position: relative;
+    width: 50%;
+    box-sizing: border-box;
+    margin-bottom: 30px;
+}
+
+
+/* 左侧事件项 */
+
+.timeline-item.left {
+    left: 0;
+}
+
+
+/* 右侧事件项 */
+
+.timeline-item.right {
+    left: 50%;
+}
+
+
+/* 年份按钮 - 增强历史厚重感 */
+
+.year-button {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #c2b280 0%, #f0e68c 50%, #c2b280 100%);
+    border: 4px solid #8b4513;
+    border-radius: 50%;
+    color: #5d2907;
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 2px 2px rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
+    font-family: "SimSun", serif;
+    z-index: 2;
+}
+
+
+/* 左侧年份按钮位置 */
+
+.timeline-item.left .year-button {
+    right: -30px;
+    top: 0;
+}
+
+
+/* 右侧年份按钮位置 */
+
+.timeline-item.right .year-button {
+    left: -30px;
+    top: 0;
+}
+
+
+/* 年份按钮悬停效果 */
+
+.year-button:hover {
+    transform: scale(1.15);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.7);
+    border-color: #a0522d;
+}
+
+
+/* 事件卡片 - 默认隐藏 */
+
+.event-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    display: none;
+    /* 默认隐藏 */
+    margin-top: 15px;
+}
+
+
+/* 鼠标悬停年份按钮时显示事件卡片 */
+
+.timeline-item:hover .event-card {
+    display: block;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+
+/* 事件卡片淡入动画 */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* 事件标题 */
+
+.event-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #8b0000;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+
+/* 事件内容 */
+
+.event-content {
+    color: #333;
+    line-height: 1.6;
+}
+
+
+/* 图片区域 */
+
+.event-image {
+    width: 100%;
+    height: 180px;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 15px 0;
+    border-radius: 4px;
+    color: #888;
+    font-style: italic;
+    border: 1px solid #eee;
+}
+
+
+/* 导航按钮样式 */
+
+.nav-button {
+    background: rgba(255, 255, 255, 0.9);
+    color: #d32f2f;
+    padding: 10px 20px;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    width: fit-content;
+}
+
+.nav-button:hover {
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+}
+
+
+/* 响应式设计 - 小屏幕适配 */
+
+@media (max-width: 768px) {
+    /* 中轴线位置调整 */
+    .vertical-timeline::after {
+        left: 30px;
+    }
+    /* 所有事件项占满宽度 */
+    .timeline-item {
+        width: 100%;
+        padding-left: 80px;
+        padding-right: 25px;
+    }
+    /* 右侧事件项也居左 */
+    .timeline-item.right {
+        left: 0%;
+    }
+    /* 调整年份按钮位置 */
+    .timeline-item.left .year-button,
+    .timeline-item.right .year-button {
+        left: 0;
+        top: 0;
+    }
+    .header h1 {
+        font-size: 2rem;
+    }
+    .year-button {
+        width: 50px;
+        height: 50px;
+        font-size: 1rem;
+    }
+}

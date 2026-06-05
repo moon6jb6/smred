@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>红军长征历史时间轴</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../timeriver_museum_mod3/mod3.css">
+    <link rel="stylesheet" href="../common.css">
+    <style>
+        * {
+            font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #9b0000, #d32f2f, #9b0000);
+            background-attachment: fixed;
+            color: #fff;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        /* 装饰网格 */
+        
+        .grid-decoration {
+            position: fixed;
+            top: 0;
+            width: 120px;
+            height: 100vh;
+            background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0z' fill='none'/%3E%3Cpath d='M1 1v18h18V1H1zm1 1h16v16H2V2zm2 2h12v12H4V4zm1 1v10h10V5H5zm1 1h8v8H6V6z' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E");
+            z-index: 1;
+        }
+        
+        .grid-right {
+            right: 0;
+        }
+        /* 主容器 */
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+        /* 页头 */
+        
+        .header {
+            background: linear-gradient(to right, #7b0000, #8d0000, #7b0000);
+            height: 15vh;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid #5a0000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+            border-radius: 10px;
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            opacity: 0.9;
+        }
+        /* 时间轴 */
+        
+        .timeline {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px 0;
+            position: relative;
+        }
+        /* 中轴线 */
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            background: linear-gradient(to bottom, #8b0000, #a52a2a, #8b0000);
+            border-radius: 3px;
+        }
+        /* 事件项 */
+        
+        .event {
+            display: flex;
+            justify-content: flex-end;
+            padding-right: 50%;
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .event:nth-child(even) {
+            justify-content: flex-start;
+            padding-left: 50%;
+            padding-right: 0;
+        }
+        
+        .event-content {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 25px;
+            width: 95%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .event-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .event-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #ffcccc;
+        }
+        
+        .event-desc {
+            margin-bottom: 15px;
+            line-height: 1.7;
+            color: darkorange;
+        }
+        /* 图片容器样式 */
+        
+        .event-img {
+            width: 100%;
+            margin: 15px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+        }
+        /* .event-img::before {
+            content: "图片位置";
+            color: rgb(249, 200, 4);
+            font-size: 1.2rem;
+        } */
+        
+        .event-date {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #8b0000, #a52a2a);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: calc(50% - 30px);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(139, 0, 0, 0.5);
+            z-index: 2;
+        }
+        
+        .event:nth-child(even) .event-date {
+            left: calc(50% - 30px);
+        }
+        /* 响应式设计 */
+        
+        @media (max-width: 768px) {
+            .grid-decoration {
+                display: none;
+            }
+            .header {
+                height: auto;
+                padding: 30px 20px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .header p {
+                font-size: 1rem;
+            }
+            .timeline::before {
+                left: 30px;
+            }
+            .event,
+            .event:nth-child(even) {
+                justify-content: flex-start;
+                padding-left: 80px;
+                padding-right: 25px;
+            }
+            .event-date {
+                left: 30px !important;
+                top: 40px;
+                transform: none;
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
+            }
+            .event-img {
+                min-height: 150px;
+            }
+        }
+        /* 页脚 */
+        
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        /* 动画效果 */
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .event {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .event:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .event:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        .event:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+        
+        .event:nth-child(5) {
+            animation-delay: 0.8s;
+        }
+        
+        .event:nth-child(6) {
+            animation-delay: 1.0s;
+        }
+        /* 滚动条样式 */
+        
+         ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: #8b0000;
+            border-radius: 4px;
+        }
+        
+         ::-webkit-scrollbar-thumb:hover {
+            background: #a52a2a;
+        }
+        
+        img {
+            max-width: 100%;
+            /* 图片最大宽度为父容器的 100% */
+            height: auto;
+            /* 高度自动调整，保持宽高比例 */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="button-container">
+        <a href="../../mainpage.html" class="nav-button">
+            <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+        <a href="../timeriver_museum_mod3/bingqi_mod8/mod8.html" class="nav-button">
+            <i class="fas fa-shield-alt"></i> 兵器进化史
+        </a>
+    </div>
+    <!-- 装饰网格 -->
+    <div class="grid-decoration grid-right"></div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 页头 -->
+        <header class="header">
+            <h1>红军长征伟大历程</h1>
+            <p>1934年10月至1936年10月，中国工农红军进行战略转移的伟大征程，是人类历史上的奇迹</p>
+        </header>
+
+        <!-- 时间轴 -->
+        <div class="timeline">
+            <!-- 事件1 -->
+            <div class="event">
+                <div class="event-date">1934<br>10月</div>
+                <div class="event-content">
+                    <h3 class="event-title">长征开始</h3>
+                    <p class="event-desc">由于第五次反"围剿"失败，中央红军主力被迫实行战略转移，从江西瑞金等地出发，开始长征。</p>
+                    <!-- 图片位置 -->
+                    <img src="mod1_images/img_00_e2cd12fc.jpg" alt="长征开始">
+                </div>
+            </div>
+
+            <!-- 事件2 -->
+            <div class="event">
+                <div class="event-date">1935<br>1月</div>
+                <div class="event-content">
+                    <h3 class="event-title">遵义会议</h3>
+                    <p class="event-desc">中共中央在贵州遵义召开政治局扩大会议，确立了毛泽东在党和红军中的领导地位，是党的历史上一个生死攸关的转折点。</p>
+                    <!-- 图片位置 -->
+                    <img src="mod1_images/img_01_385e32a4.jpg" alt="遵义会议">                    </div>
+            </div>
+
+            <!-- 事件3 -->
+            <div class="event">
+                <div class="event-date">1935<br>5月</div>
+                <div class="event-content">
+                    <h3 class="event-title">强渡大渡河</h3>
+                    <p class="event-desc">红军在安顺场强渡大渡河，飞夺泸定桥，粉碎了蒋介石让红军成为"石达开第二"的企图。</p>
+                    <!-- 图片位置 -->
+                    <img src="mod1_images/img_02_a7191f11.jpg" alt="强渡大渡河">
+
+                </div>
+            </div>
+
+            <!-- 事件4 -->
+            <div class="event">
+                <div class="event-date">1935<br>10月</div>
+                <div class="event-content">
+                    <h3 class="event-title">吴起镇会师</h3>
+                    <p class="event-desc">红一方面军到达陕北吴起镇，与陕北红军胜利会师，标志着红一方面军长征结束。</p>
+                    <!-- 图片位置 -->
+                    <img src="mod1_images/img_03_96c11b86.webp" alt="吴起镇会师">                    </div>
+            </div>
+
+            <!-- 事件5 -->
+            <div class="event">
+                <div class="event-date">1936<br>7月</div>
+                <div class="event-content">
+                    <h3 class="event-title">红二、四方面军会师</h3>
+                    <p class="event-desc">红二、红四方面军在四川甘孜地区会师，随后共同北上，向陕甘地区挺进。</p>
+                    <!-- 图片位置 -->
+                    <img src="mod1_images/img_04_6c1b6c35.jpg" alt="红二、四方面军会师">
+
+                </div>
+            </div>
+
+            <!-- 事件6 -->
+            <div class="event">
+                <div class="event-date">1936<br>10月</div>
+                <div class="event-content">
+                    <h3 class="event-title">三大主力会师</h3>
+                    <p class="event-desc">红一、红二、红四方面军在甘肃会宁地区胜利会师，标志着长征全面结束，开启了中国革命的新篇章。</p>
+                    <!-- 图片位置 -->
+                    <img src="mod1_images/img_05_0e300b7c.jpg" alt="三大主力会师">
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 模块导航 -->
+        <div style="display:flex; justify-content:center; gap:15px; margin:30px 0; flex-wrap:wrap;">
+            <a href="../chess_mod2/mod2.html" class="nav-button" style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3);">
+                <i class="fas fa-chess"></i> 下一个：象棋对战
+            </a>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>红军长征历史时间轴 - 铭记伟大征程 传承长征精神</p>
+            <p>© 2025 红色记忆纪念馆</p>
+        </footer>
+    </div>
+
+    <script>
+        // 简单的滚动动画效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const events = document.querySelectorAll('.event');
+
+            function checkScroll() {
+                events.forEach(event => {
+                    const eventPosition = event.getBoundingClientRect().top;
+                    const screenPosition = window.innerHeight * 0.85;
+
+                    if (eventPosition < screenPosition) {
+                        event.style.opacity = 1;
+                        event.style.transform = 'translateY(0)';
+                    }
+                });
+            }
+
+            // 初始检查
+            checkScroll();
+
+            // 滚动时检查
+            window.addEventListener('scroll', checkScroll);
+        });
+    </script>
+</body>
+
+</html>

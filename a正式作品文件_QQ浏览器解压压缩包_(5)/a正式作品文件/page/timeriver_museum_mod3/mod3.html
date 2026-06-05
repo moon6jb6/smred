@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间博物馆 - 中国近代简史</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SimSun", "STSong", "Microsoft YaHei", serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #9b0000 0%, #d32f2f 50%, #9b0000 100%);
+            background-attachment: fixed;
+            color: #333;
+            line-height: 1.7;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        /* 按钮容器 - 增加了间距 */
+        
+        .button-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            /* 进一步增大按钮间距 */
+        }
+        
+        .header {
+            background: linear-gradient(to right, #8b2323, #601111);
+            color: #f5e8d3;
+            text-align: center;
+            padding: 30px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid #4a0f0f;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.6rem;
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+            font-family: "STZhongsong", "SimSun", serif;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+            font-style: italic;
+        }
+        
+        .vertical-timeline {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        
+        .vertical-timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background: linear-gradient(to bottom, #8b0000, #a52a2a, #8b0000);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), inset 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+        
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-item.left {
+            left: 0;
+        }
+        
+        .timeline-item.right {
+            left: 50%;
+        }
+        
+        .year-button {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #c2b280 0%, #f0e68c 50%, #c2b280 100%);
+            border: 4px solid #8b4513;
+            border-radius: 50%;
+            color: #5d2907;
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 2px 2px rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
+            font-family: "SimSun", serif;
+            z-index: 2;
+        }
+        
+        .timeline-item.left .year-button {
+            right: -30px;
+            top: 0;
+        }
+        
+        .timeline-item.right .year-button {
+            left: -30px;
+            top: 0;
+        }
+        
+        .year-button:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.7);
+            border-color: #a0522d;
+        }
+        
+        .event-card {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .timeline-item:hover .event-card {
+            display: block;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .event-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #8b0000;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .event-content {
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        /* 导航按钮样式 - 保持原有尺寸 */
+        
+        .nav-button {
+            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+            color: white;
+            padding: 10px 20px;
+            /* 保持原有内边距，不增大按钮 */
+            border-radius: 3px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #720e1d;
+            width: fit-content;
+            /* 保持按钮宽度自适应内容 */
+            font-size: 1rem;
+            /* 固定字体大小，避免按钮变大 */
+        }
+        
+        .nav-button:hover {
+            background: linear-gradient(135deg, #e63946 0%, #9e2a2b 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+            border-color: #912020;
+        }
+        
+        @media (max-width: 768px) {
+            .vertical-timeline::after {
+                left: 30px;
+            }
+            .timeline-item {
+                width: 100%;
+                padding-left: 80px;
+                padding-right: 25px;
+            }
+            .timeline-item.right {
+                left: 0%;
+            }
+            .timeline-item.left .year-button,
+            .timeline-item.right .year-button {
+                left: 0;
+                top: 0;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .year-button {
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
+            }
+        }
+        
+        .vertical-timeline {
+            padding: 60px 0 300px 0;
+            /* 原先是20px 0，增加顶部间距使其整体下移 */
+        }
+        /* 增加事件项之间的垂直距离，延长时间轴整体长度 */
+        
+        .timeline-item {
+            margin-bottom: 50px;
+            /* 原先是30px，增加每个事件的底部间距 */
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- 按钮容器，包含两个按钮 -->
+    <div class="button-container">
+        <a href="../../mainpage.html" class="nav-button">
+            <i class="fas fa-arrow-left"></i> 返回首页
+        </a>
+        <a href="./bingqi_mod8/mod8.html" class="nav-button">
+            <i class="fas fa-shield-alt"></i> 兵器进化史
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>中国近代简史时间轴 (1840-2025)</h1>
+            <p>从鸦片战争到现代化建设的民族复兴历程</p>
+        </div>
+
+        <!-- 垂直时间轴容器 -->
+        <div class="vertical-timeline">
+            <!-- 事件卡片将由JavaScript生成 -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 定义历史事件数据
+            const events = [{
+                year: 1840,
+                title: "鸦片战争爆发",
+                content: `<p>1840年，英国发动鸦片战争，这是中国近代史的开端。战争起因于中英之间的贸易不平衡和英国的鸦片走私。</p>
+                              <img src="./鸦片战争.jpg" alt="鸦片战争场景">
+                              <p>鸦片战争持续到1842年，以清政府失败告终，最终签订了《南京条约》。</p>`
+            }, {
+                year: 1842,
+                title: "《南京条约》签订",
+                content: `<p>1842年，清政府与英国签订《南京条约》，这是中国近代史上第一个不平等条约。</p>
+                              <img src="./南京条约.webp" alt="南京条约签署场景">
+                              <p>条约规定中国割让香港岛给英国，开放五个通商口岸，并赔偿2100万银元。</p>`
+            }, {
+                year: 1851,
+                title: "太平天国运动",
+                content: `<p>1851年，洪秀全领导太平天国运动爆发。这是中国历史上规模最大的农民起义之一。</p>
+                              <img src="./太平天国运动.jpeg" alt="太平天国运动画像">
+                              <p>太平天国运动持续14年，席卷大半个中国，沉重打击了清朝的统治和外国侵略势力。</p>`
+            }, {
+                year: 1856,
+                title: "第二次鸦片战争",
+                content: `<p>1856年，英国和法国联合发动第二次鸦片战争。战争起因于"亚罗号事件"和"马神甫事件"。</p>
+                              <img src="./第二次鸦片战争.jpg" alt="第二次鸦片战争场景">
+                              <p>1860年，英法联军攻入北京，焚毁圆明园，清政府被迫签订不平等条约。</p>`
+            }, {
+                year: 1860,
+                title: "《北京条约》签订与沙俄领土扩张",
+                content: `<p>1860年，清政府与英法签订《北京条约》，同时沙俄通过《中俄北京条约》割占中国大片领土。</p>
+                              <img src="./北京条约.jpeg" alt="北京条约相关图片">
+                              <p>这使得吉林省失去了原本漫长的海岸线，从沿海省份变为内陆省份。</p>`
+            }, {
+                year: 1894,
+                title: "甲午中日战争",
+                content: `<p>1894年，中日甲午战争爆发。战争主要由朝鲜问题引发，中方在战争中遭受重大损失。</p>
+                              <img src="./甲午中日战争.jpg" alt="甲午中日战争海战场景">
+                              <p>1895年，清政府被迫签订《马关条约》，割让台湾及澎湖列岛给日本。</p>`
+            }, {
+                year: 1898,
+                title: "戊戌变法",
+                content: `<p>1898年，光绪皇帝采纳康有为、梁启超等人的主张，推行戊戌变法（又称百日维新）。</p>
+                              <img src="./戊戌变法.webp" alt="戊戌变法代表人物">
+                              <p>变法运动遭到以慈禧太后为首的保守派强烈反对，仅持续103天便告失败。</p>`
+            }, {
+                year: 1900,
+                title: "义和团运动与八国联军侵华",
+                content: `<p>1900年，义和团运动在华北地区迅速发展，提出"扶清灭洋"口号。八国联军以镇压义和团为名入侵中国。</p>
+                              <img src="./义和团运动.jpeg" alt="义和团运动场景">
+                              <p>八国联军攻占北京，慈禧太后与光绪皇帝逃亡西安，1901年签订《辛丑条约》。</p>`
+            }, {
+                year: 1905,
+                title: "同盟会成立",
+                content: `<p>1905年，孙中山在日本东京成立中国同盟会，提出了"驱除鞑虏，恢复中华，创立民国，平均地权"的革命纲领。</p>
+                              <img src="./同盟会成立.webp" alt="同盟会成立照片">
+                              <p>同盟会的成立标志着中国资产阶级革命运动进入了新阶段。</p>`
+            }, {
+                year: 1911,
+                title: "辛亥革命",
+                content: `<p>1911年10月10日，武昌起义爆发，标志着辛亥革命的开始。革命迅速蔓延全国，多个省份相继宣布独立。</p>
+                              <img src="./辛亥革命.png" alt="辛亥革命武昌起义场景">
+                              <p>1912年1月1日，中华民国临时政府在南京成立，清朝统治结束。</p>`
+            }, {
+                year: 1919,
+                title: "五四运动",
+                content: `<p>1919年5月4日，北京学生发起抗议活动，反对巴黎和会上将德国在山东的权益转让给日本。</p>
+                              <img src="./五四运动.jpg" alt="五四运动游行场景">
+                              <p>五四运动是中国新民主主义革命的开端，促进了马克思主义在中国的传播。</p>`
+            }, {
+                year: 1921,
+                title: "中国共产党成立",
+                content: `<p>1921年7月，中国共产党第一次全国代表大会在上海和嘉兴南湖召开，宣告中国共产党成立。</p>
+                              <img src="./中国共产党成立.webp" alt="中共一大会议场景">
+                              <p>中国共产党的成立是中国历史上开天辟地的大事变。</p>`
+            }, {
+                year: 1931,
+                title: "九一八事变",
+                content: `<p>1931年9月18日，日本关东军制造柳条湖事件，并以此为借口进攻沈阳，开始了对中国东北的武装占领。</p>
+                              <img src="./1931.webp" alt="九一八事变历史照片">
+                              <p>由于蒋介石采取"不抵抗政策"，日军在短短几个月内就占领了整个东北地区。</p>`
+            }, {
+                year: 1937,
+                title: "全面抗战爆发",
+                content: `<p>1937年7月7日，日军在北平附近挑起卢沟桥事变，全面抗战爆发。事变后，日本发动全面侵华战争。</p>
+                              <img src="./1937.jpg" alt="卢沟桥事变场景">
+                              <p>中国共产党倡导建立抗日民族统一战线，国共实现第二次合作，全民族抗战开始。</p>`
+            }, {
+                year: 1945,
+                title: "抗日战争胜利",
+                content: `<p>1945年8月15日，日本宣布无条件投降，中国人民抗日战争取得伟大胜利。9月2日，日本正式签署投降书。</p>
+                              <p>抗日战争是近代以来中国人民反抗外敌入侵的第一次完全胜利。</p>`
+            }, {
+                year: 1949,
+                title: "中华人民共和国成立",
+                content: `<p>1949年10月1日，毛泽东在北京天安门城楼上宣告中华人民共和国成立。这标志着新民主主义革命的基本胜利。</p>
+                              <img src="./1949.jpg" alt="开国大典场景">
+                              <p>新中国的成立，结束了中国半殖民地半封建社会的历史，中国人民从此站起来了。</p>`
+            }, {
+                year: 1978,
+                title: "改革开放",
+                content: `<p>1978年12月，中共十一届三中全会召开，决定把党和国家工作中心转移到经济建设上来，实行改革开放的历史性决策。</p>
+                              <img src="./1978.webp" alt="改革开放初期场景">
+                              <p>改革开放是决定当代中国命运的关键抉择，使中国进入了社会主义现代化建设的新时期。</p>`
+            }, {
+                year: 1997,
+                title: "香港回归",
+                content: `<p>1997年7月1日，中国政府恢复对香港行使主权，中华人民共和国香港特别行政区成立。</p>
+                              <img src="./1997.webp" alt="香港回归交接仪式">
+                              <p>香港回归标志着中国在完成祖国统一大业的道路上迈出了重要一步。</p>`
+            }, {
+                year: 2020,
+                title: "全面建成小康社会",
+                content: `<p>2020年，中国全面建成小康社会，历史性地解决了绝对贫困问题，实现了中国共产党向人民、向历史作出的庄严承诺。</p>
+                              <img src="./2020.jpg" alt="全面建成小康社会宣传图">
+                              <p>这是中国社会主义现代化建设的重要里程碑，为实现中华民族伟大复兴的中国梦奠定了坚实基础。</p>`
+            }, {
+                year: 2025,
+                title: "中国深入发展",
+                content: `<p>2025年，中国发展呈现智能化转型加速、国际合作深化、普惠服务扩展等趋势。</p>
+                              <img src="https://gips0.baidu.com/it/u=3840500252,955503926&fm=3003&app=3003&f=JPEG?w=4800&h=2700" alt="中国现代化建设成就">
+                              <p>加强与新兴市场国家政策协同和开放合作，助推全球投资恢复增长，为实现中华民族伟大复兴的中国梦奠定了坚实基础。</p>`
+            }];
+
+            // 获取时间轴容器
+            const timelineContainer = document.querySelector('.vertical-timeline');
+
+            // 生成事件项
+            events.forEach((event, index) => {
+                // 创建事件项容器
+                const timelineItem = document.createElement('div');
+                timelineItem.className = `timeline-item ${index % 2 === 0 ? 'left' : 'right'}`;
+
+                // 创建年份按钮
+                const yearButton = document.createElement('div');
+                yearButton.className = 'year-button';
+                yearButton.textContent = event.year;
+
+                // 创建事件卡片
+                const eventCard = document.createElement('div');
+                eventCard.className = 'event-card';
+
+                // 填充卡片内容
+                eventCard.innerHTML = `
+                    <div class="event-title">${event.title}</div>
+                    <div class="event-content">${event.content}</div>
+                `;
+
+                // 组合元素
+                timelineItem.appendChild(yearButton);
+                timelineItem.appendChild(eventCard);
+                timelineContainer.appendChild(timelineItem);
+            });
+        });
+    </script>
+
+    <!-- 模块导航 -->
+    <div style="display:flex; justify-content:center; gap:15px; margin:20px 0; flex-wrap:wrap; padding:0 20px;">
+        <a href="../chess_mod2/mod2.html" class="nav-button" style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3);">
+            <i class="fas fa-arrow-left"></i> 上一个：象棋对战
+        </a>
+        <a href="../sacrifice_mod4/mod4.html" class="nav-button" style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3);">
+            下一个：功勋人物纪念馆 <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+</body>
+
+</html>
