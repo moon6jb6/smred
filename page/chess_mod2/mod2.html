@@ -21,7 +21,7 @@
     
     <h1>纸上谈兵——中国象棋</h1>
     
-    <button class="login-btn" id="login-btn">登录</button>
+    <button class="login-btn" id="login-btn" style="display:none">登录</button>
     
     <button class="select-level-btn" id="select-level-btn">
         <i class="fas fa-list"></i> 选择关卡
@@ -144,25 +144,12 @@
     selected_piece = None
     chess_pieces = []  # 存储所有棋子对象
     move_hints = []    # 存储移动提示元素
+    move_hint_proxies = []  # 存储proxy引用，避免内存泄漏
     current_turn = "red"  # 当前回合，红方先行
     move_history = []  # 移动历史，用于悔棋
-    is_logged_in = False
-    current_user = None
-    user_max_level = 0  # 用户已通过的最大关卡
-
-    # 数据库模拟数据（实际应用中应从数据库获取）
-    user_data = {
-        "useradmin": {
-            "password": "useradmin",  # 修改为useradmin
-            "level": 0,
-            "max_level": 100  # 管理员可以访问所有关卡
-        },
-        "testuser": {
-            "password": "test123",
-            "level": 0,
-            "max_level": 5  # 测试用户只能访问前5关
-        }
-    }
+    is_logged_in = True
+    current_user = "player"
+    user_max_level = 100
 
         # 修改第0关数据
     level_data = {
@@ -685,7 +672,9 @@
                 hint.style.top = f"{top}px"
                 
                 # 添加点击事件
-                hint.addEventListener("click", create_proxy(lambda e, c=col, r=row: self.move_to(c, r)))
+                proxy = create_proxy(lambda e, c=col, r=row: self.move_to(c, r))
+                move_hint_proxies.append(proxy)
+                hint.addEventListener("click", proxy)
                 hint.style.pointerEvents = "auto"
                 hint.style.cursor = "pointer"
                 
@@ -697,6 +686,9 @@
                 if hint.parentNode:
                     hint.parentNode.removeChild(hint)
             move_hints.clear()
+            for proxy in move_hint_proxies:
+                proxy.destroy()
+            move_hint_proxies.clear()
         
         def move_to(self, col, row):
             global selected_piece, current_turn, move_history
@@ -869,7 +861,14 @@
             js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
         elif check_flying_general():
             loser = "黑" if current_turn == "red" else "红"
+            winner = "红" if current_turn == "red" else "黑"
             js.document.getElementById("status-msg").textContent = f"将帅对脸！{loser}方违规判负"
+            if winner == "红":
+                ending = js.document.getElementById("endingWin")
+            else:
+                ending = js.document.getElementById("endingLose")
+            ending.style.display = "flex"
+            js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
         elif not black_general_exists:
             # 红方胜利 - 显示终局冲击
             level_info = level_data[current_level]
@@ -934,7 +933,6 @@
             board_height = (self.row - 1) * self.block_length
             board.style.width = f"{board_width}px"
             board.style.height = f"{board_height}px"
-            board.style.border = "2px solid #8B4513"
             board.style.backgroundColor = self.ground_coler
             
             # 绘制横线
@@ -1203,8 +1201,10 @@
             )
         ))
         
-        # 初始状态显示登录提示
-        js.document.getElementById("status-msg").textContent = "请登录开始游戏"
+        # 自动初始化游戏
+        js.document.getElementById("status-msg").textContent = "欢迎来到象棋之战！"
+        js.document.getElementById("level-display").textContent = f"第 {current_level} 关"
+        reset_board()
 </py-script>
 
     <!-- 模块导航 -->

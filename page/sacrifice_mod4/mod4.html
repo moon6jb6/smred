@@ -490,6 +490,8 @@
         }
 
         // 创建剪影
+        let cachedSilhouettes = [];
+
         function createSilhouettes() {
             heroes.forEach((hero, i) => {
                 const el = document.createElement('div');
@@ -518,6 +520,7 @@
 
                 container.appendChild(el);
             });
+            cachedSilhouettes = Array.from(document.querySelectorAll('.silhouette'));
         }
 
         // 英雄找用户：依次自动亮起
@@ -544,8 +547,8 @@
             glowInner.style.left = e.clientX + 'px';
             glowInner.style.top = e.clientY + 'px';
 
-            // 检测剪影距离
-            document.querySelectorAll('.silhouette').forEach(el => {
+            // 检测剪影距离（使用缓存的元素列表）
+            cachedSilhouettes.forEach(el => {
                 const rect = el.getBoundingClientRect();
                 const cx = rect.left + rect.width / 2;
                 const cy = rect.top + rect.height / 2;
