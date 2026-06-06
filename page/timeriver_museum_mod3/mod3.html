@@ -123,6 +123,110 @@
             border: 2px solid rgba(255, 215, 0, 0.2);
             transition: all 0.4s;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* CSS 文物剪影形状 */
+        .object-icon .artifact-shape {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            opacity: 0.6;
+            transition: opacity 0.4s;
+        }
+
+        .history-object:hover .artifact-shape,
+        .history-object.explored .artifact-shape {
+            opacity: 0.9;
+        }
+
+        /* 卷轴 */
+        .shape-scroll {
+            background: linear-gradient(135deg, rgba(255,215,0,0.6), rgba(200,150,50,0.4));
+            clip-path: polygon(10% 0%, 90% 0%, 95% 5%, 95% 95%, 90% 100%, 10% 100%, 5% 95%, 5% 5%);
+        }
+
+        /* 旗帜 */
+        .shape-flag {
+            background: linear-gradient(135deg, rgba(200,50,50,0.6), rgba(139,0,0,0.4));
+            clip-path: polygon(15% 0%, 15% 100%, 20% 100%, 20% 10%, 85% 10%, 85% 45%, 20% 45%, 20% 100%, 15% 100%);
+        }
+
+        /* 文件/奏折 */
+        .shape-paper {
+            background: linear-gradient(135deg, rgba(255,255,220,0.5), rgba(200,180,120,0.3));
+            clip-path: polygon(0% 0%, 70% 0%, 100% 30%, 100% 100%, 0% 100%);
+        }
+
+        /* 枪 */
+        .shape-gun {
+            background: linear-gradient(135deg, rgba(100,100,100,0.6), rgba(50,50,50,0.4));
+            clip-path: polygon(0% 40%, 60% 40%, 60% 20%, 75% 20%, 75% 40%, 100% 40%, 100% 55%, 75% 55%, 75% 80%, 60% 80%, 60% 55%, 0% 55%);
+        }
+
+        /* 桌子 */
+        .shape-table {
+            background: linear-gradient(135deg, rgba(139,90,43,0.6), rgba(100,60,20,0.4));
+            clip-path: polygon(5% 30%, 95% 30%, 95% 40%, 80% 40%, 80% 100%, 70% 100%, 70% 40%, 30% 40%, 30% 100%, 20% 100%, 20% 40%, 5% 40%);
+        }
+
+        /* 话筒 */
+        .shape-mic {
+            background: linear-gradient(135deg, rgba(180,180,180,0.5), rgba(100,100,100,0.3));
+            clip-path: polygon(35% 0%, 65% 0%, 70% 10%, 70% 45%, 80% 55%, 80% 65%, 70% 65%, 70% 100%, 30% 100%, 30% 65%, 20% 65%, 20% 55%, 30% 45%, 30% 10%);
+        }
+
+        /* 剪刀/武器 */
+        .shape-weapon {
+            background: linear-gradient(135deg, rgba(150,150,150,0.5), rgba(80,80,80,0.3));
+            clip-path: polygon(50% 0%, 65% 30%, 100% 50%, 65% 70%, 50% 100%, 35% 70%, 0% 50%, 35% 30%);
+        }
+
+        /* 发现光柱效果 */
+        .discovery-beam {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .discovery-beam.active {
+            opacity: 1;
+        }
+
+        .beam-line {
+            position: absolute;
+            width: 3px;
+            height: 0;
+            background: linear-gradient(180deg, rgba(255,215,0,0.6), transparent);
+            transition: height 1s ease;
+            top: 0;
+        }
+
+        .discovery-beam.active .beam-line {
+            height: 100vh;
+        }
+
+        /* 发现粒子 */
+        .discovery-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffd700;
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat 1.5s ease forwards;
+        }
+
+        @keyframes particleFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(0); }
         }
 
         .history-object:hover .object-icon {
@@ -349,7 +453,10 @@
     </div>
 
     <!-- 底部导航 -->
-    <div class="bottom-nav">
+    <div class="bottom-nav" style="display:flex; gap:10px; align-items:center;">
+        <button id="resetBtn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.4); padding:8px 16px; border-radius:20px; font-size:0.8rem; cursor:pointer; font-family:inherit;">
+            <i class="fas fa-redo"></i> 重新探索
+        </button>
         <a href="../sacrifice_mod4/mod4.html" onclick="event.preventDefault(); filmstripTransition('../sacrifice_mod4/mod4.html');">
             下一个穿越：祭祀大典 <i class="fas fa-arrow-right"></i>
         </a>
@@ -374,6 +481,7 @@
                 name: '南京条约',
                 year: '1842年',
                 icon: '📜',
+                shape: 'shape-scroll',
                 label: '一纸条约',
                 story: '1842年，清政府被迫签订《南京条约》，割让香港岛，开放五处通商口岸。这是中国近代史上第一个不平等条约，从此，中国开始沦为半殖民地半封建社会。一纸条约，压弯了一个民族的脊梁。',
                 x: 50, y: 10, rotate: -5
@@ -382,6 +490,7 @@
                 name: '太平天国旗帜',
                 year: '1851年',
                 icon: '🚩',
+                shape: 'shape-flag',
                 label: '一面旗帜',
                 story: '1851年，洪秀全在广西金田起义，建号太平天国。这是中国历史上规模最大的农民起义，席卷半个中国，坚持了14年。虽然最终失败，但它动摇了清王朝的根基，也唤醒了后来者。',
                 x: 78, y: 18, rotate: 8
@@ -390,6 +499,7 @@
                 name: '戊戌变法奏折',
                 year: '1898年',
                 icon: '📃',
+                shape: 'shape-paper',
                 label: '一道奏折',
                 story: '1898年，康有为、梁启超推动光绪帝进行变法，历时103天即告失败。谭嗣同拒绝逃亡，说："各国变法，无不从流血而成。"从容就义。百日维新虽短，却播下了变革的种子。',
                 x: 15, y: 28, rotate: -3
@@ -398,6 +508,7 @@
                 name: '辛亥革命手枪',
                 year: '1911年',
                 icon: '🔫',
+                shape: 'shape-gun',
                 label: '一声枪响',
                 story: '1911年10月10日，武昌起义一声枪响，两千多年的封建帝制轰然倒塌。孙中山说："革命尚未成功，同志仍须努力。"这一枪，打碎了一个旧世界，也开启了一个充满动荡的新时代。',
                 x: 82, y: 38, rotate: 12
@@ -406,6 +517,7 @@
                 name: '五四传单',
                 year: '1919年',
                 icon: '🗞',
+                shape: 'shape-paper',
                 label: '一张传单',
                 story: '1919年5月4日，北京学生走上街头，高喊"外争主权，内除国贼"。这一天，中国青年第一次以一个群体的姿态登上历史舞台。五四运动不仅是一场爱国运动，更是一场思想启蒙。',
                 x: 25, y: 50, rotate: -8
@@ -414,6 +526,7 @@
                 name: '中共一大会议桌',
                 year: '1921年',
                 icon: '🪑',
+                shape: 'shape-table',
                 label: '一张桌子',
                 story: '1921年7月，13位代表在上海法租界的一张桌子旁，召开了中国共产党第一次全国代表大会。他们平均年龄28岁。谁也不知道，这张桌子旁诞生的组织，将改变中国的命运。',
                 x: 60, y: 52, rotate: 3
@@ -422,6 +535,7 @@
                 name: '南昌起义军旗',
                 year: '1927年',
                 icon: '🏴',
+                shape: 'shape-flag',
                 label: '一面军旗',
                 story: '1927年8月1日，南昌城头一声枪响，中国共产党有了自己的武装力量。这面军旗，从南昌升起，经过长征、抗日、解放战争，最终插遍了全中国。',
                 x: 40, y: 68, rotate: -6
@@ -430,6 +544,7 @@
                 name: '遵义会议桌',
                 year: '1935年',
                 icon: '🪑',
+                shape: 'shape-table',
                 label: '一张会议桌',
                 story: '1935年1月，在遵义的一间小屋里，中国共产党做出了一个改变命运的决定：确立毛泽东的领导地位。这张桌子旁的争论，挽救了红军，挽救了党，挽救了中国革命。',
                 x: 75, y: 70, rotate: 5
@@ -438,6 +553,7 @@
                 name: '开国大典话筒',
                 year: '1949年',
                 icon: '🎙',
+                shape: 'shape-mic',
                 label: '一个话筒',
                 story: '1949年10月1日，毛泽东站在天安门城楼上，对着这个话筒说："中华人民共和国中央人民政府今天成立了！"这句话，传遍了全中国，也传遍了全世界。一个新时代，从这个话筒开始。',
                 x: 20, y: 82, rotate: -4
@@ -446,6 +562,7 @@
                 name: '改革开放红头文件',
                 year: '1978年',
                 icon: '📋',
+                shape: 'shape-paper',
                 label: '一份文件',
                 story: '1978年12月，十一届三中全会召开，中国开始了改革开放。这份文件，让中国从封闭走向开放，从贫穷走向富裕。40多年后的今天，中国已经成为世界第二大经济体。一切，从这份文件开始。',
                 x: 58, y: 85, rotate: 7
@@ -482,7 +599,9 @@
                 }
 
                 el.innerHTML = `
-                    <div class="object-icon">${obj.icon}</div>
+                    <div class="object-icon">
+                        <div class="artifact-shape ${obj.shape}"></div>
+                    </div>
                     <div class="object-label">${obj.label}</div>
                     <div class="object-year">${obj.year}</div>
                 `;
@@ -508,14 +627,46 @@
                 overlay.classList.add('active');
             });
 
-            // 标记已探索
+            // 标记已探索（首次发现时播放光柱效果）
             if (!explored[index]) {
                 explored[index] = true;
                 localStorage.setItem('mod3_explored', JSON.stringify(explored));
                 const el = document.querySelector(`.history-object[data-index="${index}"]`);
                 if (el) el.classList.add('explored');
                 updateCollect();
+                playDiscoveryEffect(el);
             }
+        }
+
+        // 发现仪式感效果
+        function playDiscoveryEffect(targetEl) {
+            if (!targetEl) return;
+            const rect = targetEl.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            // 创建光柱
+            const beam = document.createElement('div');
+            beam.className = 'discovery-beam';
+            beam.innerHTML = `<div class="beam-line" style="left:${cx}px"></div>`;
+            document.body.appendChild(beam);
+
+            // 创建粒子
+            for (let i = 0; i < 8; i++) {
+                const p = document.createElement('div');
+                p.className = 'discovery-particle';
+                p.style.left = (cx + (Math.random() - 0.5) * 60) + 'px';
+                p.style.top = (cy + (Math.random() - 0.5) * 30) + 'px';
+                p.style.animationDelay = (Math.random() * 0.5) + 's';
+                beam.appendChild(p);
+            }
+
+            requestAnimationFrame(() => beam.classList.add('active'));
+
+            // 1.5s后清理
+            setTimeout(() => {
+                beam.remove();
+            }, 1800);
         }
 
         // 关闭浮层
@@ -545,6 +696,12 @@
                 summaryHint.style.display = 'none';
             }
         }
+
+        // 重置探索
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            localStorage.removeItem('mod3_explored');
+            location.reload();
+        });
 
         // 初始化
         createObjects();

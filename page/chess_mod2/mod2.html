@@ -101,24 +101,6 @@
 
     <div id="loading">正在加载象棋...</div>
 
-    <div class="modal" id="login-modal">
-        <div class="modal-content">
-            <h2>用户登录</h2>
-            <div class="form-group">
-                <label for="username">用户名</label>
-                <input type="text" id="username" placeholder="请输入用户名">
-            </div>
-            <div class="form-group">
-                <label for="password">密码</label>
-                <input type="password" id="password" placeholder="请输入密码">
-            </div>
-            <div class="modal-buttons">
-                <button id="login-submit">登录</button>
-                <button id="login-cancel">取消</button>
-            </div>
-        </div>
-    </div>
-
     <div class="level-select-modal" id="level-select-modal">
         <div class="level-select-content">
             <button class="close-level-select" id="close-level-select">&times;</button>
@@ -140,7 +122,7 @@
 
     # 游戏状态
     current_level = 0
-    total_levels = 100  # 总共100关
+    total_levels = 11  # 总共11关（长征10场战役）
     selected_piece = None
     chess_pieces = []  # 存储所有棋子对象
     move_hints = []    # 存储移动提示元素
@@ -346,20 +328,6 @@
     }
         
     
-
-    # 为演示添加更多关卡数据（实际应从数据库获取）
-    for i in range(10, 101):
-
-            level_data[i] = {
-                "ground": "#deb887",
-                "hengxian": 10,
-                "shuxian": 9,
-                "pieces": [
-                    # 默认布局（实际应根据具体关卡设置）
-                    ("帅", "red", 4, 9),
-                    ("将", "black", 4, 0)
-                ]
-            }
 
     class Chess:
         def __init__(self, name, color, col, row, id):
@@ -745,7 +713,11 @@
         
         def capture(self):
             self.alive = False
-            self.element.style.display = "none"
+            self.element.classList.add("capturing")
+            def hide_after_animation(e):
+                self.element.style.display = "none"
+                self.element.classList.remove("capturing")
+            self.element.addEventListener("animationend", create_proxy(hide_after_animation))
             js.document.getElementById("status-msg").textContent = f"{'红' if self.color == 'red' else '黑'}方{self.name}被吃"
         
         def restore(self, col, row):
@@ -882,9 +854,9 @@
             js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
 
             # 更新用户进度
-            if is_logged_in and current_user != "useradmin" and current_level == user_max_level:
-                user_max_level += 1
-                user_data[current_user]["max_level"] = user_max_level
+            global user_max_level
+            if current_level >= user_max_level:
+                user_max_level = current_level + 1
     def undo_move():
         global current_turn, move_history
         
@@ -958,7 +930,34 @@
                 line_bottom.style.height = "45%"
                 line_bottom.style.bottom = "0px"
                 board.appendChild(line_bottom)
-            
+
+            # 楚河汉界装饰
+            river = js.document.createElement("div")
+            river.style.cssText = f"""
+                position: absolute;
+                top: {(self.row - 1) * self.block_length * 0.45 - 15}px;
+                left: {1 * self.block_length}px;
+                right: {1 * self.block_length}px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                pointer-events: none;
+                z-index: 3;
+                font-size: 24px;
+                font-weight: bold;
+                color: rgba(139, 69, 19, 0.4);
+                font-family: 'KaiTi', 'STKaiti', serif;
+                letter-spacing: 8px;
+            """
+            river_left = js.document.createElement("span")
+            river_left.textContent = "楚  河"
+            river_right = js.document.createElement("span")
+            river_right.textContent = "汉  界"
+            river.appendChild(river_left)
+            river.appendChild(river_right)
+            board.appendChild(river)
+
             # 使用SVG绘制斜线
             self.draw_diagonal_lines()
         
@@ -1035,13 +1034,8 @@
 
     def change_level(direction):
         global current_level
-        
+
         if direction == "next" and current_level < total_levels - 1:
-            # 检查是否有权限进入下一关
-            if current_user != "useradmin" and current_level + 1 > user_max_level:
-                js.document.getElementById("status-msg").textContent = "请先通过当前关卡"
-                return
-            
             current_level += 1
         elif direction == "prev" and current_level > 0:
             current_level -= 1
@@ -1068,37 +1062,6 @@
         else:
             js.document.getElementById("status-msg").textContent = "关卡数据不存在"
 
-    def login(username, password):
-        global is_logged_in, current_user, current_level, user_max_level
-        
-        # 模拟数据库验证
-        if username in user_data and user_data[username]["password"] == password:
-            is_logged_in = True
-            current_user = username
-            current_level = user_data[username]["level"]
-            user_max_level = user_data[username]["max_level"]
-            
-            # 更新界面显示
-            js.document.getElementById("level-number").textContent = str(current_level)
-            js.document.getElementById("level-display").textContent = f"第 {current_level} 关"
-            
-            # 初始化棋盘
-            reset_board()
-            
-            js.document.getElementById("status-msg").textContent = f"欢迎回来，{username}！"
-            js.document.getElementById("login-modal").style.display = "none"
-            
-            return True
-        else:
-            js.document.getElementById("status-msg").textContent = "用户名或密码错误"
-            return False
-
-    def show_login_modal():
-        js.document.getElementById("login-modal").style.display = "flex"
-
-    def hide_login_modal():
-        js.document.getElementById("login-modal").style.display = "none"
-
     def show_level_select():
         modal = js.document.getElementById("level-select-modal")
         modal.style.display = "flex"
@@ -1113,7 +1076,7 @@
             btn.textContent = str(i)
             
             # 检查关卡是否解锁
-            if current_user == "useradmin" or i <= user_max_level:
+            if i <= user_max_level:
                 btn.classList.add("unlocked")
                 btn.addEventListener("click", create_proxy(lambda e, level=i: select_level(level)))
             else:
@@ -1127,9 +1090,9 @@
 
     def select_level(level):
         global current_level
-        
+
         # 检查是否有权限选择该关卡
-        if current_user != "useradmin" and level > user_max_level:
+        if level > user_max_level:
             js.document.getElementById("status-msg").textContent = "请先通过前置关卡"
             hide_level_select()
             return
@@ -1157,8 +1120,6 @@
         js.document.getElementById("next-btn").addEventListener("click", create_proxy(lambda e: change_level("next")))
         js.document.getElementById("reset-btn").addEventListener("click", create_proxy(lambda e: reset_board()))
         js.document.getElementById("undo-btn").addEventListener("click", create_proxy(lambda e: undo_move()))
-        js.document.getElementById("login-btn").addEventListener("click", create_proxy(lambda e: show_login_modal()))
-        js.document.getElementById("login-cancel").addEventListener("click", create_proxy(lambda e: hide_login_modal()))
         js.document.getElementById("select-level-btn").addEventListener("click", create_proxy(lambda e: show_level_select()))
         js.document.getElementById("close-level-select").addEventListener("click", create_proxy(lambda e: hide_level_select()))
         js.document.getElementById("next-level-btn").addEventListener("click", create_proxy(lambda e: next_level()))
@@ -1190,17 +1151,6 @@
             js.document.getElementById("victory-modal").style.display = "none"
             reset_board()
 
-        # 绑定事件监听器时使用这个函数
-        #js.document.getElementById("restart-level-btn").addEventListener("click", create_proxy(handle_restart_click))
-        
-        # 登录表单提交
-        js.document.getElementById("login-submit").addEventListener("click", create_proxy(lambda e: 
-            login(
-                js.document.getElementById("username").value,
-                js.document.getElementById("password").value
-            )
-        ))
-        
         # 自动初始化游戏
         js.document.getElementById("status-msg").textContent = "欢迎来到象棋之战！"
         js.document.getElementById("level-display").textContent = f"第 {current_level} 关"

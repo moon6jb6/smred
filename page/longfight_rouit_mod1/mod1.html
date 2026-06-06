@@ -204,17 +204,36 @@
             transform: scale(1.5);
         }
 
-        /* 湘江震动效果 */
+        /* 湘江震动效果 - 更强烈 */
         .shake {
-            animation: shakeAnim 0.1s infinite;
+            animation: shakeAnim 0.08s infinite;
         }
 
         @keyframes shakeAnim {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            50% { transform: translateX(2px); }
-            75% { transform: translateX(-1px); }
-            100% { transform: translateX(1px); }
+            0% { transform: translate(0, 0); }
+            20% { transform: translate(-6px, 3px); }
+            40% { transform: translate(5px, -4px); }
+            60% { transform: translate(-4px, 2px); }
+            80% { transform: translate(6px, -2px); }
+            100% { transform: translate(-3px, 3px); }
+        }
+
+        /* 血色渐染效果 */
+        .blood-wash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(139, 0, 0, 0.4) 100%);
+            z-index: 1999;
+            opacity: 0;
+            transition: opacity 2s ease;
+            pointer-events: none;
+        }
+
+        .blood-wash.active {
+            opacity: 1;
         }
 
         /* 强制停顿遮罩 */
@@ -452,6 +471,9 @@
     <!-- 滚动提示 -->
     <div class="scroll-hint" id="scrollHint">向下滚动 · 继续前进</div>
 
+    <!-- 血色渐染 -->
+    <div class="blood-wash" id="bloodWash"></div>
+
     <!-- 强制停顿遮罩 -->
     <div class="pause-overlay" id="pauseOverlay">
         <div class="pause-number">30000</div>
@@ -476,14 +498,19 @@
 
         let currentStage = 0;
         let xiangAnimated = false;
+        const bloodWash = document.getElementById('bloodWash');
         let pauseShown = false;
 
-        // IntersectionObserver 检测当前阶段
+        // IntersectionObserver 检测当前阶段（离开时重置动画标志，允许重播）
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
+                const index = parseInt(entry.target.dataset.index);
                 if (entry.isIntersecting) {
-                    const index = parseInt(entry.target.dataset.index);
                     setActiveStage(index);
+                } else if (index === 1) {
+                    // 离开湘江阶段时重置，允许再次触发动画
+                    xiangAnimated = false;
+                    pauseShown = false;
                 }
             });
         }, { threshold: 0.5 });
@@ -545,24 +572,30 @@
             requestAnimationFrame(update);
         }
 
-        // 强制停顿
+        // 强制停顿 — 冲击序列：血色渐染→震动→遮罩
         function triggerPause() {
             if (pauseShown) return;
             pauseShown = true;
 
-            // 先震动
-            document.body.classList.add('shake');
+            // 1. 血色渐染
+            bloodWash.classList.add('active');
 
+            // 2. 0.5s后开始震动
+            setTimeout(() => {
+                document.body.classList.add('shake');
+            }, 500);
+
+            // 3. 2s后停止震动，显示遮罩
             setTimeout(() => {
                 document.body.classList.remove('shake');
-                // 显示停顿遮罩
+                bloodWash.classList.remove('active');
                 pauseOverlay.classList.add('active');
 
-                // 2秒后自动关闭
+                // 3s后自动关闭
                 setTimeout(() => {
                     pauseOverlay.classList.remove('active');
-                }, 2500);
-            }, 1500);
+                }, 3000);
+            }, 2000);
         }
 
         // 指示器点击跳转

@@ -13,19 +13,19 @@
             box-sizing: border-box;
         }
 
-        body {
-            background: linear-gradient(180deg, #1a0a00 0%, #2d1500 50%, #1a0a00 100%);
-            color: #f5f5f5;
-            font-family: 'Microsoft YaHei', 'SimHei', serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
         }
 
-        /* 导航 */
+        body {
+            background: #0a0a0a;
+            color: #f5f5f5;
+            font-family: 'Microsoft YaHei', 'SimHei', serif;
+            overflow-x: hidden;
+        }
+
+        /* ========== 导航 ========== */
         .nav-buttons {
             position: fixed;
             top: 20px;
@@ -55,44 +55,279 @@
             color: rgba(255, 215, 0, 0.8);
         }
 
-        /* 标题 */
-        .page-title {
-            text-align: center;
-            margin-bottom: 50px;
+        /* ========== 进度条 ========== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8b0000, #ffd700);
+            z-index: 1002;
+            transition: width 0.3s ease;
+            width: 0%;
         }
 
-        .page-title h1 {
-            font-size: 2.5rem;
-            color: #ffd700;
-            letter-spacing: 4px;
-            margin-bottom: 10px;
-        }
-
-        .page-title p {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 1rem;
-            letter-spacing: 2px;
-        }
-
-        /* 卡片容器 */
-        .cards-container {
-            display: flex;
-            gap: 40px;
-            justify-content: center;
-            flex-wrap: wrap;
-            max-width: 1100px;
+        /* ========== 全屏场景 ========== */
+        .scene {
             width: 100%;
-            perspective: 1000px;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
-        /* 卡片翻转容器 */
-        .card-flip {
+        /* ========== 开场场景 ========== */
+        .scene-intro {
+            background: radial-gradient(ellipse at center, #1a0800 0%, #0a0a0a 70%);
+        }
+
+        .intro-content {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1.5s ease;
+        }
+
+        .scene-intro.active .intro-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .intro-content h1 {
+            font-size: 3rem;
+            color: #ffd700;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+        }
+
+        .intro-content p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+
+        .intro-arrow {
+            margin-top: 60px;
+            font-size: 1.5rem;
+            color: rgba(255, 215, 0, 0.3);
+            animation: arrowBounce 2s ease infinite;
+        }
+
+        @keyframes arrowBounce {
+            0%, 100% { transform: translateY(0); opacity: 0.3; }
+            50% { transform: translateY(10px); opacity: 0.7; }
+        }
+
+        /* ========== 选择场景 ========== */
+        .scene-choice {
+            background: #0a0a0a;
+            flex-direction: column;
+            padding: 60px 40px;
+        }
+
+        .scene-choice::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+        }
+
+        .scene-choice.active::before {
+            opacity: 1;
+        }
+
+        .scene-1::before {
+            background: radial-gradient(ellipse at 30% 70%, rgba(139, 0, 0, 0.15) 0%, transparent 60%);
+        }
+
+        .scene-2::before {
+            background: radial-gradient(ellipse at 70% 30%, rgba(255, 140, 0, 0.12) 0%, transparent 60%);
+        }
+
+        .scene-3::before {
+            background: radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 60%);
+        }
+
+        /* 年份 */
+        .choice-year {
+            font-size: 8rem;
+            font-weight: 900;
+            color: transparent;
+            -webkit-text-stroke: 2px rgba(255, 215, 0, 0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            letter-spacing: 20px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease 0.3s;
+        }
+
+        .scene-choice.active .choice-year {
+            opacity: 1;
+        }
+
+        /* 场景剪影 */
+        .scene-silhouette {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 1.2s ease 0.5s;
+        }
+
+        .scene-choice.active .scene-silhouette {
+            opacity: 1;
+        }
+
+        .silhouette-mountains {
+            width: 800px;
+            height: 200px;
+            position: relative;
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            opacity: 0.3;
+        }
+
+        .mountain-1 {
+            left: 5%;
+            border-width: 0 120px 160px 120px;
+            border-color: transparent transparent #1a0800 transparent;
+        }
+
+        .mountain-2 {
+            left: 25%;
+            border-width: 0 180px 200px 180px;
+            border-color: transparent transparent #1a0800 transparent;
+        }
+
+        .mountain-3 {
+            left: 55%;
+            border-width: 0 150px 180px 150px;
+            border-color: transparent transparent #1a0800 transparent;
+        }
+
+        .mountain-4 {
+            left: 75%;
+            border-width: 0 100px 140px 100px;
+            border-color: transparent transparent #1a0800 transparent;
+        }
+
+        /* 城楼剪影 */
+        .silhouette-tiananmen {
+            width: 400px;
+            height: 180px;
+            position: relative;
+        }
+
+        .tiananmen-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
             width: 300px;
-            height: 400px;
-            cursor: pointer;
+            height: 80px;
+            background: #1a0800;
+            clip-path: polygon(5% 100%, 0% 40%, 15% 20%, 30% 30%, 35% 0%, 40% 30%, 45% 15%, 50% 0%, 55% 15%, 60% 30%, 65% 0%, 70% 30%, 85% 20%, 100% 40%, 95% 100%);
+            opacity: 0.5;
         }
 
-        .card-inner {
+        /* 人物剪影 */
+        .silhouette-person {
+            width: 80px;
+            height: 160px;
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .person-head {
+            width: 30px;
+            height: 30px;
+            background: #1a0800;
+            border-radius: 50%;
+            margin: 0 auto;
+            opacity: 0.6;
+        }
+
+        .person-body {
+            width: 40px;
+            height: 80px;
+            background: #1a0800;
+            margin: 5px auto 0;
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+            opacity: 0.6;
+        }
+
+        /* 选择内容 */
+        .choice-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 700px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease 0.8s;
+        }
+
+        .scene-choice.active .choice-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .choice-label {
+            font-size: 0.85rem;
+            color: rgba(255, 215, 0, 0.4);
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .choice-question {
+            font-size: 1.8rem;
+            color: #ffd700;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        }
+
+        .choice-answer {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        /* 翻转卡片 */
+        .flip-card {
+            width: 100%;
+            max-width: 500px;
+            height: 220px;
+            perspective: 1000px;
+            cursor: pointer;
+            margin: 0 auto;
+        }
+
+        .flip-inner {
             position: relative;
             width: 100%;
             height: 100%;
@@ -100,137 +335,165 @@
             transform-style: preserve-3d;
         }
 
-        .card-flip.flipped .card-inner {
+        .flip-card.flipped .flip-inner {
             transform: rotateY(180deg);
         }
 
-        /* 卡片正面 */
-        .card-front,
-        .card-back {
+        .flip-front,
+        .flip-back {
             position: absolute;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .card-front {
-            background: linear-gradient(145deg, #2a1a0a, #1a0a00);
-            border: 2px solid rgba(255, 215, 0, 0.15);
+            border-radius: 12px;
+            padding: 25px 30px;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            padding: 30px;
+        }
+
+        .flip-front {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.02));
+            border: 1px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .flip-front p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.5);
             text-align: center;
-            transition: border-color 0.3s;
         }
 
-        .card-flip:hover .card-front {
-            border-color: rgba(255, 215, 0, 0.4);
+        .flip-front .flip-icon {
+            font-size: 1.5rem;
+            color: rgba(255, 215, 0, 0.3);
+            text-align: center;
+            margin-bottom: 10px;
         }
 
-        .card-year {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #ffd700;
-            margin-bottom: 15px;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-        }
-
-        .card-event {
-            font-size: 1.3rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-        }
-
-        .card-choice {
-            font-size: 1.05rem;
-            color: rgba(255, 215, 0, 0.7);
-            font-style: italic;
-            line-height: 1.6;
-        }
-
-        .card-hint {
-            position: absolute;
-            bottom: 15px;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.2);
-            letter-spacing: 1px;
-        }
-
-        /* 卡片背面 */
-        .card-back {
-            background: linear-gradient(145deg, #1a0a00, #2a1a0a);
-            border: 2px solid rgba(255, 215, 0, 0.3);
+        .flip-back {
+            background: linear-gradient(135deg, rgba(26, 8, 0, 0.95), rgba(45, 21, 0, 0.95));
+            border: 1px solid rgba(255, 215, 0, 0.3);
             transform: rotateY(180deg);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-            text-align: center;
-        }
-
-        .back-context {
-            font-size: 0.95rem;
-            line-height: 1.9;
-            color: rgba(255, 255, 255, 0.75);
-            margin-bottom: 25px;
             text-align: left;
         }
 
-        .back-quote {
-            font-size: 1.1rem;
-            font-style: italic;
+        .flip-back .quote {
+            font-size: 1.15rem;
             color: #ffd700;
+            font-style: italic;
             line-height: 1.8;
             margin-bottom: 15px;
             position: relative;
-            padding: 0 15px;
+            padding-left: 20px;
+            border-left: 2px solid rgba(255, 215, 0, 0.3);
         }
 
-        .back-quote::before {
-            content: "\201C";
-            position: absolute;
-            top: -15px;
-            left: -5px;
-            font-size: 3rem;
-            color: rgba(255, 215, 0, 0.15);
-            font-family: serif;
+        .flip-back .context {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.8;
         }
 
-        .back-data {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.35);
-            margin-top: 10px;
+        .flip-back .data {
+            font-size: 0.8rem;
+            color: rgba(255, 215, 0, 0.4);
+            margin-top: 12px;
         }
 
-        .back-hint {
-            position: absolute;
-            bottom: 15px;
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.2);
-            letter-spacing: 1px;
-        }
-
-        /* 底部总结 */
-        .summary {
+        /* ========== 总结场景 ========== */
+        .scene-summary {
+            background: radial-gradient(ellipse at center, #1a0800 0%, #0a0a0a 70%);
+            flex-direction: column;
             text-align: center;
-            margin-top: 60px;
+            padding: 40px;
+        }
+
+        .summary-content {
             max-width: 600px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.5s ease;
+        }
+
+        .scene-summary.active .summary-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .summary-timeline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .timeline-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-year {
+            font-size: 1.5rem;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .timeline-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .timeline-arrow {
+            font-size: 1.2rem;
+            color: rgba(255, 215, 0, 0.3);
         }
 
         .summary-line {
-            font-size: 1.2rem;
-            color: rgba(255, 215, 0, 0.6);
+            font-size: 1.3rem;
+            color: rgba(255, 215, 0, 0.7);
             letter-spacing: 3px;
-            line-height: 2;
+            line-height: 2.2;
         }
 
-        /* 底部导航 */
+        .summary-sub {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 30px;
+            letter-spacing: 1px;
+        }
+
+        /* ========== 阶段指示器 ========== */
+        .stage-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1001;
+        }
+
+        .stage-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .stage-dot.active {
+            background: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            transform: scale(1.3);
+        }
+
+        /* ========== 底部导航 ========== */
         .bottom-nav {
             position: fixed;
             bottom: 20px;
@@ -258,25 +521,55 @@
             color: rgba(255, 215, 0, 0.8);
         }
 
-        /* 移动端 */
+        /* ========== 响应式 ========== */
         @media (max-width: 768px) {
-            .cards-container {
-                flex-direction: column;
-                align-items: center;
-                gap: 30px;
+            .intro-content h1 {
+                font-size: 2rem;
+                letter-spacing: 4px;
             }
 
-            .card-flip {
-                width: 280px;
-                height: 380px;
+            .choice-year {
+                font-size: 5rem;
+                letter-spacing: 10px;
             }
 
-            .page-title h1 {
-                font-size: 1.8rem;
+            .choice-question {
+                font-size: 1.3rem;
             }
 
-            .card-year {
-                font-size: 2.5rem;
+            .choice-answer {
+                font-size: 1rem;
+            }
+
+            .flip-card {
+                height: 200px;
+            }
+
+            .silhouette-mountains {
+                width: 100%;
+            }
+
+            .stage-dots {
+                right: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .intro-content h1 {
+                font-size: 1.5rem;
+                letter-spacing: 2px;
+            }
+
+            .choice-year {
+                font-size: 3.5rem;
+            }
+
+            .choice-question {
+                font-size: 1.1rem;
+            }
+
+            .flip-card {
+                height: 180px;
             }
         }
     </style>
@@ -290,86 +583,154 @@
         </a>
     </div>
 
-    <!-- 标题 -->
-    <div class="page-title">
-        <h1>三次选择</h1>
-        <p>一个人的三次选择，改变了一个国家的命运</p>
+    <!-- 进度条 -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- 阶段指示器 -->
+    <div class="stage-dots" id="stageDots"></div>
+
+    <!-- 开场 -->
+    <div class="scene scene-intro" id="scene-0">
+        <div class="intro-content">
+            <h1>三次选择</h1>
+            <p>一个人的三次选择，改变了一个国家的命运</p>
+            <p style="font-size:0.85rem; color:rgba(255,215,0,0.3); margin-top:10px;">向下滚动，穿越历史</p>
+            <div class="intro-arrow"><i class="fas fa-chevron-down"></i></div>
+        </div>
     </div>
 
-    <!-- 卡片 -->
-    <div class="cards-container">
-        <!-- 第一次选择 -->
-        <div class="card-flip" onclick="this.classList.toggle('flipped')">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="card-year">1927</div>
-                    <div class="card-event">秋收起义</div>
-                    <div class="card-choice">他选择了农村，<br>而不是城市</div>
-                    <div class="card-hint">点击翻转</div>
-                </div>
-                <div class="card-back">
-                    <div class="back-context">
-                        1927年，大革命失败。按照苏联经验，革命应该从城市开始。但毛泽东做出了一个当时所有人都不理解的决定：放弃攻打大城市，转向农村，建立井冈山革命根据地。
-                    </div>
-                    <div class="back-quote">
-                        "农村包围城市，武装夺取政权。"
-                    </div>
-                    <div class="back-data">秋收起义部队：5000人 → 井冈山会师后：10000人</div>
-                    <div class="back-hint">点击翻回</div>
-                </div>
+    <!-- 第一次选择：1927 -->
+    <div class="scene scene-choice scene-1" id="scene-1">
+        <div class="choice-year">1927</div>
+
+        <div class="scene-silhouette">
+            <div class="silhouette-mountains">
+                <div class="mountain mountain-1"></div>
+                <div class="mountain mountain-2"></div>
+                <div class="mountain mountain-3"></div>
+                <div class="mountain mountain-4"></div>
             </div>
         </div>
 
-        <!-- 第二次选择 -->
-        <div class="card-flip" onclick="this.classList.toggle('flipped')">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="card-year">1935</div>
-                    <div class="card-event">遵义会议</div>
-                    <div class="card-choice">他选择了实事求是，<br>而不是教条</div>
-                    <div class="card-hint">点击翻转</div>
-                </div>
-                <div class="card-back">
-                    <div class="back-context">
-                        第五次反"围剿"失败，红军从8.6万人锐减到3万人。博古、李德坚持"御敌于国门之外"的教条主义。遵义会议上，毛泽东力主改变战略方针，灵活机动作战。这是他人生的最低谷，也是转折点。
-                    </div>
-                    <div class="back-quote">
-                        "打得赢就打，打不赢就走。"
-                    </div>
-                    <div class="back-data">遵义会议后四渡赤水：3万人跳出40万敌军包围</div>
-                    <div class="back-hint">点击翻回</div>
-                </div>
+        <div class="choice-content">
+            <div class="choice-label">第一次选择</div>
+            <div class="choice-question">当所有人都走向城市，<br>他选择了农村</div>
+            <div class="choice-answer">
+                1927年，大革命失败。按照苏联经验，革命应该从城市开始。<br>
+                但毛泽东放弃了攻打大城市，转向井冈山，建立了第一个农村革命根据地。
             </div>
-        </div>
-
-        <!-- 第三次选择 -->
-        <div class="card-flip" onclick="this.classList.toggle('flipped')">
-            <div class="card-inner">
-                <div class="card-front">
-                    <div class="card-year">1949</div>
-                    <div class="card-event">天安门城楼</div>
-                    <div class="card-choice">他选择了宣告，<br>而不是沉默</div>
-                    <div class="card-hint">点击翻转</div>
-                </div>
-                <div class="card-back">
-                    <div class="back-context">
-                        1949年10月1日下午3时，毛泽东站在天安门城楼上。28年的奋斗，无数人的牺牲，都凝聚在这一刻。他按下话筒的那一刻，一个旧时代结束了，一个新时代开始了。
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <div class="flip-icon"><i class="fas fa-hand-pointer"></i></div>
+                        <p>点击翻开历史的真相</p>
                     </div>
-                    <div class="back-quote">
-                        "中华人民共和国中央人民政府今天成立了！"
+                    <div class="flip-back">
+                        <div class="quote">"农村包围城市，武装夺取政权。"</div>
+                        <div class="context">这条道路后来被称为"井冈山道路"，成为中国革命胜利的根本路线。在此之前，没有人想过，农民可以改变中国。</div>
+                        <div class="data">秋收起义：5000人出发 → 井冈山会师后：10000人</div>
                     </div>
-                    <div class="back-data">开国大典当天，天安门广场30万军民</div>
-                    <div class="back-hint">点击翻回</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 底部总结 -->
-    <div class="summary">
-        <div class="summary-line">
-            农村包围城市 → 实事求是 → 站起来<br>
-            一个人的三次选择，改变了一个国家的命运
+    <!-- 第二次选择：1935 -->
+    <div class="scene scene-choice scene-2" id="scene-2">
+        <div class="choice-year">1935</div>
+
+        <div class="scene-silhouette">
+            <div class="silhouette-mountains">
+                <div class="mountain mountain-2"></div>
+                <div class="mountain mountain-3"></div>
+            </div>
+        </div>
+
+        <div class="choice-content">
+            <div class="choice-label">第二次选择</div>
+            <div class="choice-question">当教条指挥一切，<br>他选择了实事求是</div>
+            <div class="choice-answer">
+                第五次反"围剿"失败，红军从8.6万人锐减到3万人。<br>
+                博古、李德坚持教条主义。遵义会议上，毛泽东力主灵活机动作战。
+            </div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <div class="flip-icon"><i class="fas fa-hand-pointer"></i></div>
+                        <p>点击翻开历史的真相</p>
+                    </div>
+                    <div class="flip-back">
+                        <div class="quote">"打得赢就打，打不赢就走。"</div>
+                        <div class="context">遵义会议是毛泽东人生的最低谷，也是转折点。四渡赤水，3万人跳出40万敌军包围圈，被誉为"神来之笔"。</div>
+                        <div class="data">遵义会议后四渡赤水：3万人跳出40万敌军包围</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第三次选择：1949 -->
+    <div class="scene scene-choice scene-3" id="scene-3">
+        <div class="choice-year">1949</div>
+
+        <div class="scene-silhouette">
+            <div class="silhouette-tiananmen">
+                <div class="silhouette-person">
+                    <div class="person-head"></div>
+                    <div class="person-body"></div>
+                </div>
+                <div class="tiananmen-base"></div>
+            </div>
+        </div>
+
+        <div class="choice-content">
+            <div class="choice-label">第三次选择</div>
+            <div class="choice-question">28年的奋斗凝聚在这一刻，<br>他选择了宣告</div>
+            <div class="choice-answer">
+                1949年10月1日下午3时，毛泽东站在天安门城楼上。<br>
+                无数人的牺牲，都凝聚在按下话筒的那一刻。
+            </div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-inner">
+                    <div class="flip-front">
+                        <div class="flip-icon"><i class="fas fa-hand-pointer"></i></div>
+                        <p>点击翻开历史的真相</p>
+                    </div>
+                    <div class="flip-back">
+                        <div class="quote">"中华人民共和国中央人民政府今天成立了！"</div>
+                        <div class="context">一个旧时代结束了，一个新时代开始了。这一天，中国人民从此站起来了。从1921年到1949年，28年血与火的征程，终于抵达终点。</div>
+                        <div class="data">开国大典：天安门广场30万军民共同见证</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 总结 -->
+    <div class="scene scene-summary" id="scene-4">
+        <div class="summary-content">
+            <div class="summary-timeline">
+                <div class="timeline-node">
+                    <div class="timeline-year">1927</div>
+                    <div class="timeline-label">农村包围城市</div>
+                </div>
+                <div class="timeline-arrow">→</div>
+                <div class="timeline-node">
+                    <div class="timeline-year">1935</div>
+                    <div class="timeline-label">实事求是</div>
+                </div>
+                <div class="timeline-arrow">→</div>
+                <div class="timeline-node">
+                    <div class="timeline-year">1949</div>
+                    <div class="timeline-label">站起来</div>
+                </div>
+            </div>
+            <div class="summary-line">
+                三次选择，一条道路<br>
+                从井冈山到天安门<br>
+                一个人的判断，改变了一个国家的命运
+            </div>
+            <div class="summary-sub">赓续红色血脉 · 传承奋斗精神</div>
         </div>
     </div>
 
@@ -381,6 +742,50 @@
     </div>
 
     <script src="../filmstrip.js"></script>
+    <script>
+        const scenes = document.querySelectorAll('.scene');
+        const progressBar = document.getElementById('progressBar');
+        const stageDotsContainer = document.getElementById('stageDots');
+        let currentScene = 0;
+
+        // 创建阶段指示器
+        scenes.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'stage-dot';
+            dot.addEventListener('click', () => {
+                scenes[i].scrollIntoView({ behavior: 'smooth' });
+            });
+            stageDotsContainer.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.stage-dot');
+
+        // IntersectionObserver 检测当前场景
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const idx = Array.from(scenes).indexOf(entry.target);
+                    currentScene = idx;
+
+                    // 激活场景
+                    entry.target.classList.add('active');
+
+                    // 更新进度条
+                    const progress = (idx / (scenes.length - 1)) * 100;
+                    progressBar.style.width = progress + '%';
+
+                    // 更新指示器
+                    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+                }
+            });
+        }, { threshold: 0.5 });
+
+        scenes.forEach(scene => observer.observe(scene));
+
+        // 初始激活第一幕
+        document.getElementById('scene-0').classList.add('active');
+        dots[0].classList.add('active');
+    </script>
 </body>
 
 </html>

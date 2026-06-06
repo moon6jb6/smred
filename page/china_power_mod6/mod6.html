@@ -85,75 +85,26 @@
             padding: 40px 0;
         }
 
-        .line-track {
+        .line-chart-wrapper {
             width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            position: relative;
-            margin: 60px 0;
+            margin: 20px 0;
         }
 
-        .line-progress {
-            height: 100%;
-            background: linear-gradient(to right, #8b0000, #ffd700);
-            border-radius: 2px;
-            width: 0%;
-            transition: width 0.1s linear;
+        .line-chart-wrapper svg {
+            width: 100%;
+            height: auto;
         }
 
-        .line-node {
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #ffd700;
-            border: 3px solid #0a0a1a;
-            cursor: pointer;
-            transition: all 0.3s;
-            z-index: 2;
+        .chart-dot {
+            transition: r 0.3s, opacity 0.5s;
         }
 
-        .line-node:hover {
-            transform: translate(-50%, -50%) scale(1.5);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        .chart-dot:hover {
+            r: 10;
         }
 
-        .line-node-label {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.5);
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            text-align: center;
-        }
-
-        .line-node:hover .line-node-label {
-            opacity: 1;
-        }
-
-        .line-node-story {
-            position: absolute;
-            top: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            font-size: 0.75rem;
-            color: rgba(255, 215, 0, 0.6);
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
-
-        .line-node:hover .line-node-story {
-            opacity: 1;
+        .chart-label {
+            transition: opacity 0.5s;
         }
 
         .data-number {
@@ -426,28 +377,62 @@
         <p class="section-subtitle">从0到50000公里，中国高铁走过的路</p>
 
         <div class="data-line-container">
-            <div class="line-track">
-                <div class="line-progress" id="lineProgress"></div>
-                <div class="line-node" data-km="0" style="left: 0%">
-                    <div class="line-node-label">2008年<br>京津城际</div>
-                    <div class="line-node-story">中国第一条高铁</div>
-                </div>
-                <div class="line-node" data-km="9300" style="left: 20%">
-                    <div class="line-node-label">2012年<br>9300公里</div>
-                    <div class="line-node-story">超越日本成为世界第一</div>
-                </div>
-                <div class="line-node" data-km="19000" style="left: 42%">
-                    <div class="line-node-label">2016年<br>19000公里</div>
-                    <div class="line-node-story">覆盖全国主要城市</div>
-                </div>
-                <div class="line-node" data-km="35000" style="left: 78%">
-                    <div class="line-node-label">2020年<br>35000公里</div>
-                    <div class="line-node-story">超过世界其他国家总和</div>
-                </div>
-                <div class="line-node" data-km="50000" style="left: 100%">
-                    <div class="line-node-label">2026年<br>50000公里</div>
-                    <div class="line-node-story">连接每一个省会城市</div>
-                </div>
+            <div class="line-chart-wrapper">
+                <svg id="lineChart" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                    <!-- 网格线 -->
+                    <line x1="60" y1="20" x2="60" y2="250" stroke="rgba(255,215,0,0.1)" stroke-width="1"/>
+                    <line x1="60" y1="250" x2="760" y2="250" stroke="rgba(255,215,0,0.1)" stroke-width="1"/>
+                    <line x1="60" y1="185" x2="760" y2="185" stroke="rgba(255,215,0,0.05)" stroke-width="0.5" stroke-dasharray="4"/>
+                    <line x1="60" y1="120" x2="760" y2="120" stroke="rgba(255,215,0,0.05)" stroke-width="0.5" stroke-dasharray="4"/>
+                    <line x1="60" y1="55" x2="760" y2="55" stroke="rgba(255,215,0,0.05)" stroke-width="0.5" stroke-dasharray="4"/>
+
+                    <!-- Y轴标签 -->
+                    <text x="50" y="255" fill="rgba(255,255,255,0.3)" font-size="11" text-anchor="end">0</text>
+                    <text x="50" y="190" fill="rgba(255,255,255,0.3)" font-size="11" text-anchor="end">1.5万</text>
+                    <text x="50" y="125" fill="rgba(255,255,255,0.3)" font-size="11" text-anchor="end">3万</text>
+                    <text x="50" y="60" fill="rgba(255,255,255,0.3)" font-size="11" text-anchor="end">4.5万</text>
+
+                    <!-- 面积填充 -->
+                    <path id="chartArea" fill="url(#areaGradient)" opacity="0"/>
+
+                    <!-- 渐变定义 -->
+                    <defs>
+                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#ffd700" stop-opacity="0.3"/>
+                            <stop offset="100%" stop-color="#ffd700" stop-opacity="0"/>
+                        </linearGradient>
+                        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#8b0000"/>
+                            <stop offset="100%" stop-color="#ffd700"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- 折线（动画绘制） -->
+                    <polyline id="chartLine" fill="none" stroke="url(#lineGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+                        points="80,250 220,210 390,160 600,85 740,35"
+                        stroke-dasharray="1000" stroke-dashoffset="1000"/>
+
+                    <!-- 数据点 -->
+                    <circle class="chart-dot" cx="80" cy="250" r="6" fill="#8b0000" stroke="#ffd700" stroke-width="2" opacity="0"/>
+                    <circle class="chart-dot" cx="220" cy="210" r="6" fill="#8b0000" stroke="#ffd700" stroke-width="2" opacity="0"/>
+                    <circle class="chart-dot" cx="390" cy="160" r="6" fill="#8b0000" stroke="#ffd700" stroke-width="2" opacity="0"/>
+                    <circle class="chart-dot" cx="600" cy="85" r="6" fill="#8b0000" stroke="#ffd700" stroke-width="2" opacity="0"/>
+                    <circle class="chart-dot" cx="740" cy="35" r="8" fill="#ffd700" stroke="#fff" stroke-width="2" opacity="0"/>
+
+                    <!-- X轴标签 -->
+                    <text x="80" y="275" fill="rgba(255,255,255,0.5)" font-size="11" text-anchor="middle">2008</text>
+                    <text x="220" y="275" fill="rgba(255,255,255,0.5)" font-size="11" text-anchor="middle">2012</text>
+                    <text x="390" y="275" fill="rgba(255,255,255,0.5)" font-size="11" text-anchor="middle">2016</text>
+                    <text x="600" y="275" fill="rgba(255,255,255,0.5)" font-size="11" text-anchor="middle">2020</text>
+                    <text x="740" y="275" fill="rgba(255,215,0,0.8)" font-size="12" text-anchor="middle" font-weight="bold">2026</text>
+
+                    <!-- 数据标签 -->
+                    <text class="chart-label" x="80" y="243" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="middle" opacity="0">0</text>
+                    <text class="chart-label" x="220" y="203" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="middle" opacity="0">9,300km</text>
+                    <text class="chart-label" x="390" y="153" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="middle" opacity="0">19,000km</text>
+                    <text class="chart-label" x="600" y="78" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="middle" opacity="0">35,000km</text>
+                    <text class="chart-label" x="740" y="25" fill="#ffd700" font-size="12" text-anchor="middle" font-weight="bold" opacity="0">50,000km</text>
+                </svg>
             </div>
 
             <div class="data-number">
@@ -545,10 +530,20 @@
 
     <script src="../filmstrip.js"></script>
     <script>
-        // 区块一：数据线滚动动画
-        const lineProgress = document.getElementById('lineProgress');
+        // 区块一：SVG折线图动画
         const kmNumber = document.getElementById('kmNumber');
         const sectionLine = document.getElementById('sectionLine');
+        const chartLine = document.getElementById('chartLine');
+        const chartArea = document.getElementById('chartArea');
+        const chartDots = document.querySelectorAll('.chart-dot');
+        const chartLabels = document.querySelectorAll('.chart-label');
+        const totalLineLength = chartLine ? chartLine.getTotalLength() : 1000;
+        let chartAnimated = false;
+
+        if (chartLine) {
+            chartLine.style.strokeDasharray = totalLineLength;
+            chartLine.style.strokeDashoffset = totalLineLength;
+        }
 
         function animateDataLine() {
             const rect = sectionLine.getBoundingClientRect();
@@ -556,9 +551,33 @@
 
             if (rect.top < windowHeight && rect.bottom > 0) {
                 const progress = Math.min(1, Math.max(0, (windowHeight - rect.top) / (windowHeight + rect.height)));
-                lineProgress.style.width = (progress * 100) + '%';
                 const km = Math.round(progress * 50000);
                 kmNumber.textContent = km.toLocaleString();
+
+                // SVG折线动画
+                if (chartLine && !chartAnimated) {
+                    chartAnimated = true;
+                    // 绘制折线
+                    chartLine.style.transition = 'stroke-dashoffset 2s ease';
+                    chartLine.style.strokeDashoffset = '0';
+
+                    // 面积填充
+                    chartArea.style.transition = 'opacity 1s ease 0.5s';
+                    chartArea.setAttribute('d', 'M80,250 L220,210 L390,160 L600,85 L740,35 L740,250 L80,250 Z');
+                    chartArea.style.opacity = '1';
+
+                    // 数据点逐个出现
+                    chartDots.forEach((dot, i) => {
+                        dot.style.transition = `opacity 0.4s ease ${0.8 + i * 0.3}s`;
+                        dot.style.opacity = '1';
+                    });
+
+                    // 标签逐个出现
+                    chartLabels.forEach((label, i) => {
+                        label.style.transition = `opacity 0.4s ease ${1.0 + i * 0.3}s`;
+                        label.style.opacity = '1';
+                    });
+                }
             }
         }
 
@@ -674,6 +693,18 @@
                 });
                 ticking = true;
             }
+        });
+
+        // 地图响应窗口resize（防抖）
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                // 清空地图容器中动态创建的元素
+                const dynamicEls = mapContainer.querySelectorAll('.map-line, .map-endpoint, .map-label');
+                dynamicEls.forEach(el => el.remove());
+                createMap();
+            }, 300);
         });
 
         // 初始化
