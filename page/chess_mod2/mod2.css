@@ -58,7 +58,7 @@
             gap: 10px;
         }
         
-        button {
+        .controls button {
             padding: 10px;
             background-color: #8b4513;
             color: white;
@@ -68,8 +68,8 @@
             font-size: 16px;
             transition: background-color 0.3s;
         }
-        
-        button:hover {
+
+        .controls button:hover {
             background-color: #6b3409;
         }
         
@@ -477,7 +477,7 @@
         }
         /* 弹窗内容 */
         
-        .modal-content {
+        .victory-modal .modal-content {
             background-color: #fff;
             padding: 30px 50px;
             border-radius: 10px;
@@ -485,8 +485,8 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         /* 胜利文字 */
-        
-        .modal-content h2 {
+
+        .victory-modal .modal-content h2 {
             color: #e74c3c;
             font-size: 2.5rem;
             margin-bottom: 15px;

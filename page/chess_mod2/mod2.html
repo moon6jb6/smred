@@ -741,7 +741,7 @@
 
     def update_piece_counter():
         counter_list = js.document.getElementById("piece-counter-list")
-        counter_list.innerHTML = ""
+        counter_list.replaceChildren()
         
         # 统计每种棋子的存活数量
         piece_counts = {}
@@ -825,7 +825,7 @@
 
     def check_game_end():
         global user_max_level
-    # 检查是否有一方的将/帅被吃掉
+        # 检查是否有一方的将/帅被吃掉
         red_general_exists = any(piece.alive and piece.color == "red" and piece.name == "帅" for piece in chess_pieces)
         black_general_exists = any(piece.alive and piece.color == "black" and piece.name == "将" for piece in chess_pieces)
 

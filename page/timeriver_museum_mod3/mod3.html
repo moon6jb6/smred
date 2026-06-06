@@ -386,6 +386,18 @@
             color: rgba(255, 215, 0, 0.8);
         }
 
+        /* 重置按钮 */
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.4);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
         /* 移动端 */
         @media (max-width: 768px) {
             .objects-container {
@@ -454,7 +466,7 @@
 
     <!-- 底部导航 -->
     <div class="bottom-nav" style="display:flex; gap:10px; align-items:center;">
-        <button id="resetBtn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.4); padding:8px 16px; border-radius:20px; font-size:0.8rem; cursor:pointer; font-family:inherit;">
+        <button id="resetBtn" class="reset-btn">
             <i class="fas fa-redo"></i> 重新探索
         </button>
         <a href="../sacrifice_mod4/mod4.html" onclick="event.preventDefault(); filmstripTransition('../sacrifice_mod4/mod4.html');">
@@ -570,7 +582,8 @@
         ];
 
         // 状态
-        const explored = JSON.parse(localStorage.getItem('mod3_explored') || '{}');
+        let explored = {};
+        try { explored = JSON.parse(localStorage.getItem('mod3_explored') || '{}'); } catch(e) { explored = {}; }
         const container = document.getElementById('objectsContainer');
         const overlay = document.getElementById('overlay');
         const overlayIcon = document.getElementById('overlayIcon');

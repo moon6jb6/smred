@@ -626,6 +626,7 @@
         const mapPopupClose = document.getElementById('mapPopupClose');
 
         function createMap() {
+            if (!mapContainer) return;
             const cx = mapContainer.offsetWidth / 2;
             const cy = mapContainer.offsetHeight / 2;
 
@@ -652,11 +653,12 @@
 
                 endpoint.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    mapPopup.classList.remove('active');
                     mapPopupTitle.textContent = rel.name + ' — ' + rel.trade;
                     mapPopupContent.textContent = rel.story;
                     mapPopup.style.left = Math.min(ex + 20, mapContainer.offsetWidth - 300) + 'px';
                     mapPopup.style.top = (ey - 30) + 'px';
-                    mapPopup.classList.add('active');
+                    requestAnimationFrame(() => mapPopup.classList.add('active'));
                 });
 
                 mapContainer.appendChild(endpoint);

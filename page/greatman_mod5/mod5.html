@@ -744,6 +744,7 @@
     <script src="../filmstrip.js"></script>
     <script>
         const scenes = document.querySelectorAll('.scene');
+        const sceneIndex = new Map([...scenes].map((s, i) => [s, i]));
         const progressBar = document.getElementById('progressBar');
         const stageDotsContainer = document.getElementById('stageDots');
         let currentScene = 0;
@@ -764,7 +765,7 @@
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const idx = Array.from(scenes).indexOf(entry.target);
+                    const idx = sceneIndex.get(entry.target);
                     currentScene = idx;
 
                     // 激活场景
