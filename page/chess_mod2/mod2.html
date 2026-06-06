@@ -10,6 +10,16 @@
     <link rel="stylesheet" href="./mod2.css">
 <script src="../filmstrip.js"></script>
 <script>checkNarrativeTransition();</script>
+<script>
+    // PyScript loading timeout — 15秒后提示
+    setTimeout(function() {
+        var loading = document.getElementById('loading');
+        if (loading && loading.style.display !== 'none') {
+            var text = loading.querySelector('.loading-text');
+            if (text) text.textContent = '加载较慢，请耐心等待...';
+        }
+    }, 15000);
+</script>
 </head>
 <body>
     <div class="button-container">
@@ -100,7 +110,15 @@
         <button class="ending-btn" id="endingLoseBtn">再来一次</button>
     </div>
 
-    <div id="loading">正在加载象棋...</div>
+    <div id="loading">
+        <div class="loading-bars">
+            <div class="loading-bar"></div>
+            <div class="loading-bar"></div>
+            <div class="loading-bar"></div>
+            <div class="loading-bar"></div>
+        </div>
+        <div class="loading-text">正在加载象棋引擎...</div>
+    </div>
 
     <div class="level-select-modal" id="level-select-modal">
         <div class="level-select-content">
@@ -918,7 +936,10 @@
         current_turn = "red"
         update_turn_indicator()
         
-        js.document.getElementById("loading").style.display = "none"
+        js.document.getElementById("loading").classList.add("fade-out")
+        def _remove_loading(_):
+            js.document.getElementById("loading").style.display = "none"
+        js.setTimeout(create_proxy(_remove_loading), 800)
 
     def change_level(direction):
         global current_level

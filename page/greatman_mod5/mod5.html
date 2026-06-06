@@ -333,50 +333,14 @@
         }
 
         /* 选择按钮 */
-        .choice-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 1s ease 1.2s;
+        /* 呼吸效果 — 自动翻转前的提示 */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.015); }
         }
 
-        .scene-choice.active .choice-buttons {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .choice-btn {
-            background: rgba(255, 215, 0, 0.05);
-            border: 1px solid rgba(255, 215, 0, 0.25);
-            color: rgba(255, 215, 0, 0.8);
-            padding: 14px 32px;
-            border-radius: 30px;
-            font-size: 1rem;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-
-        .choice-btn:hover {
-            background: rgba(255, 215, 0, 0.12);
-            border-color: rgba(255, 215, 0, 0.5);
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
-            transform: scale(1.05);
-        }
-
-        .choice-btn.chosen {
-            background: rgba(255, 215, 0, 0.2);
-            border-color: #ffd700;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-        }
-
-        .choice-btn.not-chosen {
-            opacity: 0.2;
-            pointer-events: none;
+        .flip-scene.breathing {
+            animation: breathe 0.8s ease-in-out 1;
         }
 
         /* 背面内容 */
@@ -678,10 +642,6 @@
                         1927年，大革命失败。按照苏联经验，革命应该从城市开始。<br>
                         但毛泽东放弃了攻打大城市，转向井冈山。
                     </div>
-                    <div class="choice-buttons">
-                        <button class="choice-btn" data-choice="a" onclick="flipScene(1, this)">攻打大城市</button>
-                        <button class="choice-btn" data-choice="b" onclick="flipScene(1, this)">转向农村</button>
-                    </div>
                 </div>
             </div>
             <!-- 背面：历史结果 -->
@@ -713,10 +673,6 @@
                     <div class="choice-answer">
                         第五次反"围剿"失败，红军从8.6万人锐减到3万人。<br>
                         博古、李德坚持教条主义。遵义会议上，毛泽东力主灵活机动作战。
-                    </div>
-                    <div class="choice-buttons">
-                        <button class="choice-btn" data-choice="a" onclick="flipScene(2, this)">坚持教条</button>
-                        <button class="choice-btn" data-choice="b" onclick="flipScene(2, this)">灵活机动</button>
                     </div>
                 </div>
             </div>
@@ -751,10 +707,6 @@
                     <div class="choice-answer">
                         1949年10月1日下午3时，毛泽东站在天安门城楼上。<br>
                         无数人的牺牲，都凝聚在按下话筒的那一刻。
-                    </div>
-                    <div class="choice-buttons">
-                        <button class="choice-btn" data-choice="a" onclick="flipScene(3, this)">保持沉默</button>
-                        <button class="choice-btn" data-choice="b" onclick="flipScene(3, this)">向世界宣告</button>
                     </div>
                 </div>
             </div>
@@ -828,6 +780,8 @@
         const dots = document.querySelectorAll('.stage-dot');
 
         // IntersectionObserver
+        const autoFlipped = new Set();
+
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -837,6 +791,20 @@
                     const progress = (idx / (scenes.length - 1)) * 100;
                     progressBar.style.width = progress + '%';
                     dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+
+                    // 选择场景：滚动到后自动翻转
+                    if (entry.target.classList.contains('scene-choice') && !autoFlipped.has(idx)) {
+                        autoFlipped.add(idx);
+                        const flipScene = entry.target.querySelector('.flip-scene');
+                        // 1.2s后呼吸效果
+                        setTimeout(() => {
+                            if (flipScene) flipScene.classList.add('breathing');
+                        }, 1200);
+                        // 2s后自动翻转
+                        setTimeout(() => {
+                            entry.target.classList.add('flipped');
+                        }, 2000);
+                    }
                 }
             });
         }, { threshold: 0.5 });
@@ -846,27 +814,6 @@
         // 初始激活
         document.getElementById('scene-0').classList.add('active');
         dots[0].classList.add('active');
-
-        // 全屏3D翻转
-        function flipScene(sceneNum, btn) {
-            const scene = document.getElementById('scene-' + sceneNum);
-            if (scene.classList.contains('flipped')) return;
-
-            // 标记按钮状态
-            const buttons = scene.querySelectorAll('.choice-btn');
-            buttons.forEach(b => {
-                if (b === btn) {
-                    b.classList.add('chosen');
-                } else {
-                    b.classList.add('not-chosen');
-                }
-            });
-
-            // 0.5s后翻转
-            setTimeout(() => {
-                scene.classList.add('flipped');
-            }, 500);
-        }
     </script>
 </body>
 

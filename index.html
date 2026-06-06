@@ -588,15 +588,15 @@
         let introFinished = false;
 
         // 开场动画序列
-        // 1s 黑屏 → 显示数字
+        // 0.5s 黑屏 → 显示数字
         setTimeout(() => {
             introNumber.classList.add('visible');
-        }, 1000);
+        }, 500);
 
-        // 1.5s 后开始数字递减 86000→7000
+        // 0.8s 后开始数字递减 86000→7000（2.5秒）
         setTimeout(() => {
-            animateIntroNumber(86000, 7000, 4000);
-        }, 1500);
+            animateIntroNumber(86000, 7000, 2500);
+        }, 800);
 
         // 数字递减动画
         function animateIntroNumber(from, to, duration) {
@@ -624,17 +624,17 @@
             // 显示说明文字
             setTimeout(() => {
                 introCountLabel.classList.add('visible');
-            }, 300);
+            }, 200);
             // 逐行显示白字
             introLines.forEach((line, i) => {
                 setTimeout(() => {
                     line.classList.add('visible');
-                }, 800 + i * 700);
+                }, 400 + i * 400);
             });
-            // 5s 后标记可点击
+            // 1.5s 后标记可点击
             setTimeout(() => {
                 introFinished = true;
-            }, 3000);
+            }, 1500);
         }
 
         // 点击任意处进入
