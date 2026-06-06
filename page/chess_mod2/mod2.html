@@ -127,10 +127,9 @@
     chess_pieces = []  # 存储所有棋子对象
     move_hints = []    # 存储移动提示元素
     move_hint_proxies = []  # 存储proxy引用，避免内存泄漏
+    piece_proxies = []  # 存储棋子click proxy，避免内存泄漏
     current_turn = "red"  # 当前回合，红方先行
     move_history = []  # 移动历史，用于悔棋
-    is_logged_in = True
-    current_user = "player"
     user_max_level = 100
 
         # 修改第0关数据
@@ -354,7 +353,9 @@
             piece.style.left = f"{left}px"
             piece.style.top = f"{top}px"
             
-            piece.addEventListener("click", create_proxy(lambda e: self.on_click()))
+            click_proxy = create_proxy(lambda e: self.on_click())
+            piece_proxies.append(click_proxy)
+            piece.addEventListener("click", click_proxy)
             self.element = piece
             board.appendChild(piece)
         
@@ -717,7 +718,9 @@
             def hide_after_animation(e):
                 self.element.style.display = "none"
                 self.element.classList.remove("capturing")
-            self.element.addEventListener("animationend", create_proxy(hide_after_animation))
+            anim_proxy = create_proxy(hide_after_animation)
+            piece_proxies.append(anim_proxy)
+            self.element.addEventListener("animationend", anim_proxy)
             js.document.getElementById("status-msg").textContent = f"{'红' if self.color == 'red' else '黑'}方{self.name}被吃"
         
         def restore(self, col, row):
@@ -832,8 +835,10 @@
             ending.style.display = "flex"
             js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
         elif check_flying_general():
-            loser = "黑" if current_turn == "red" else "红"
-            winner = "红" if current_turn == "red" else "黑"
+            # current_turn已切换，所以上一手走棋的人违规
+            violator = "黑" if current_turn == "red" else "红"
+            winner = current_turn  # 当前回合方是赢家
+            loser = violator
             js.document.getElementById("status-msg").textContent = f"将帅对脸！{loser}方违规判负"
             if winner == "红":
                 ending = js.document.getElementById("endingWin")
@@ -854,7 +859,6 @@
             js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
 
             # 更新用户进度
-            global user_max_level
             if current_level >= user_max_level:
                 user_max_level = current_level + 1
     def undo_move():
@@ -1014,8 +1018,14 @@
         for piece in pieces:
             board.removeChild(piece)
         
-        # 清除移动历史
+        # 清除移动历史和proxy（避免内存泄漏）
         move_history.clear()
+        for proxy in piece_proxies:
+            proxy.destroy()
+        piece_proxies.clear()
+        for proxy in move_hint_proxies:
+            proxy.destroy()
+        move_hint_proxies.clear()
         chess_pieces.clear()
         
         # 创建棋子对象
@@ -1145,12 +1155,6 @@
 
         js.document.getElementById("endingWinBtn").addEventListener("click", create_proxy(close_ending_win))
         js.document.getElementById("endingLoseBtn").addEventListener("click", create_proxy(close_ending_lose))
-        # 重玩本关按钮事件
-# 定义一个普通函数来包含赋值操作和逻辑
-        def handle_restart_click(e):
-            js.document.getElementById("victory-modal").style.display = "none"
-            reset_board()
-
         # 自动初始化游戏
         js.document.getElementById("status-msg").textContent = "欢迎来到象棋之战！"
         js.document.getElementById("level-display").textContent = f"第 {current_level} 关"
