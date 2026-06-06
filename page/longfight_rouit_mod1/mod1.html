@@ -236,39 +236,6 @@
             opacity: 1;
         }
 
-        /* 强制停顿遮罩 */
-        .pause-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        .pause-overlay.active {
-            display: flex;
-        }
-
-        .pause-number {
-            font-size: 8rem;
-            font-weight: bold;
-            color: #ff3333;
-            text-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
-        }
-
-        .pause-text {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 20px;
-            letter-spacing: 3px;
-        }
-
         /* 各阶段背景色 */
         .stage-1 { background: linear-gradient(180deg, #2d0a0a 0%, #4a1515 100%); }
         .stage-2 { background: linear-gradient(180deg, #1a0000 0%, #3d0000 100%); }
@@ -305,6 +272,237 @@
             color: rgba(255, 215, 0, 0.8);
         }
 
+        /* ========== 湘江分支选择系统 ========== */
+
+        /* 选择界面遮罩 */
+        .choice-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .choice-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .choice-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(4px);
+        }
+
+        .choice-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+            animation: choiceFadeUp 1s ease-out;
+        }
+
+        @keyframes choiceFadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .choice-year {
+            font-size: 0.9rem;
+            color: rgba(255, 215, 0, 0.6);
+            letter-spacing: 4px;
+        }
+
+        .choice-location {
+            font-size: 2.5rem;
+            color: #ffd700;
+            font-weight: bold;
+            margin: 10px 0 20px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .choice-situation {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+        }
+
+        .choice-divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.4), transparent);
+            margin: 30px auto;
+        }
+
+        .choice-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .choice-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            padding: 25px 30px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            min-width: 200px;
+            font-family: inherit;
+        }
+
+        .choice-btn:hover {
+            border-color: rgba(255, 215, 0, 0.8);
+            background: rgba(255, 215, 0, 0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.15);
+        }
+
+        .choice-btn-title {
+            font-size: 1.3rem;
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .choice-btn-desc {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.4;
+        }
+
+        .choice-hint {
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 2px;
+            animation: hintPulse 2s infinite;
+        }
+
+        /* 后果展示遮罩 */
+        .consequence-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.95);
+        }
+
+        .consequence-overlay.active {
+            display: flex;
+        }
+
+        .consequence-content {
+            text-align: center;
+            transition: opacity 1s ease;
+        }
+
+        .consequence-number {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+            font-variant-numeric: tabular-nums;
+            transition: color 0.5s ease;
+        }
+
+        .consequence-number.red {
+            color: #ff3333;
+            text-shadow: 0 0 40px rgba(255, 0, 0, 0.5);
+        }
+
+        .consequence-arrow {
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin: 10px 0;
+            animation: arrowPulse 1.5s ease infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { opacity: 0.4; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(5px); }
+        }
+
+        .consequence-final {
+            font-size: 7rem;
+        }
+
+        .consequence-text {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .consequence-text.visible {
+            opacity: 1;
+        }
+
+        .consequence-sub {
+            display: block;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 10px;
+        }
+
+        /* 反转区 */
+        .reality-check {
+            text-align: center;
+            display: none;
+        }
+
+        .reality-text {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 2.2;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        .reality-text.visible {
+            opacity: 1;
+        }
+
+        .reality-highlight {
+            color: #ffd700;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .reality-continue {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: rgba(255, 215, 0, 0.5);
+            letter-spacing: 2px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 1s ease, color 0.3s;
+            animation: hintPulse 2s infinite;
+        }
+
+        .reality-continue:hover {
+            color: #ffd700;
+        }
+
         /* 移动端适配 */
         @media (max-width: 768px) {
             .stage-title {
@@ -316,11 +514,27 @@
             .stage-number {
                 font-size: 3.5rem;
             }
-            .pause-number {
-                font-size: 5rem;
-            }
             .stage-indicator {
                 right: 10px;
+            }
+            .choice-content {
+                padding: 25px;
+            }
+            .choice-location {
+                font-size: 1.8rem;
+            }
+            .choice-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            .choice-btn {
+                min-width: 240px;
+            }
+            .consequence-number {
+                font-size: 4rem;
+            }
+            .consequence-final {
+                font-size: 5rem;
             }
         }
 
@@ -331,9 +545,6 @@
             }
             .stage-number {
                 font-size: 2.8rem;
-            }
-            .pause-number {
-                font-size: 4rem;
             }
             .stage {
                 padding: 30px 15px;
@@ -474,10 +685,47 @@
     <!-- 血色渐染 -->
     <div class="blood-wash" id="bloodWash"></div>
 
-    <!-- 强制停顿遮罩 -->
-    <div class="pause-overlay" id="pauseOverlay">
-        <div class="pause-number">30000</div>
-        <div class="pause-text">湘江一役，56000人再也没有回来</div>
+    <!-- 湘江分支：选择界面 -->
+    <div class="choice-overlay" id="choiceOverlay">
+        <div class="choice-backdrop"></div>
+        <div class="choice-content">
+            <div class="choice-year">1934年11月</div>
+            <div class="choice-location">湘江</div>
+            <div class="choice-situation">
+                前有封锁，后有追兵。<br>
+                86000人只剩这一次机会。
+            </div>
+            <div class="choice-divider"></div>
+            <div class="choice-options">
+                <button class="choice-btn" id="btnAttack">
+                    <div class="choice-btn-title">正面强渡</div>
+                    <div class="choice-btn-desc">集中火力，强行突破封锁线</div>
+                </button>
+                <button class="choice-btn" id="btnRetreat">
+                    <div class="choice-btn-title">轻装急行</div>
+                    <div class="choice-btn-desc">丢掉辎重，从缝隙中穿过去</div>
+                </button>
+            </div>
+            <div class="choice-hint">你的选择，决定他们的命运</div>
+        </div>
+    </div>
+
+    <!-- 湘江分支：后果展示 -->
+    <div class="consequence-overlay" id="consequenceOverlay">
+        <div class="consequence-content" id="consequenceContent">
+            <div class="consequence-number" id="consequenceFrom">86000</div>
+            <div class="consequence-arrow">↓</div>
+            <div class="consequence-number consequence-final" id="consequenceTo">30000</div>
+            <div class="consequence-text" id="consequenceText"></div>
+        </div>
+        <div class="reality-check" id="realityCheck">
+            <div class="reality-text" id="realityText">
+                但历史没有如果。<br>
+                <span class="reality-highlight">博古选择了正面强渡。</span><br>
+                这是真实发生的事。
+            </div>
+            <div class="reality-continue" id="realityContinue">继续前行 →</div>
+        </div>
     </div>
 
     <!-- 底部导航 -->
@@ -496,23 +744,43 @@
         const indicators = document.querySelectorAll('.indicator-dot');
         const progressBar = document.getElementById('progressBar');
         const scrollHint = document.getElementById('scrollHint');
-        const pauseOverlay = document.getElementById('pauseOverlay');
+        const choiceOverlay = document.getElementById('choiceOverlay');
+        const consequenceOverlay = document.getElementById('consequenceOverlay');
+        const consequenceContent = document.getElementById('consequenceContent');
+        const consequenceFrom = document.getElementById('consequenceFrom');
+        const consequenceTo = document.getElementById('consequenceTo');
+        const consequenceText = document.getElementById('consequenceText');
+        const realityCheck = document.getElementById('realityCheck');
+        const realityText = document.getElementById('realityText');
+        const realityContinue = document.getElementById('realityContinue');
+        const bloodWash = document.getElementById('bloodWash');
 
         let currentStage = 0;
         let xiangAnimated = false;
-        const bloodWash = document.getElementById('bloodWash');
-        let pauseShown = false;
+        let choiceActive = false;
 
-        // IntersectionObserver 检测当前阶段（离开时重置动画标志，允许重播）
+        // 检查 sessionStorage 是否已做过选择
+        function getChoiceState() {
+            try {
+                return JSON.parse(sessionStorage.getItem('mod1_xiangjiang_choice'));
+            } catch { return null; }
+        }
+
+        function saveChoiceState(path) {
+            sessionStorage.setItem('mod1_xiangjiang_choice', JSON.stringify({
+                path: path,
+                timestamp: Date.now()
+            }));
+        }
+
+        // IntersectionObserver 检测当前阶段
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 const index = parseInt(entry.target.dataset.index);
                 if (entry.isIntersecting) {
                     setActiveStage(index);
                 } else if (index === 1) {
-                    // 离开湘江阶段时重置，允许再次触发动画
                     xiangAnimated = false;
-                    pauseShown = false;
                 }
             });
         }, { threshold: 0.5 });
@@ -522,44 +790,47 @@
         function setActiveStage(index) {
             currentStage = index;
 
-            // 更新阶段样式
             stages.forEach((stage, i) => {
                 stage.classList.toggle('active', i === index);
             });
 
-            // 更新指示器
             indicators.forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
             });
 
-            // 更新进度条
             const progress = ((index + 1) / stages.length) * 100;
             progressBar.style.width = progress + '%';
 
-            // 湘江阶段动画
+            // 湘江阶段：检查是否已做过选择
             if (index === 1 && !xiangAnimated) {
                 xiangAnimated = true;
-                animateXiang();
+                const saved = getChoiceState();
+                if (saved) {
+                    // 已做过选择，直接显示最终数字
+                    const xiangNum = document.getElementById('xiangNumber');
+                    xiangNum.textContent = '30,000';
+                } else {
+                    // 未做选择，先播放数字递减，然后弹出选择
+                    animateXiangThenChoice();
+                }
             }
 
-            // 隐藏滚动提示（到达最后一屏）
             if (index === stages.length - 1) {
                 scrollHint.style.opacity = '0';
             }
         }
 
-        // 湘江数字递减动画
-        function animateXiang() {
+        // 湘江数字递减 → 选择界面
+        function animateXiangThenChoice() {
             const xiangNum = document.getElementById('xiangNumber');
             const start = 86000;
-            const end = 30000;
-            const duration = 4000; // 4秒
+            const end = 50000; // 先减到50000，让用户感受到"人在减少"
+            const duration = 3000;
             const startTime = performance.now();
 
             function update(now) {
                 const elapsed = now - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                // easeOutExpo
                 const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
                 const current = Math.round(start - (start - end) * eased);
                 xiangNum.textContent = current.toLocaleString();
@@ -567,70 +838,198 @@
                 if (progress < 1) {
                     requestAnimationFrame(update);
                 } else {
-                    // 数字到30000后，震动 + 强制停顿
-                    triggerPause();
+                    // 数字到50000后，暂停滚动，弹出选择界面
+                    showChoiceOverlay();
                 }
             }
             requestAnimationFrame(update);
         }
 
-        // 强制停顿 — 冲击序列：粒子burst→血色渐染→震动→遮罩
-        function triggerPause() {
-            if (pauseShown) return;
-            pauseShown = true;
-
-            // 1. 粒子burst
-            const xiangNum = document.getElementById('xiangNumber');
-            burstParticles(xiangNum, 800);
-
-            // 2. 0.8s后血色渐染
-            setTimeout(() => {
-                bloodWash.classList.add('active');
-            }, 800);
-
-            // 3. 1.3s后开始震动
-            setTimeout(() => {
-                document.body.classList.add('shake');
-            }, 1300);
-
-            // 4. 3s后停止震动，显示遮罩
-            setTimeout(() => {
-                document.body.classList.remove('shake');
-                bloodWash.classList.remove('active');
-                pauseOverlay.classList.add('active');
-
-                // 3s后自动关闭
-                setTimeout(() => {
-                    pauseOverlay.classList.remove('active');
-                }, 3000);
-            }, 3000);
+        // 显示选择界面
+        function showChoiceOverlay() {
+            choiceActive = true;
+            document.body.style.overflow = 'hidden';
+            choiceOverlay.style.display = 'flex';
+            requestAnimationFrame(() => {
+                choiceOverlay.classList.add('active');
+            });
         }
 
-        // 粒子burst效果
-        function burstParticles(element, count) {
-            const rect = element.getBoundingClientRect();
-            const cx = rect.left + rect.width / 2;
-            const cy = rect.top + rect.height / 2;
+        // 隐藏选择界面
+        function hideChoiceOverlay() {
+            choiceOverlay.classList.remove('active');
+            setTimeout(() => {
+                choiceOverlay.style.display = 'none';
+            }, 800);
+        }
+
+        // 绑定选择按钮
+        document.getElementById('btnAttack').addEventListener('click', () => {
+            if (!choiceActive) return;
+            choiceActive = false;
+            saveChoiceState('attack');
+            hideChoiceOverlay();
+            setTimeout(() => playConsequence('attack'), 400);
+        });
+
+        document.getElementById('btnRetreat').addEventListener('click', () => {
+            if (!choiceActive) return;
+            choiceActive = false;
+            saveChoiceState('retreat');
+            hideChoiceOverlay();
+            setTimeout(() => playConsequence('retreat'), 400);
+        });
+
+        // 后果流程配置
+        const consequenceFlow = {
+            attack: {
+                from: 86000, to: 30000,
+                duration: 2500,
+                text: '湘江一战，56000人再也没有回来。<span class="consequence-sub">江水被染红了三天。</span>',
+                particleColor: 'red',
+                particleCount: 800,
+                shakeIntensity: 8,
+                realityLine: '但历史没有如果。<br><span class="reality-highlight">博古选择了正面强渡。</span><br>这是真实发生的事。'
+            },
+            retreat: {
+                from: 86000, to: 45000,
+                duration: 1800,
+                text: '丢掉了所有辎重。大炮、印刷机、X光机……全部沉入江中。<span class="consequence-sub">但大多数人活了下来。</span>',
+                particleColor: 'gold',
+                particleCount: 400,
+                shakeIntensity: 3,
+                realityLine: '但历史没有如果。<br><span class="reality-highlight">博古选择了正面强渡。</span><br>这是真实发生的事。'
+            }
+        };
+
+        // 播放后果动画
+        async function playConsequence(path) {
+            const config = consequenceFlow[path];
+
+            // 显示后果遮罩
+            consequenceOverlay.classList.add('active');
+
+            // 重置状态
+            consequenceFrom.textContent = config.from.toLocaleString();
+            consequenceTo.textContent = config.to.toLocaleString();
+            consequenceTo.classList.toggle('red', path === 'attack');
+            consequenceText.innerHTML = config.text;
+            consequenceText.classList.remove('visible');
+            realityCheck.style.display = 'none';
+            realityText.classList.remove('visible');
+            realityContinue.style.opacity = '0';
+            realityText.innerHTML = config.realityLine;
+            consequenceContent.style.opacity = '1';
+
+            // 1. 数字递减
+            await animateConsequenceNumber(config.from, config.to, config.duration);
+
+            // 2. 显示文字
+            await delay(500);
+            consequenceText.classList.add('visible');
+
+            // 3. 粒子爆发
+            burstParticlesFromCenter(config.particleCount, config.particleColor, path === 'attack' ? 'up' : 'down');
+
+            // 4. 震动
+            document.body.classList.add('shake');
+            setTimeout(() => {
+                document.body.classList.remove('shake');
+            }, config.shakeIntensity * 100);
+
+            // 5. 等待
+            await delay(3000);
+
+            // 6. 血色渐染（仅攻击路线）
+            if (path === 'attack') {
+                bloodWash.classList.add('active');
+                await delay(800);
+                bloodWash.classList.remove('active');
+            }
+
+            // 7. 隐藏后果内容，显示反转
+            consequenceContent.style.opacity = '0';
+            await delay(800);
+            realityCheck.style.display = 'block';
+            await delay(300);
+            realityText.classList.add('visible');
+
+            // 8. 显示继续按钮
+            await delay(2500);
+            realityContinue.style.opacity = '1';
+            realityContinue.addEventListener('click', finishConsequence, { once: true });
+        }
+
+        // 结束后果，恢复滚动
+        function finishConsequence() {
+            consequenceOverlay.classList.remove('active');
+            choiceActive = false;
+            document.body.style.overflow = '';
+
+            // 更新湘江数字为最终值
+            const xiangNum = document.getElementById('xiangNumber');
+            xiangNum.textContent = '30,000';
+        }
+
+        // 后果数字递减动画
+        function animateConsequenceNumber(from, to, duration) {
+            return new Promise(resolve => {
+                const startTime = performance.now();
+                function update(now) {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                    const current = Math.round(from - (from - to) * eased);
+                    consequenceFrom.textContent = current.toLocaleString();
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    } else {
+                        resolve();
+                    }
+                }
+                requestAnimationFrame(update);
+            });
+        }
+
+        // 延迟工具
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // 从屏幕中心爆发粒子（扩展版，支持颜色和方向）
+        function burstParticlesFromCenter(count, color, direction) {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
 
             const canvas = document.createElement('canvas');
-            canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:1998;pointer-events:none;';
+            canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:2699;pointer-events:none;';
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             document.body.appendChild(canvas);
             const ctx = canvas.getContext('2d');
 
+            const colorSets = {
+                red: { r: 255, g: 60, b: 40 },
+                gold: { r: 255, g: 215, b: 0 }
+            };
+            const baseColor = colorSets[color] || colorSets.red;
+            const vyBias = direction === 'up' ? -2 : 0.5;
+
             const particles = [];
             for (let i = 0; i < count; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                const speed = 1 + Math.random() * 4;
+                const speed = 1 + Math.random() * 5;
                 particles.push({
-                    x: cx, y: cy,
+                    x: cx + (Math.random() - 0.5) * 100,
+                    y: cy + (Math.random() - 0.5) * 60,
                     vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed - 1.5,
+                    vy: Math.sin(angle) * speed + vyBias,
                     life: 1,
                     decay: 0.003 + Math.random() * 0.008,
-                    size: 1 + Math.random() * 2.5,
-                    r: 255, g: Math.floor(50 + Math.random() * 50), b: Math.floor(30 + Math.random() * 30)
+                    size: 1 + Math.random() * 3,
+                    r: baseColor.r + Math.floor(Math.random() * 40 - 20),
+                    g: baseColor.g + Math.floor(Math.random() * 40 - 20),
+                    b: baseColor.b + Math.floor(Math.random() * 20)
                 });
             }
 
@@ -642,9 +1041,8 @@
                     alive = true;
                     p.x += p.vx;
                     p.y += p.vy;
-                    p.vy -= 0.02; // 向上漂
+                    p.vy += direction === 'up' ? -0.015 : 0.02;
                     p.life -= p.decay;
-                    // 颜色从红→金
                     const t = 1 - p.life;
                     const r = Math.round(p.r + (255 - p.r) * t);
                     const g = Math.round(p.g + (215 - p.g) * t);
