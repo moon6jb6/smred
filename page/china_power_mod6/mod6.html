@@ -14,7 +14,7 @@
         }
 
         body {
-            background: linear-gradient(180deg, #0a0a1a 0%, #1a0a00 50%, #0a0a1a 100%);
+            background: #0a0a0a;
             color: #f5f5f5;
             font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
             line-height: 1.6;
@@ -50,272 +50,276 @@
             color: rgba(255, 215, 0, 0.8);
         }
 
-        /* 区块通用 */
-        .section {
+        /* ========== 开场 ========== */
+        .hero-section {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 80px 20px;
-            position: relative;
+            text-align: center;
+            padding: 40px 20px;
+            background: radial-gradient(ellipse at center, #1a0800 0%, #0a0a0a 70%);
         }
 
-        .section-title {
-            font-size: 2rem;
+        .hero-title {
+            font-size: 2.5rem;
             color: #ffd700;
-            letter-spacing: 4px;
-            margin-bottom: 15px;
-            text-align: center;
+            letter-spacing: 6px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.2s ease;
         }
 
-        .section-subtitle {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.95rem;
-            margin-bottom: 50px;
-            text-align: center;
-            letter-spacing: 2px;
+        .hero-title.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        /* 区块一：数据线 */
-        .data-line-container {
-            max-width: 900px;
-            width: 100%;
-            position: relative;
-            padding: 40px 0;
-        }
-
-        .line-chart-wrapper {
-            width: 100%;
-            margin: 20px 0;
-        }
-
-        .line-chart-wrapper svg {
-            width: 100%;
-            height: auto;
-        }
-
-        .chart-dot {
-            transition: r 0.3s, opacity 0.5s;
-        }
-
-        .chart-dot:hover {
-            r: 10;
-        }
-
-        .chart-label {
-            transition: opacity 0.5s;
-        }
-
-        .data-number {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .data-number .number {
-            font-size: 4rem;
-            font-weight: bold;
-            color: #ffd700;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .data-number .unit {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-left: 10px;
-        }
-
-        .data-number .label {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.3);
-            margin-top: 5px;
-        }
-
-        /* 区块二：对比表 */
-        .compare-section {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .compare-container {
-            max-width: 900px;
-            width: 100%;
-        }
-
-        .compare-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 60px;
-            flex-wrap: wrap;
-        }
-
-        .compare-item {
-            text-align: center;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .compare-item .name {
+        .hero-subtitle {
             font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 15px;
-        }
-
-        .compare-item .value {
-            font-size: 3rem;
-            font-weight: bold;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .compare-item .value.weak {
-            color: #888;
-        }
-
-        .compare-item .value.strong {
-            color: #ffd700;
-        }
-
-        .compare-item .unit {
-            font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+            opacity: 0;
+            transition: opacity 1s ease 0.5s;
         }
 
-        .compare-vs {
-            font-size: 1.5rem;
-            color: rgba(255, 255, 255, 0.2);
-            font-weight: bold;
+        .hero-subtitle.visible {
+            opacity: 1;
         }
 
-        .compare-caption {
-            text-align: center;
-            font-size: 1rem;
-            color: rgba(255, 215, 0, 0.6);
-            font-style: italic;
-            margin-top: -20px;
-            margin-bottom: 40px;
+        .hero-hint {
+            font-size: 0.85rem;
+            color: rgba(255, 215, 0, 0.3);
+            margin-top: 40px;
+            opacity: 0;
+            transition: opacity 1s ease 1s;
+            animation: hintPulse 2s infinite 2s;
         }
 
-        .compare-divider {
-            width: 60%;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.08);
-            margin: 0 auto 60px;
+        .hero-hint.visible {
+            opacity: 1;
         }
 
-        /* 区块三：关系图 */
-        .map-section {
-            background: rgba(0, 0, 0, 0.2);
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
 
-        .map-container {
+        /* ========== 时间线 ========== */
+        .timeline-section {
             max-width: 800px;
-            width: 100%;
+            margin: 0 auto;
+            padding: 80px 20px 120px;
             position: relative;
-            height: 500px;
         }
 
-        .map-center {
+        /* 中轴线 */
+        .timeline-line {
             position: absolute;
-            top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #ffd700, #8b0000);
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                rgba(255, 215, 0, 0.15) 5%,
+                rgba(255, 215, 0, 0.15) 95%,
+                transparent 100%);
+            transform: translateX(-50%);
+        }
+
+        /* 时间节点 */
+        .timeline-node {
+            position: relative;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            z-index: 3;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            align-items: flex-start;
+            margin-bottom: 120px;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s ease;
         }
 
-        .map-line {
+        .timeline-node.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .timeline-node:nth-child(odd) {
+            flex-direction: row;
+        }
+
+        .timeline-node:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        /* 年份标签 */
+        .node-year {
             position: absolute;
-            top: 50%;
             left: 50%;
-            height: 2px;
-            background: linear-gradient(to right, rgba(255, 215, 0, 0.6), rgba(255, 215, 0, 0.1));
-            transform-origin: left center;
-            z-index: 1;
-            transition: height 0.3s, background 0.3s;
+            top: -5px;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            z-index: 10;
+            background: #0a0a0a;
+            padding: 0 15px;
+            letter-spacing: 3px;
+            white-space: nowrap;
         }
 
-        .map-line:hover {
-            height: 4px;
-            background: linear-gradient(to right, rgba(255, 215, 0, 0.9), rgba(255, 215, 0, 0.3));
-        }
-
-        .map-endpoint {
+        /* 节点圆点 */
+        .node-dot {
             position: absolute;
-            width: 14px;
-            height: 14px;
+            left: 50%;
+            top: 30px;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             background: #ffd700;
-            border: 2px solid #0a0a1a;
-            z-index: 2;
-            cursor: pointer;
-            transition: all 0.3s;
+            border: 3px solid #0a0a0a;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            z-index: 10;
         }
 
-        .map-endpoint:hover {
-            transform: scale(1.8);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        /* 内容卡片 */
+        .node-content {
+            width: 42%;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            transition: all 0.4s ease;
         }
 
-        .map-label {
-            position: absolute;
+        .timeline-node:nth-child(odd) .node-content {
+            margin-right: auto;
+            margin-left: 0;
+        }
+
+        .timeline-node:nth-child(even) .node-content {
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        .node-content:hover {
+            border-color: rgba(255, 215, 0, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+        }
+
+        /* 剪影图标 */
+        .node-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+        }
+
+        .node-icon svg {
+            width: 48px;
+            height: 48px;
+            fill: #ffd700;
+        }
+
+        /* 数字高亮 */
+        .node-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            font-variant-numeric: tabular-nums;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .node-number-label {
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.6);
-            white-space: nowrap;
-            pointer-events: none;
-            transition: color 0.3s;
-        }
-
-        .map-endpoint:hover + .map-label,
-        .map-label:hover {
-            color: #ffd700;
-        }
-
-        .map-popup {
-            display: none;
-            position: absolute;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            max-width: 280px;
-            z-index: 100;
-            font-size: 0.9rem;
-            line-height: 1.8;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .map-popup.active {
-            display: block;
-        }
-
-        .map-popup-title {
-            color: #ffd700;
-            font-size: 1rem;
-            margin-bottom: 8px;
-        }
-
-        .map-popup-close {
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            background: none;
-            border: none;
             color: rgba(255, 255, 255, 0.4);
-            cursor: pointer;
-            font-size: 1rem;
+            margin-bottom: 15px;
         }
 
-        /* 底部 */
+        .node-text {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.9;
+        }
+
+        .node-quote {
+            font-size: 0.95rem;
+            color: rgba(255, 215, 0, 0.6);
+            font-style: italic;
+            border-left: 2px solid rgba(255, 215, 0, 0.2);
+            padding-left: 15px;
+            margin-top: 15px;
+            line-height: 1.8;
+        }
+
+        /* 色彩过渡 — 从黑白到彩色 */
+        .timeline-node:nth-child(1) { filter: grayscale(0.8); }
+        .timeline-node:nth-child(2) { filter: grayscale(0.6); }
+        .timeline-node:nth-child(3) { filter: grayscale(0.4); }
+        .timeline-node:nth-child(4) { filter: grayscale(0.2); }
+        .timeline-node:nth-child(5) { filter: grayscale(0); }
+        .timeline-node:nth-child(6) { filter: grayscale(0); }
+
+        /* ========== 结尾 ========== */
+        .ending-section {
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 20px;
+            background: radial-gradient(ellipse at center, #1a0800 0%, #0a0a0a 70%);
+        }
+
+        .ending-glow {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+            margin-bottom: 40px;
+            animation: endingPulse 3s ease infinite;
+        }
+
+        @keyframes endingPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.15); opacity: 0.8; }
+        }
+
+        .ending-text {
+            font-size: 1.4rem;
+            color: rgba(255, 215, 0, 0.7);
+            letter-spacing: 3px;
+            line-height: 2.2;
+            max-width: 600px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1.2s ease;
+        }
+
+        .ending-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .ending-sub {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 30px;
+            letter-spacing: 1px;
+        }
+
+        /* ========== 底部导航 ========== */
         .bottom-nav {
             text-align: center;
             padding: 40px 20px;
@@ -338,26 +342,51 @@
             color: rgba(255, 215, 0, 0.8);
         }
 
-        /* 移动端 */
+        /* ========== 响应式 ========== */
         @media (max-width: 768px) {
-            .section {
-                padding: 60px 15px;
+            .hero-title {
+                font-size: 1.8rem;
+                letter-spacing: 3px;
             }
-            .section-title {
-                font-size: 1.5rem;
+            .timeline-node {
+                flex-direction: column !important;
+                align-items: center;
+                margin-bottom: 80px;
             }
-            .compare-row {
-                flex-direction: column;
-                gap: 20px;
+            .node-content {
+                width: 90%;
+                margin: 40px 0 0 !important;
             }
-            .compare-vs {
-                transform: rotate(90deg);
+            .node-year {
+                font-size: 1.2rem;
             }
-            .map-container {
-                height: 400px;
+            .node-number {
+                font-size: 2rem;
             }
-            .data-number .number {
-                font-size: 2.8rem;
+            .timeline-line {
+                left: 30px;
+            }
+            .node-dot {
+                left: 30px;
+            }
+            .node-year {
+                left: 30px;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 1.4rem;
+            }
+            .node-content {
+                padding: 20px;
+            }
+            .node-number {
+                font-size: 1.8rem;
+            }
+            .ending-text {
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -371,348 +400,211 @@
         </a>
     </div>
 
-    <!-- 区块一：一条线 -->
-    <div class="section" id="sectionLine">
-        <h2 class="section-title">一条线</h2>
-        <p class="section-subtitle">从0到50000公里，中国高铁走过的路</p>
+    <!-- 开场 -->
+    <div class="hero-section">
+        <h1 class="hero-title" id="heroTitle">普通人的70年</h1>
+        <p class="hero-subtitle" id="heroSubtitle">不是宏大的数据，是每一个具体的人</p>
+        <div class="hero-hint" id="heroHint">向下滚动，走过这段路</div>
+    </div>
 
-        <div class="data-line-container">
-            <div class="line-chart-wrapper">
-                <svg id="lineChart" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
-                    <!-- 网格线 -->
-                    <line x1="60" y1="20" x2="60" y2="250" stroke="rgba(255,215,0,0.1)" stroke-width="1"/>
-                    <line x1="60" y1="250" x2="760" y2="250" stroke="rgba(255,215,0,0.1)" stroke-width="1"/>
-                    <line x1="60" y1="185" x2="760" y2="185" stroke="rgba(255,215,0,0.05)" stroke-width="0.5" stroke-dasharray="4"/>
-                    <line x1="60" y1="120" x2="760" y2="120" stroke="rgba(255,215,0,0.05)" stroke-width="0.5" stroke-dasharray="4"/>
-                    <line x1="60" y1="55" x2="760" y2="55" stroke="rgba(255,215,0,0.05)" stroke-width="0.5" stroke-dasharray="4"/>
+    <!-- 时间线 -->
+    <div class="timeline-section">
+        <div class="timeline-line"></div>
 
-                    <!-- Y轴标签 -->
-                    <text x="50" y="255" fill="rgba(255,255,255,0.3)" font-size="11" text-anchor="end">0</text>
-                    <text x="50" y="190" fill="rgba(255,255,255,0.3)" font-size="11" text-anchor="end">1.5万</text>
-                    <text x="50" y="125" fill="rgba(255,255,255,0.3)" font-size="11" text-anchor="end">3万</text>
-                    <text x="50" y="60" fill="rgba(255,255,255,0.3)" font-size="11" text-anchor="end">4.5万</text>
-
-                    <!-- 面积填充 -->
-                    <path id="chartArea" fill="url(#areaGradient)" opacity="0"/>
-
-                    <!-- 渐变定义 -->
-                    <defs>
-                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#ffd700" stop-opacity="0.3"/>
-                            <stop offset="100%" stop-color="#ffd700" stop-opacity="0"/>
-                        </linearGradient>
-                        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stop-color="#8b0000"/>
-                            <stop offset="100%" stop-color="#ffd700"/>
-                        </linearGradient>
-                    </defs>
-
-                    <!-- 折线（动画绘制） -->
-                    <polyline id="chartLine" fill="none" stroke="url(#lineGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
-                        points="80,250 220,210 390,160 600,85 740,35"
-                        stroke-dasharray="1000" stroke-dashoffset="1000"/>
-
-                    <!-- 数据点 -->
-                    <circle class="chart-dot" cx="80" cy="250" r="6" fill="#8b0000" stroke="#ffd700" stroke-width="2" opacity="0"/>
-                    <circle class="chart-dot" cx="220" cy="210" r="6" fill="#8b0000" stroke="#ffd700" stroke-width="2" opacity="0"/>
-                    <circle class="chart-dot" cx="390" cy="160" r="6" fill="#8b0000" stroke="#ffd700" stroke-width="2" opacity="0"/>
-                    <circle class="chart-dot" cx="600" cy="85" r="6" fill="#8b0000" stroke="#ffd700" stroke-width="2" opacity="0"/>
-                    <circle class="chart-dot" cx="740" cy="35" r="8" fill="#ffd700" stroke="#fff" stroke-width="2" opacity="0"/>
-
-                    <!-- X轴标签 -->
-                    <text x="80" y="275" fill="rgba(255,255,255,0.5)" font-size="11" text-anchor="middle">2008</text>
-                    <text x="220" y="275" fill="rgba(255,255,255,0.5)" font-size="11" text-anchor="middle">2012</text>
-                    <text x="390" y="275" fill="rgba(255,255,255,0.5)" font-size="11" text-anchor="middle">2016</text>
-                    <text x="600" y="275" fill="rgba(255,255,255,0.5)" font-size="11" text-anchor="middle">2020</text>
-                    <text x="740" y="275" fill="rgba(255,215,0,0.8)" font-size="12" text-anchor="middle" font-weight="bold">2026</text>
-
-                    <!-- 数据标签 -->
-                    <text class="chart-label" x="80" y="243" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="middle" opacity="0">0</text>
-                    <text class="chart-label" x="220" y="203" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="middle" opacity="0">9,300km</text>
-                    <text class="chart-label" x="390" y="153" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="middle" opacity="0">19,000km</text>
-                    <text class="chart-label" x="600" y="78" fill="rgba(255,255,255,0.4)" font-size="10" text-anchor="middle" opacity="0">35,000km</text>
-                    <text class="chart-label" x="740" y="25" fill="#ffd700" font-size="12" text-anchor="middle" font-weight="bold" opacity="0">50,000km</text>
-                </svg>
+        <!-- 1949 -->
+        <div class="timeline-node" data-number="35" data-suffix="岁">
+            <div class="node-year">1949</div>
+            <div class="node-dot"></div>
+            <div class="node-content">
+                <div class="node-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                </div>
+                <div class="node-number">35</div>
+                <div class="node-number-label">岁 — 中国人均寿命</div>
+                <div class="node-text">
+                    1949年，新中国成立。一个普通中国人，平均只能活35岁。<br>
+                    婴儿死亡率超过200‰，每5个孩子就有1个活不到一岁。
+                </div>
             </div>
+        </div>
 
-            <div class="data-number">
-                <span class="number" id="kmNumber">0</span>
-                <span class="unit">公里</span>
-                <div class="label">中国高铁运营里程</div>
+        <!-- 1964 -->
+        <div class="timeline-node" data-number="1" data-suffix="颗">
+            <div class="node-year">1964</div>
+            <div class="node-dot"></div>
+            <div class="node-content">
+                <div class="node-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="node-number">1</div>
+                <div class="node-number-label">颗原子弹爆炸成功</div>
+                <div class="node-text">
+                    罗布泊，一朵蘑菇云升起。<br>
+                    从此，中国人可以说："我们也有这个了。"<br>
+                    隐姓埋名的科学家，有的到死家人都不知道他在做什么。
+                </div>
+                <div class="node-quote">"做好了这件事情，我这一生就过得很有意义，就是为它死了也值得。" —— 邓稼先</div>
+            </div>
+        </div>
+
+        <!-- 1978 -->
+        <div class="timeline-node" data-number="134" data-suffix="元">
+            <div class="node-year">1978</div>
+            <div class="node-dot"></div>
+            <div class="node-content">
+                <div class="node-icon">
+                    <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+                </div>
+                <div class="node-number">134</div>
+                <div class="node-number-label">元 — 一个农民的年收入</div>
+                <div class="node-text">
+                    1978年，改革开放。一个普通农民，一年挣134元。<br>
+                    平均每天3毛7分钱。一个鸡蛋5分钱，一天能买7个鸡蛋。<br>
+                    这一年，小岗村18户农民按下了红手印。
+                </div>
+            </div>
+        </div>
+
+        <!-- 2008 -->
+        <div class="timeline-node" data-number="69297" data-suffix="人">
+            <div class="node-year">2008</div>
+            <div class="node-dot"></div>
+            <div class="node-content">
+                <div class="node-icon">
+                    <svg viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"/></svg>
+                </div>
+                <div class="node-number">69,297</div>
+                <div class="node-number-label">人 — 汶川地震遇难人数</div>
+                <div class="node-text">
+                    2008年5月12日，14时28分。<br>
+                    一个老师撑住了门框，让学生先跑。<br>
+                    一个母亲用身体护住婴儿，手机上留着："亲爱的宝贝，如果你能活着，一定要记住我爱你。"
+                </div>
+            </div>
+        </div>
+
+        <!-- 2020 -->
+        <div class="timeline-node" data-number="127" data-suffix="单">
+            <div class="node-year">2020</div>
+            <div class="node-dot"></div>
+            <div class="node-content">
+                <div class="node-icon">
+                    <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                </div>
+                <div class="node-number">127</div>
+                <div class="node-number-label">单 — 一个快递员一天的配送量</div>
+                <div class="node-text">
+                    2020年，疫情。一个快递员，一天送127单。<br>
+                    每一单背后是一个不能出门的人。<br>
+                    他不知道收件人长什么样，但他知道，那些东西是他们需要的。
+                </div>
+            </div>
+        </div>
+
+        <!-- 2026 -->
+        <div class="timeline-node" data-number="0" data-suffix="">
+            <div class="node-year">2026</div>
+            <div class="node-dot"></div>
+            <div class="node-content" style="border-color: rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.05);">
+                <div class="node-number" style="font-size:1.8rem; color: rgba(255,215,0,0.8);">你的故事</div>
+                <div class="node-number-label">从这里开始</div>
+                <div class="node-text">
+                    从人均寿命35岁到78岁。<br>
+                    从年收入134元到……你现在的数字。<br>
+                    从"我们也有原子弹了"到"你也在改变世界"。<br><br>
+                    <strong style="color: rgba(255,215,0,0.7);">这70年，是无数个普通人撑起来的。<br>而你，也是其中一个。</strong>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 区块二：一张表 -->
-    <div class="section compare-section" id="sectionCompare">
-        <h2 class="section-title">一张表</h2>
-        <p class="section-subtitle">300年的差距，是多少人的命填回来的</p>
-
-        <div class="compare-container">
-            <!-- 对比1：射速 -->
-            <div class="compare-row">
-                <div class="compare-item">
-                    <div class="name">清·火绳枪</div>
-                    <div class="value weak" data-target="1">0</div>
-                    <div class="unit">发/分钟</div>
-                </div>
-                <div class="compare-vs">VS</div>
-                <div class="compare-item">
-                    <div class="name">95式自动步枪</div>
-                    <div class="value strong" data-target="650">0</div>
-                    <div class="unit">发/分钟</div>
-                </div>
-            </div>
-            <div class="compare-caption">射速提升了650倍</div>
-            <div class="compare-divider"></div>
-
-            <!-- 对比2：射程 -->
-            <div class="compare-row">
-                <div class="compare-item">
-                    <div class="name">清·火绳枪</div>
-                    <div class="value weak" data-target="50">0</div>
-                    <div class="unit">米</div>
-                </div>
-                <div class="compare-vs">VS</div>
-                <div class="compare-item">
-                    <div class="name">95式自动步枪</div>
-                    <div class="value strong" data-target="400">0</div>
-                    <div class="unit">米</div>
-                </div>
-            </div>
-            <div class="compare-caption">射程提升了8倍</div>
-            <div class="compare-divider"></div>
-
-            <!-- 对比3：导弹 -->
-            <div class="compare-row">
-                <div class="compare-item">
-                    <div class="name">1960年·东风-1</div>
-                    <div class="value weak" data-target="600">0</div>
-                    <div class="unit">公里</div>
-                </div>
-                <div class="compare-vs">VS</div>
-                <div class="compare-item">
-                    <div class="name">2019年·东风-41</div>
-                    <div class="value strong" data-target="14000">0</div>
-                    <div class="unit">公里</div>
-                </div>
-            </div>
-            <div class="compare-caption">射程从600公里到覆盖全球</div>
+    <!-- 结尾 -->
+    <div class="ending-section">
+        <div class="ending-glow"></div>
+        <div class="ending-text" id="endingText">
+            从1949到2026<br>
+            不是一个国家的崛起<br>
+            是每一个普通人<br>
+            用自己的方式<br>
+            撑起了这段历史
         </div>
-    </div>
-
-    <!-- 区块三：一张图 -->
-    <div class="section map-section" id="sectionMap">
-        <h2 class="section-title">一张图</h2>
-        <p class="section-subtitle">中国与世界的连接</p>
-
-        <div class="map-container" id="mapContainer">
-            <!-- 中国（中心） -->
-            <div class="map-center">中国</div>
-
-            <!-- 关系线和端点由JS生成 -->
-
-            <!-- 弹窗 -->
-            <div class="map-popup" id="mapPopup">
-                <button class="map-popup-close" id="mapPopupClose">&times;</button>
-                <div class="map-popup-title" id="mapPopupTitle"></div>
-                <div id="mapPopupContent"></div>
-            </div>
-        </div>
+        <div class="ending-sub">赓续红色血脉 · 传承奋斗精神</div>
     </div>
 
     <!-- 底部导航 -->
     <div class="bottom-nav">
-        <a href="../chess_mod2/mod2.html" onclick="event.preventDefault(); filmstripTransition('../chess_mod2/mod2.html');">
+        <a href="../chess_mod2/mod2.html" onclick="event.preventDefault(); filmstripTransition('../chess_mod2/mod2.html', '而今天的中国，需要你理解——什么是胜利。');">
             下一个穿越：象棋之战 <i class="fas fa-arrow-right"></i>
         </a>
     </div>
 
     <script src="../filmstrip.js"></script>
     <script>
-        // 区块一：SVG折线图动画
-        const kmNumber = document.getElementById('kmNumber');
-        const sectionLine = document.getElementById('sectionLine');
-        const chartLine = document.getElementById('chartLine');
-        const chartArea = document.getElementById('chartArea');
-        const chartDots = document.querySelectorAll('.chart-dot');
-        const chartLabels = document.querySelectorAll('.chart-label');
-        const totalLineLength = chartLine ? chartLine.getTotalLength() : 1000;
-        let chartAnimated = false;
+        checkNarrativeTransition();
 
-        if (chartLine) {
-            chartLine.style.strokeDasharray = totalLineLength;
-            chartLine.style.strokeDashoffset = totalLineLength;
-        }
+        // 开场动画
+        const heroTitle = document.getElementById('heroTitle');
+        const heroSubtitle = document.getElementById('heroSubtitle');
+        const heroHint = document.getElementById('heroHint');
+        const endingText = document.getElementById('endingText');
 
-        function animateDataLine() {
-            const rect = sectionLine.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
+        setTimeout(() => heroTitle.classList.add('visible'), 300);
+        setTimeout(() => heroSubtitle.classList.add('visible'), 800);
+        setTimeout(() => heroHint.classList.add('visible'), 1300);
 
-            if (rect.top < windowHeight && rect.bottom > 0) {
-                const progress = Math.min(1, Math.max(0, (windowHeight - rect.top) / (windowHeight + rect.height)));
-                const km = Math.round(progress * 50000);
-                kmNumber.textContent = km.toLocaleString();
+        // 滚动触发 — 时间线节点入场 + 数字动画
+        const timelineNodes = document.querySelectorAll('.timeline-node');
+        const nodeIndex = new Map([...timelineNodes].map((n, i) => [n, i]));
+        const animatedNodes = new Set();
 
-                // SVG折线动画
-                if (chartLine && !chartAnimated) {
-                    chartAnimated = true;
-                    // 绘制折线
-                    chartLine.style.transition = 'stroke-dashoffset 2s ease';
-                    chartLine.style.strokeDashoffset = '0';
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const node = entry.target;
+                    node.classList.add('visible');
 
-                    // 面积填充
-                    chartArea.style.transition = 'opacity 1s ease 0.5s';
-                    chartArea.setAttribute('d', 'M80,250 L220,210 L390,160 L600,85 L740,35 L740,250 L80,250 Z');
-                    chartArea.style.opacity = '1';
+                    // 数字动画
+                    if (!animatedNodes.has(node)) {
+                        animatedNodes.add(node);
+                        const numEl = node.querySelector('.node-number');
+                        const target = parseInt(node.dataset.number);
+                        const suffix = node.dataset.suffix || '';
+                        if (target > 0 && numEl) {
+                            animateNumber(numEl, 0, target, 2000, suffix);
+                        }
+                    }
+                }
+            });
+        }, { threshold: 0.3 });
 
-                    // 数据点逐个出现
-                    chartDots.forEach((dot, i) => {
-                        dot.style.transition = `opacity 0.4s ease ${0.8 + i * 0.3}s`;
-                        dot.style.opacity = '1';
-                    });
+        timelineNodes.forEach(node => observer.observe(node));
 
-                    // 标签逐个出现
-                    chartLabels.forEach((label, i) => {
-                        label.style.transition = `opacity 0.4s ease ${1.0 + i * 0.3}s`;
-                        label.style.opacity = '1';
-                    });
+        // 结尾动画
+        const endingObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    endingText.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.3 });
+
+        endingObserver.observe(endingText);
+
+        // 数字动画
+        function animateNumber(el, from, to, duration, suffix) {
+            const startTime = performance.now();
+            function update(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                const current = Math.round(from + (to - from) * eased);
+                el.textContent = current.toLocaleString() + suffix;
+                if (progress < 1) {
+                    requestAnimationFrame(update);
                 }
             }
+            requestAnimationFrame(update);
         }
-
-        // 区块二：对比数字动画
-        const compareValues = document.querySelectorAll('.compare-item .value');
-        let compareAnimated = false;
-
-        function animateCompare() {
-            if (compareAnimated) return;
-            const section = document.getElementById('sectionCompare');
-            const rect = section.getBoundingClientRect();
-
-            if (rect.top < window.innerHeight * 0.7) {
-                compareAnimated = true;
-                compareValues.forEach(el => {
-                    const target = parseInt(el.dataset.target);
-                    const duration = 2000;
-                    const start = performance.now();
-
-                    function tick(now) {
-                        const elapsed = now - start;
-                        const p = Math.min(elapsed / duration, 1);
-                        const eased = 1 - Math.pow(1 - p, 3);
-                        el.textContent = Math.round(target * eased).toLocaleString();
-                        if (p < 1) requestAnimationFrame(tick);
-                    }
-                    requestAnimationFrame(tick);
-                });
-            }
-        }
-
-        // 区块三：关系地图
-        const relations = [
-            { name: '东盟', angle: 150, distance: 160, trade: '10200亿美元', story: '2026年，中国与东盟贸易额突破10200亿美元，连续6年互为最大贸易伙伴。' },
-            { name: '非洲', angle: 210, distance: 180, trade: '3000亿美元', story: '中国在非洲建设了超过1.2万公里铁路、近12万公里公路、近千座桥梁。' },
-            { name: '欧盟', angle: 310, distance: 170, trade: '8200亿美元', story: '中欧班列累计开行超过9万列，连接中国与欧洲25个国家200多个城市。' },
-            { name: '俄罗斯', angle: 350, distance: 150, trade: '2600亿美元', story: '中俄贸易额持续创历史新高，能源、农业、科技合作不断深化。' },
-            { name: '拉美', angle: 250, distance: 190, trade: '4800亿美元', story: '中国是拉美第二大贸易伙伴，在基础设施、能源、通信领域深度合作。' },
-            { name: '中亚', angle: 40, distance: 140, trade: '800亿美元', story: '中国-中亚天然气管道累计输气超过4500亿立方米，惠及中国5亿居民。' }
-        ];
-
-        const mapContainer = document.getElementById('mapContainer');
-        const mapPopup = document.getElementById('mapPopup');
-        const mapPopupTitle = document.getElementById('mapPopupTitle');
-        const mapPopupContent = document.getElementById('mapPopupContent');
-        const mapPopupClose = document.getElementById('mapPopupClose');
-
-        function createMap() {
-            if (!mapContainer) return;
-            const cx = mapContainer.offsetWidth / 2;
-            const cy = mapContainer.offsetHeight / 2;
-
-            relations.forEach(rel => {
-                const rad = (rel.angle * Math.PI) / 180;
-                // CSS坐标系：y轴向下，角度顺时针；math坐标系：y轴向上，角度逆时针
-                const ex = cx + Math.cos(rad) * rel.distance;
-                const ey = cy - Math.sin(rad) * rel.distance;
-
-                // 线
-                const line = document.createElement('div');
-                line.className = 'map-line';
-                const length = rel.distance;
-                line.style.width = length + 'px';
-                line.style.transform = `rotate(${-rel.angle}deg)`;
-                mapContainer.appendChild(line);
-
-                // 端点
-                const endpoint = document.createElement('div');
-                endpoint.className = 'map-endpoint';
-                endpoint.style.left = ex + 'px';
-                endpoint.style.top = ey + 'px';
-                endpoint.style.transform = 'translate(-50%, -50%)';
-
-                endpoint.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    mapPopup.classList.remove('active');
-                    mapPopupTitle.textContent = rel.name + ' — ' + rel.trade;
-                    mapPopupContent.textContent = rel.story;
-                    mapPopup.style.left = Math.min(ex + 20, mapContainer.offsetWidth - 300) + 'px';
-                    mapPopup.style.top = (ey - 30) + 'px';
-                    requestAnimationFrame(() => mapPopup.classList.add('active'));
-                });
-
-                mapContainer.appendChild(endpoint);
-
-                // 标签
-                const label = document.createElement('div');
-                label.className = 'map-label';
-                label.textContent = rel.name;
-                const lx = ex + Math.cos(rad) * 25;
-                const ly = ey - Math.sin(rad) * 25;
-                label.style.left = lx + 'px';
-                label.style.top = ly + 'px';
-                label.style.transform = 'translate(-50%, -50%)';
-                mapContainer.appendChild(label);
-            });
-        }
-
-        mapPopupClose.addEventListener('click', () => {
-            mapPopup.classList.remove('active');
-        });
-
-        document.addEventListener('click', () => {
-            mapPopup.classList.remove('active');
-        });
-
-        // 滚动监听（节流）
-        let ticking = false;
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    animateDataLine();
-                    animateCompare();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        });
-
-        // 地图响应窗口resize（防抖）
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                // 清空地图容器中动态创建的元素
-                const dynamicEls = mapContainer.querySelectorAll('.map-line, .map-endpoint, .map-label');
-                dynamicEls.forEach(el => el.remove());
-                createMap();
-            }, 300);
-        });
-
-        // 初始化
-        animateDataLine();
-        animateCompare();
-        createMap();
     </script>
 </body>
 

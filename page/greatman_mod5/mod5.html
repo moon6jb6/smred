@@ -77,6 +77,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            perspective: 1200px;
         }
 
         /* ========== 开场场景 ========== */
@@ -123,39 +124,73 @@
             50% { transform: translateY(10px); opacity: 0.7; }
         }
 
-        /* ========== 选择场景 ========== */
+        /* ========== 选择场景 — 全屏3D翻转 ========== */
         .scene-choice {
             background: #0a0a0a;
+            padding: 0;
+        }
+
+        /* 3D翻转容器 */
+        .flip-scene {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scene-choice.flipped .flip-scene {
+            transform: rotateY(180deg);
+        }
+
+        .flip-front,
+        .flip-back {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-direction: column;
             padding: 60px 40px;
         }
 
-        .scene-choice::before {
+        /* 正面 — 选择困境 */
+        .flip-front {
+            z-index: 2;
+        }
+
+        .flip-front::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             opacity: 0;
             transition: opacity 1.5s ease;
             pointer-events: none;
         }
 
-        .scene-choice.active::before {
+        .scene-choice.active .flip-front::before {
             opacity: 1;
         }
 
-        .scene-1::before {
+        .scene-1 .flip-front::before {
             background: radial-gradient(ellipse at 30% 70%, rgba(139, 0, 0, 0.15) 0%, transparent 60%);
         }
 
-        .scene-2::before {
+        .scene-2 .flip-front::before {
             background: radial-gradient(ellipse at 70% 30%, rgba(255, 140, 0, 0.12) 0%, transparent 60%);
         }
 
-        .scene-3::before {
+        .scene-3 .flip-front::before {
             background: radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 60%);
+        }
+
+        /* 背面 — 历史结果 */
+        .flip-back {
+            transform: rotateY(180deg);
+            background: #0a0a0a;
         }
 
         /* 年份 */
@@ -207,29 +242,10 @@
             opacity: 0.3;
         }
 
-        .mountain-1 {
-            left: 5%;
-            border-width: 0 120px 160px 120px;
-            border-color: transparent transparent #1a0800 transparent;
-        }
-
-        .mountain-2 {
-            left: 25%;
-            border-width: 0 180px 200px 180px;
-            border-color: transparent transparent #1a0800 transparent;
-        }
-
-        .mountain-3 {
-            left: 55%;
-            border-width: 0 150px 180px 150px;
-            border-color: transparent transparent #1a0800 transparent;
-        }
-
-        .mountain-4 {
-            left: 75%;
-            border-width: 0 100px 140px 100px;
-            border-color: transparent transparent #1a0800 transparent;
-        }
+        .mountain-1 { left: 5%; border-width: 0 120px 160px 120px; border-color: transparent transparent #1a0800 transparent; }
+        .mountain-2 { left: 25%; border-width: 0 180px 200px 180px; border-color: transparent transparent #1a0800 transparent; }
+        .mountain-3 { left: 55%; border-width: 0 150px 180px 150px; border-color: transparent transparent #1a0800 transparent; }
+        .mountain-4 { left: 75%; border-width: 0 100px 140px 100px; border-color: transparent transparent #1a0800 transparent; }
 
         /* 城楼剪影 */
         .silhouette-tiananmen {
@@ -250,7 +266,6 @@
             opacity: 0.5;
         }
 
-        /* 人物剪影 */
         .silhouette-person {
             width: 80px;
             height: 160px;
@@ -311,93 +326,120 @@
         }
 
         .choice-answer {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             color: rgba(255, 255, 255, 0.7);
             line-height: 1.8;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
-        /* 翻转卡片 */
-        .flip-card {
-            width: 100%;
-            max-width: 500px;
-            height: 220px;
-            perspective: 1000px;
-            cursor: pointer;
-            margin: 0 auto;
-        }
-
-        .flip-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            transform-style: preserve-3d;
-        }
-
-        .flip-card.flipped .flip-inner {
-            transform: rotateY(180deg);
-        }
-
-        .flip-front,
-        .flip-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 12px;
-            padding: 25px 30px;
+        /* 选择按钮 */
+        .choice-buttons {
             display: flex;
-            flex-direction: column;
+            gap: 20px;
             justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease 1.2s;
         }
 
-        .flip-front {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.02));
-            border: 1px solid rgba(255, 215, 0, 0.15);
+        .scene-choice.active .choice-buttons {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .flip-front p {
+        .choice-btn {
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            color: rgba(255, 215, 0, 0.8);
+            padding: 14px 32px;
+            border-radius: 30px;
             font-size: 1rem;
-            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .choice-btn:hover {
+            background: rgba(255, 215, 0, 0.12);
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
+            transform: scale(1.05);
+        }
+
+        .choice-btn.chosen {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .choice-btn.not-chosen {
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        /* 背面内容 */
+        .back-content {
+            max-width: 700px;
             text-align: center;
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            transition: all 1s ease 0.5s;
         }
 
-        .flip-front .flip-icon {
-            font-size: 1.5rem;
-            color: rgba(255, 215, 0, 0.3);
-            text-align: center;
-            margin-bottom: 10px;
+        .scene-choice.flipped .back-content {
+            opacity: 1;
+            transform: translateY(0) scale(1);
         }
 
-        .flip-back {
-            background: linear-gradient(135deg, rgba(26, 8, 0, 0.95), rgba(45, 21, 0, 0.95));
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            transform: rotateY(180deg);
-            text-align: left;
-        }
-
-        .flip-back .quote {
-            font-size: 1.15rem;
+        .back-content .quote {
+            font-size: 1.6rem;
             color: #ffd700;
             font-style: italic;
-            line-height: 1.8;
-            margin-bottom: 15px;
-            position: relative;
-            padding-left: 20px;
-            border-left: 2px solid rgba(255, 215, 0, 0.3);
+            line-height: 2;
+            margin-bottom: 30px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
         }
 
-        .flip-back .context {
+        .back-content .quote::before,
+        .back-content .quote::after {
+            content: '"';
+            color: rgba(255, 215, 0, 0.3);
+            font-size: 2rem;
+        }
+
+        .back-content .context {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 2;
+            margin-bottom: 25px;
+        }
+
+        .back-content .data {
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.8;
+            color: rgba(255, 215, 0, 0.4);
+            letter-spacing: 2px;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 20px;
+            display: inline-block;
         }
 
-        .flip-back .data {
-            font-size: 0.8rem;
-            color: rgba(255, 215, 0, 0.4);
-            margin-top: 12px;
+        /* 背面光路 */
+        .back-glow {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 0;
+            background: linear-gradient(to top, rgba(255, 215, 0, 0.4), transparent);
+            transition: height 2s ease 1s;
+        }
+
+        .scene-choice.flipped .back-glow {
+            height: 40%;
         }
 
         /* ========== 总结场景 ========== */
@@ -466,6 +508,21 @@
             letter-spacing: 1px;
         }
 
+        /* 光路终点 */
+        .summary-glow {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+            margin: 0 auto 40px;
+            animation: summaryPulse 3s ease infinite;
+        }
+
+        @keyframes summaryPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
         /* ========== 阶段指示器 ========== */
         .stage-dots {
             position: fixed;
@@ -527,30 +584,28 @@
                 font-size: 2rem;
                 letter-spacing: 4px;
             }
-
             .choice-year {
                 font-size: 5rem;
                 letter-spacing: 10px;
             }
-
             .choice-question {
                 font-size: 1.3rem;
             }
-
             .choice-answer {
                 font-size: 1rem;
             }
-
-            .flip-card {
-                height: 200px;
+            .back-content .quote {
+                font-size: 1.2rem;
             }
-
             .silhouette-mountains {
                 width: 100%;
             }
-
             .stage-dots {
                 right: 10px;
+            }
+            .choice-btn {
+                padding: 10px 24px;
+                font-size: 0.9rem;
             }
         }
 
@@ -559,17 +614,20 @@
                 font-size: 1.5rem;
                 letter-spacing: 2px;
             }
-
             .choice-year {
                 font-size: 3.5rem;
             }
-
             .choice-question {
                 font-size: 1.1rem;
             }
-
-            .flip-card {
-                height: 180px;
+            .back-content .quote {
+                font-size: 1.05rem;
+            }
+            .back-content .context {
+                font-size: 0.95rem;
+            }
+            .flip-front, .flip-back {
+                padding: 40px 20px;
             }
         }
     </style>
@@ -601,107 +659,112 @@
 
     <!-- 第一次选择：1927 -->
     <div class="scene scene-choice scene-1" id="scene-1">
-        <div class="choice-year">1927</div>
-
-        <div class="scene-silhouette">
-            <div class="silhouette-mountains">
-                <div class="mountain mountain-1"></div>
-                <div class="mountain mountain-2"></div>
-                <div class="mountain mountain-3"></div>
-                <div class="mountain mountain-4"></div>
-            </div>
-        </div>
-
-        <div class="choice-content">
-            <div class="choice-label">第一次选择</div>
-            <div class="choice-question">当所有人都走向城市，<br>他选择了农村</div>
-            <div class="choice-answer">
-                1927年，大革命失败。按照苏联经验，革命应该从城市开始。<br>
-                但毛泽东放弃了攻打大城市，转向井冈山，建立了第一个农村革命根据地。
-            </div>
-            <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                <div class="flip-inner">
-                    <div class="flip-front">
-                        <div class="flip-icon"><i class="fas fa-hand-pointer"></i></div>
-                        <p>点击翻开历史的真相</p>
-                    </div>
-                    <div class="flip-back">
-                        <div class="quote">"农村包围城市，武装夺取政权。"</div>
-                        <div class="context">这条道路后来被称为"井冈山道路"，成为中国革命胜利的根本路线。在此之前，没有人想过，农民可以改变中国。</div>
-                        <div class="data">秋收起义：5000人出发 → 井冈山会师后：10000人</div>
+        <div class="flip-scene">
+            <!-- 正面：选择困境 -->
+            <div class="flip-front">
+                <div class="choice-year">1927</div>
+                <div class="scene-silhouette">
+                    <div class="silhouette-mountains">
+                        <div class="mountain mountain-1"></div>
+                        <div class="mountain mountain-2"></div>
+                        <div class="mountain mountain-3"></div>
+                        <div class="mountain mountain-4"></div>
                     </div>
                 </div>
+                <div class="choice-content">
+                    <div class="choice-label">第一次选择</div>
+                    <div class="choice-question">当所有人都走向城市，<br>他选择了农村</div>
+                    <div class="choice-answer">
+                        1927年，大革命失败。按照苏联经验，革命应该从城市开始。<br>
+                        但毛泽东放弃了攻打大城市，转向井冈山。
+                    </div>
+                    <div class="choice-buttons">
+                        <button class="choice-btn" data-choice="a" onclick="flipScene(1, this)">攻打大城市</button>
+                        <button class="choice-btn" data-choice="b" onclick="flipScene(1, this)">转向农村</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 背面：历史结果 -->
+            <div class="flip-back">
+                <div class="back-content">
+                    <div class="quote">农村包围城市，武装夺取政权。</div>
+                    <div class="context">这条道路后来被称为"井冈山道路"，成为中国革命胜利的根本路线。在此之前，没有人想过，农民可以改变中国。</div>
+                    <div class="data">秋收起义：5000人出发 → 井冈山会师后：10000人</div>
+                </div>
+                <div class="back-glow"></div>
             </div>
         </div>
     </div>
 
     <!-- 第二次选择：1935 -->
     <div class="scene scene-choice scene-2" id="scene-2">
-        <div class="choice-year">1935</div>
-
-        <div class="scene-silhouette">
-            <div class="silhouette-mountains">
-                <div class="mountain mountain-2"></div>
-                <div class="mountain mountain-3"></div>
-            </div>
-        </div>
-
-        <div class="choice-content">
-            <div class="choice-label">第二次选择</div>
-            <div class="choice-question">当教条指挥一切，<br>他选择了实事求是</div>
-            <div class="choice-answer">
-                第五次反"围剿"失败，红军从8.6万人锐减到3万人。<br>
-                博古、李德坚持教条主义。遵义会议上，毛泽东力主灵活机动作战。
-            </div>
-            <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                <div class="flip-inner">
-                    <div class="flip-front">
-                        <div class="flip-icon"><i class="fas fa-hand-pointer"></i></div>
-                        <p>点击翻开历史的真相</p>
-                    </div>
-                    <div class="flip-back">
-                        <div class="quote">"打得赢就打，打不赢就走。"</div>
-                        <div class="context">遵义会议是毛泽东人生的最低谷，也是转折点。四渡赤水，3万人跳出40万敌军包围圈，被誉为"神来之笔"。</div>
-                        <div class="data">遵义会议后四渡赤水：3万人跳出40万敌军包围</div>
+        <div class="flip-scene">
+            <div class="flip-front">
+                <div class="choice-year">1935</div>
+                <div class="scene-silhouette">
+                    <div class="silhouette-mountains">
+                        <div class="mountain mountain-2"></div>
+                        <div class="mountain mountain-3"></div>
                     </div>
                 </div>
+                <div class="choice-content">
+                    <div class="choice-label">第二次选择</div>
+                    <div class="choice-question">当教条指挥一切，<br>他选择了实事求是</div>
+                    <div class="choice-answer">
+                        第五次反"围剿"失败，红军从8.6万人锐减到3万人。<br>
+                        博古、李德坚持教条主义。遵义会议上，毛泽东力主灵活机动作战。
+                    </div>
+                    <div class="choice-buttons">
+                        <button class="choice-btn" data-choice="a" onclick="flipScene(2, this)">坚持教条</button>
+                        <button class="choice-btn" data-choice="b" onclick="flipScene(2, this)">灵活机动</button>
+                    </div>
+                </div>
+            </div>
+            <div class="flip-back">
+                <div class="back-content">
+                    <div class="quote">打得赢就打，打不赢就走。</div>
+                    <div class="context">遵义会议是毛泽东人生的最低谷，也是转折点。四渡赤水，3万人跳出40万敌军包围圈，被誉为"神来之笔"。</div>
+                    <div class="data">遵义会议后四渡赤水：3万人跳出40万敌军包围</div>
+                </div>
+                <div class="back-glow"></div>
             </div>
         </div>
     </div>
 
     <!-- 第三次选择：1949 -->
     <div class="scene scene-choice scene-3" id="scene-3">
-        <div class="choice-year">1949</div>
-
-        <div class="scene-silhouette">
-            <div class="silhouette-tiananmen">
-                <div class="silhouette-person">
-                    <div class="person-head"></div>
-                    <div class="person-body"></div>
-                </div>
-                <div class="tiananmen-base"></div>
-            </div>
-        </div>
-
-        <div class="choice-content">
-            <div class="choice-label">第三次选择</div>
-            <div class="choice-question">28年的奋斗凝聚在这一刻，<br>他选择了宣告</div>
-            <div class="choice-answer">
-                1949年10月1日下午3时，毛泽东站在天安门城楼上。<br>
-                无数人的牺牲，都凝聚在按下话筒的那一刻。
-            </div>
-            <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                <div class="flip-inner">
-                    <div class="flip-front">
-                        <div class="flip-icon"><i class="fas fa-hand-pointer"></i></div>
-                        <p>点击翻开历史的真相</p>
-                    </div>
-                    <div class="flip-back">
-                        <div class="quote">"中华人民共和国中央人民政府今天成立了！"</div>
-                        <div class="context">一个旧时代结束了，一个新时代开始了。这一天，中国人民从此站起来了。从1921年到1949年，28年血与火的征程，终于抵达终点。</div>
-                        <div class="data">开国大典：天安门广场30万军民共同见证</div>
+        <div class="flip-scene">
+            <div class="flip-front">
+                <div class="choice-year">1949</div>
+                <div class="scene-silhouette">
+                    <div class="silhouette-tiananmen">
+                        <div class="silhouette-person">
+                            <div class="person-head"></div>
+                            <div class="person-body"></div>
+                        </div>
+                        <div class="tiananmen-base"></div>
                     </div>
                 </div>
+                <div class="choice-content">
+                    <div class="choice-label">第三次选择</div>
+                    <div class="choice-question">28年的奋斗凝聚在这一刻，<br>他选择了宣告</div>
+                    <div class="choice-answer">
+                        1949年10月1日下午3时，毛泽东站在天安门城楼上。<br>
+                        无数人的牺牲，都凝聚在按下话筒的那一刻。
+                    </div>
+                    <div class="choice-buttons">
+                        <button class="choice-btn" data-choice="a" onclick="flipScene(3, this)">保持沉默</button>
+                        <button class="choice-btn" data-choice="b" onclick="flipScene(3, this)">向世界宣告</button>
+                    </div>
+                </div>
+            </div>
+            <div class="flip-back">
+                <div class="back-content">
+                    <div class="quote">中华人民共和国中央人民政府今天成立了！</div>
+                    <div class="context">一个旧时代结束了，一个新时代开始了。这一天，中国人民从此站起来了。从1921年到1949年，28年血与火的征程，终于抵达终点。</div>
+                    <div class="data">开国大典：天安门广场30万军民共同见证</div>
+                </div>
+                <div class="back-glow"></div>
             </div>
         </div>
     </div>
@@ -709,6 +772,7 @@
     <!-- 总结 -->
     <div class="scene scene-summary" id="scene-4">
         <div class="summary-content">
+            <div class="summary-glow"></div>
             <div class="summary-timeline">
                 <div class="timeline-node">
                     <div class="timeline-year">1927</div>
@@ -736,13 +800,15 @@
 
     <!-- 底部导航 -->
     <div class="bottom-nav">
-        <a href="../china_power_mod6/mod6.html" onclick="event.preventDefault(); filmstripTransition('../china_power_mod6/mod6.html');">
+        <a href="../china_power_mod6/mod6.html" onclick="event.preventDefault(); filmstripTransition('../china_power_mod6/mod6.html', '他选择的路，通向了今天。');">
             下一个穿越：中国力量 <i class="fas fa-arrow-right"></i>
         </a>
     </div>
 
     <script src="../filmstrip.js"></script>
     <script>
+        checkNarrativeTransition();
+
         const scenes = document.querySelectorAll('.scene');
         const sceneIndex = new Map([...scenes].map((s, i) => [s, i]));
         const progressBar = document.getElementById('progressBar');
@@ -761,21 +827,15 @@
 
         const dots = document.querySelectorAll('.stage-dot');
 
-        // IntersectionObserver 检测当前场景
+        // IntersectionObserver
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const idx = sceneIndex.get(entry.target);
                     currentScene = idx;
-
-                    // 激活场景
                     entry.target.classList.add('active');
-
-                    // 更新进度条
                     const progress = (idx / (scenes.length - 1)) * 100;
                     progressBar.style.width = progress + '%';
-
-                    // 更新指示器
                     dots.forEach((d, i) => d.classList.toggle('active', i === idx));
                 }
             });
@@ -783,9 +843,30 @@
 
         scenes.forEach(scene => observer.observe(scene));
 
-        // 初始激活第一幕
+        // 初始激活
         document.getElementById('scene-0').classList.add('active');
         dots[0].classList.add('active');
+
+        // 全屏3D翻转
+        function flipScene(sceneNum, btn) {
+            const scene = document.getElementById('scene-' + sceneNum);
+            if (scene.classList.contains('flipped')) return;
+
+            // 标记按钮状态
+            const buttons = scene.querySelectorAll('.choice-btn');
+            buttons.forEach(b => {
+                if (b === btn) {
+                    b.classList.add('chosen');
+                } else {
+                    b.classList.add('not-chosen');
+                }
+            });
+
+            // 0.5s后翻转
+            setTimeout(() => {
+                scene.classList.add('flipped');
+            }, 500);
+        }
     </script>
 </body>
 

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./mod2.css">
 <script src="../filmstrip.js"></script>
+<script>checkNarrativeTransition();</script>
 </head>
 <body>
     <div class="button-container">
@@ -122,7 +123,7 @@
 
     # 游戏状态
     current_level = 0
-    total_levels = 11  # 总共11关（长征10场战役）
+    total_levels = 4  # 4关：教学 + 3场关键战役
     selected_piece = None
     chess_pieces = []  # 存储所有棋子对象
     move_hints = []    # 存储移动提示元素
@@ -135,194 +136,71 @@
         # 修改第0关数据
     level_data = {
         0: {
-            "ground": "#deb887",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
+            “ground”: “#deb887”,
+            “hengxian”: 10,
+            “shuxian”: 9,
+            “pieces”: [
                 # 红方棋子
-                ("帅", "red", 4, 9),
-                ("炮", "red", 1, 7),
+                (“帅”, “red”, 4, 9),
+                (“炮”, “red”, 1, 7),
                 # 黑方棋子
-                ("将", "black", 4, 0),
-                ("兵", "black", 4, 3)
+                (“将”, “black”, 4, 0),
+                (“兵”, “black”, 4, 3)
             ],
-            "tips": "基础教学",
-            "tit": "学习象棋基本规则和走法"
+            “tips”: “基础教学”,
+            “tit”: “学习象棋基本规则和走法”,
+            “narrative”: “在你指挥战斗之前，先学会基本的规则。”
         },
         1: {
-            "ground": "#deb887",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
-                ("帅", "red", 4, 9),
-                ("炮", "red", 1, 7),
-                ("兵", "red", 4, 6),
-                ("将", "black", 4, 0),
-                ("车", "black", 4, 3)
+            “ground”: “#deb887”,
+            “hengxian”: 10,
+            “shuxian”: 9,
+            “pieces”: [
+                (“帅”, “red”, 4, 9),
+                (“炮”, “red”, 1, 7),
+                (“兵”, “red”, 4, 6),
+                (“将”, “black”, 4, 0),
+                (“车”, “black”, 4, 3)
             ],
-            "tips": "第一战：血战湘江",
-            "tit": "1934年11月——红军突破国民党军第四道封锁线，虽损失惨重但粉碎敌人围歼企图，为长征保留核心力量"
+            “tips”: “血战湘江”,
+            “tit”: “1934年11月——红军突破国民党军第四道封锁线，虽损失惨重但粉碎敌人围歼企图，为长征保留核心力量”,
+            “narrative”: “1934年11月。湘江。86000人只剩30000。但战斗没有结束。”
         },
         2: {
-            "ground": "#deb887",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
-                ("帅", "red", 4, 9),
-                ("马", "red", 3, 7),
-                ("炮", "red", 4, 8),
-                ("将", "black", 4, 0),
-                ("车", "black", 8, 8)
+            “ground”: “#deb887”,
+            “hengxian”: 10,
+            “shuxian”: 9,
+            “pieces”: [
+                # 红方：沿桥突击（列4为桥身）
+                (“帅”, “red”, 4, 9),
+                (“兵”, “red”, 4, 7), (“兵”, “red”, 4, 8),  # 突击队员
+                (“兵”, “red”, 3, 9), (“军”, “red”, 5, 9),  # 掩护部队
+                # 黑方：桥对岸防御
+                (“将”, “black”, 4, 0),  # 桥头指挥
+                (“兵”, “black”, 4, 1), (“兵”, “black”, 4, 2),  # 桥上火力
+                (“炮”, “black”, 3, 0), (“炮”, “black”, 5, 0)  # 两侧封锁
             ],
-            "tips": "第二战：强渡乌江",
-            "tit": "1935年1月——红军击溃黔军防线，突破天险乌江，为占领遵义创造关键条件，是长征首次大胜"
+            “tips”: “飞夺泸定桥”,
+            “tit”: “1935年5月——红军昼夜奔袭240里，22名勇士攀爬铁索突破泸定桥，粉碎敌人火攻封锁，打开北上通道”,
+            “narrative”: “1935年5月。泸定桥。22个人，13根铁链，脚下是万丈深渊。”
         },
         3: {
-            "ground": "#deb887",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
-                # 红方（红军）：集中中路，左右翼配合
-                ("帅", "red", 4, 9),  # 核心指挥
-                ("军", "red", 3, 7),  # 自定义棋子（代表主力军团）
-                ("军", "red", 5, 7),
-                ("炮", "red", 1, 8),  # 远程支援
-                ("炮", "red", 7, 8),
-                # 黑方（黔军）：分散防御，中路空虚
-                ("将", "black", 4, 0),  # 敌军指挥
-                ("兵", "black", 2, 2),  # 左翼防御
-                ("兵", "black", 6, 2),  # 右翼防御
-                ("车", "black", 0, 1),  # 侧翼机动部队
-                ("车", "black", 8, 1)
-            ],
-            "tips": "第三战：遵义战役",
-            "tit": "1935年1月——红军集中兵力击溃黔军，歼敌3000余人，是长征以来首次大规模胜仗，巩固了遵义根据地"
-        },
-        4: {
-            "ground": "#deb887",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
-                # 红方：中路隐蔽，两翼机动
-                ("帅", "red", 4, 8),  # 指挥中枢隐蔽
-                ("马", "red", 2, 9),  # 骑兵机动（马代表快速部队）
-                ("马", "red", 6, 9),
-                ("兵", "red", 4, 6),  # 后卫掩护
-                # 黑方：多层包围，核心在右
-                ("将", "black", 7, 1),  # 敌军主力位置
-                ("车", "black", 1, 3),  # 左翼封锁
-                ("车", "black", 5, 2),  # 中路追击
-                ("炮", "black", 8, 4),  # 远程封锁
-                ("兵", "black", 3, 1), ("兵", "black", 5, 1)  # 内层包围
-            ],
-            "tips": "第四战：四渡赤水",
-            "tit": "1935年2-3月——红军灵活机动，四渡赤水河，巧妙摆脱国民党军围追堵截，是毛泽东军事指挥的经典战例"
-        },
-        # 5-10关保持不变...
-        5: {
-            "ground": "#aqua",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
-                # 红方：分路渡江
-                ("帅", "red", 4, 9),  # 需抵达 row ≤3
-                ("兵", "red", 2, 8),  # 左路渡江部队
-                ("兵", "red", 6, 8),  # 右路渡江部队
-                ("炮", "red", 0, 7),  # 掩护炮火
-                # 黑方：沿江布防
-                ("将", "black", 4, 0),  # 敌军指挥部
-                ("兵", "black", 1, 4), ("兵", "black", 3, 4),  # 江防据点
-                ("兵", "black", 5, 4), ("兵", "black", 7, 4),
-                ("车", "black", 4, 2)  # 机动增援部队
-            ],
-            "tips": "第五战：巧渡金沙江",
-            "tit": "1935年5月——红军声东击西，趁敌军调防空隙，七日七夜渡过金沙江，彻底跳出国民党军包围圈"
-        },
-        6: {
-            "ground": "#aqua",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
-                # 红方：突击队在前，主力在后
-                ("帅", "red", 4, 9),  # 需抵达 row ≤5
-                ("兵", "red", 2, 7),  # 突击队（可过河）
-                ("兵", "red", 4, 8),  # 主力部队
-                ("炮", "red", 6, 9),  # 对岸掩护
-                # 黑方：渡口死守
-                ("将", "black", 2, 3),  # 渡口指挥
-                ("兵", "black", 2, 5),  # 河防前沿
-                ("车", "black", 0, 2), ("车", "black", 4, 2)  # 增援部队
-            ],
-            "tips": "第六战：强渡大渡河",
-            "tit": "1935年5月——红军在安顺场以22人突击队强渡大渡河，打破蒋介石'让红军成为石达开第二'的妄想"
-        },
-        7: {
-            "ground": "#deb887",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
-                # 红方：沿桥突击（列4为桥身）
-                ("帅", "red", 4, 9),
-                ("兵", "red", 4, 7), ("兵", "red", 4, 8),  # 突击队员
-                ("兵", "red", 3, 9), ("军", "red", 5, 9),  # 掩护部队
-                # 黑方：桥对岸防御
-                ("将", "black", 4, 0),  # 桥头指挥
-                ("兵", "black", 4, 1), ("兵", "black", 4, 2),  # 桥上火力
-                ("炮", "black", 3, 0), ("炮", "black", 5, 0)  # 两侧封锁
-            ],
-            "tips": "第七战：飞夺泸定桥",
-            "tit": "1935年5月——红军昼夜奔袭240里，22名勇士攀爬铁索突破泸定桥，粉碎敌人火攻封锁，打开北上通道"
-        },
-        8: {
-            "ground": "#e6e6fa",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
-                # 红方：精简兵力，保护核心
-                ("帅", "red", 4, 9),  # 必须存活到 row=0
-                ("军", "red", 2, 8), ("军", "red", 6, 8),  # 护卫部队
-                # 黑方：环境障碍（不可吃，接触即红方棋子被移除）
-                ("障", "black", 1, 6), ("障", "black", 3, 6),  # “障”为自定义障碍
-                ("障", "black", 5, 6), ("障", "black", 7, 6),
-                ("障", "black", 4, 4)  # 中路核心障碍
-            ],
-            "tips": "第八战：过雪山草地",
-            "tit": "1935年6-8月——红军翻越夹金山、跋涉松潘草地，以顽强意志克服高寒缺氧、缺衣少食，保存革命火种"
-        },
-        9: {
-            "ground": "#8b4513",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
-                # 红方：正面牵制+侧翼迂回
-                ("帅", "red", 4, 9),
-                ("马", "red", 0, 7),  # 迂回部队（绕后）
-                ("炮", "red", 4, 8),  # 正面攻击
-                ("兵", "red", 8, 7),  # 右翼配合
-                # 黑方：隘口死守
-                ("将", "black", 4, 1),  # 隘口指挥
-                ("车", "black", 4, 3),  # 正面防御
-                ("兵", "black", 2, 2), ("兵", "black", 6, 2)  # 两侧防御
-            ],
-            "tips": "第九战：腊子口战役",
-            "tit": "1935年9月——红军以正面强攻+侧翼迂回战术突破天险腊子口，粉碎敌人最后一道封锁线，为北上陕甘打开通道"
-        },
-        10: {
-            "ground": "#deb887",
-            "hengxian": 10,
-            "shuxian": 9,
-            "pieces": [
+            “ground”: “#deb887”,
+            “hengxian”: 10,
+            “shuxian”: 9,
+            “pieces”: [
                 # 红方：多方向会师
-                ("帅", "red", 4, 9),  # 红一方面军
-                ("兵", "red", 1, 5),  # 红二方面军（需到4,4）
-                ("兵", "red", 7, 5),  # 红四方面军（需到4,4）
-                ("兵", "red", 2, 8), ("兵", "red", 6, 8),
+                (“帅”, “red”, 4, 9),  # 红一方面军
+                (“兵”, “red”, 1, 5),  # 红二方面军（需到4,4）
+                (“兵”, “red”, 7, 5),  # 红四方面军（需到4,4）
+                (“兵”, “red”, 2, 8), (“兵”, “red”, 6, 8),
                 # 黑方：最后的阻击
-                ("将", "black", 3, 3), ("将", "black", 5, 3),  # 残余敌军
-                ("兵", "black", 4, 6)  # 中路骚扰
+                (“将”, “black”, 3, 3), (“将”, “black”, 5, 3),  # 残余敌军
+                (“兵”, “black”, 4, 6)  # 中路骚扰
             ],
-            "tips": "会宁会师",
-            "tit": "1936年10月——红一、二、四方面军在甘肃会宁胜利会师，标志着长征胜利结束，开启中国革命新局面"
+            “tips”: “会宁会师”,
+            “tit”: “1936年10月——红一、二、四方面军在甘肃会宁胜利会师，标志着长征胜利结束，开启中国革命新局面”,
+            “narrative”: “1936年10月。甘肃会宁。两年了，终于到了。”
         }
     }
         
@@ -1061,6 +939,29 @@
         
         js.document.getElementById("status-msg").textContent = f"已切换到第 {current_level} 关"
 
+    def show_chess_narrative(text):
+        """显示关卡叙事文字 — 黑屏+白字，2.5s后自动消失"""
+        overlay = js.document.createElement("div")
+        overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99998;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 1s ease;"
+        text_el = js.document.createElement("div")
+        text_el.style.cssText = "font-family:'Microsoft YaHei',sans-serif;font-size:1.3rem;color:rgba(255,255,255,0.85);letter-spacing:3px;line-height:2;text-align:center;max-width:80%;opacity:0;transform:translateY(20px);transition:opacity 1s ease 0.3s,transform 1s ease 0.3s;"
+        text_el.textContent = text
+        overlay.appendChild(text_el)
+        js.document.body.appendChild(overlay)
+        # 淡入
+        def show(_):
+            overlay.style.opacity = "1"
+            text_el.style.opacity = "1"
+            text_el.style.transform = "translateY(0)"
+        js.setTimeout(create_proxy(show), 50)
+        # 2.5s后淡出
+        def hide(_):
+            overlay.style.opacity = "0"
+            def remove(_):
+                overlay.remove()
+            js.setTimeout(create_proxy(remove), 800)
+        js.setTimeout(create_proxy(hide), 2500)
+
     def reset_board():
         # 使用当前关卡数据初始化棋子
         if current_level in level_data:
@@ -1069,6 +970,10 @@
             js.document.getElementById("status-msg").textContent = "棋盘已重置"
             tips = level_info.get("tips", "")
             js.document.getElementById("level_name").textContent = str(tips)
+            # 显示叙事文字
+            narrative = level_info.get("narrative", "")
+            if narrative:
+                show_chess_narrative(narrative)
         else:
             js.document.getElementById("status-msg").textContent = "关卡数据不存在"
 

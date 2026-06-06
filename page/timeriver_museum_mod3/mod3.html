@@ -386,6 +386,74 @@
             color: rgba(255, 215, 0, 0.8);
         }
 
+        /* 隐藏手稿 */
+        .hidden-manuscript {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 99997;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .hidden-manuscript.visible {
+            opacity: 1;
+        }
+
+        .hidden-manuscript.fade-out {
+            opacity: 0;
+        }
+
+        .manuscript-paper {
+            background: linear-gradient(135deg, #f5e6c8, #e8d5a8);
+            color: #2a1a0a;
+            padding: 40px 50px;
+            border-radius: 4px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transform: rotate(-1deg);
+        }
+
+        .manuscript-title {
+            font-size: 0.85rem;
+            color: rgba(42, 26, 10, 0.4);
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+        }
+
+        .manuscript-text {
+            font-size: 1.15rem;
+            line-height: 2;
+            color: rgba(42, 26, 10, 0.85);
+            margin-bottom: 20px;
+        }
+
+        .manuscript-source {
+            font-size: 0.9rem;
+            color: rgba(42, 26, 10, 0.5);
+        }
+
+        .manuscript-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: rgba(42, 26, 10, 0.3);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .manuscript-close:hover {
+            color: rgba(42, 26, 10, 0.8);
+        }
+
         /* 重置按钮 */
         .reset-btn {
             background: rgba(255, 255, 255, 0.05);
@@ -469,7 +537,7 @@
         <button id="resetBtn" class="reset-btn">
             <i class="fas fa-redo"></i> 重新探索
         </button>
-        <a href="../sacrifice_mod4/mod4.html" onclick="event.preventDefault(); filmstripTransition('../sacrifice_mod4/mod4.html');">
+        <a href="../sacrifice_mod4/mod4.html" onclick="event.preventDefault(); filmstripTransition('../sacrifice_mod4/mod4.html', '有些名字被记住了。更多的，连名字都没有留下。');">
             下一个穿越：祭祀大典 <i class="fas fa-arrow-right"></i>
         </a>
     </div>
@@ -487,6 +555,8 @@
 
     <script src="../filmstrip.js"></script>
     <script>
+        checkNarrativeTransition();
+
         // 10个历史物件
         const objects = [
             {
@@ -599,6 +669,20 @@
 
         // 创建物件
         function createObjects() {
+            // 飞入方向池
+            const flyDirs = [
+                { x: -120, y: 0 },   // 左
+                { x: 120, y: 0 },    // 右
+                { x: 0, y: -120 },   // 上
+                { x: 0, y: 120 },    // 下
+                { x: -100, y: -80 }, // 左上
+                { x: 100, y: -80 },  // 右上
+                { x: -100, y: 80 },  // 左下
+                { x: 100, y: 80 },   // 右下
+                { x: -120, y: 30 },
+                { x: 120, y: -30 },
+            ];
+
             objects.forEach((obj, i) => {
                 const el = document.createElement('div');
                 el.className = 'history-object';
@@ -619,8 +703,22 @@
                     <div class="object-year">${obj.year}</div>
                 `;
 
+                // 飞入动画 — 从随机方向飞入，错落延迟
+                const dir = flyDirs[i % flyDirs.length];
+                const delay = 300 + i * 120;
+                el.style.opacity = '0';
+                el.style.transition = 'none';
+                el.style.transform = `rotate(${obj.rotate}deg) translate(${dir.x}px, ${dir.y}px) scale(0.3)`;
+
                 el.addEventListener('click', () => openOverlay(i));
                 container.appendChild(el);
+
+                // 延迟后飞入到最终位置
+                setTimeout(() => {
+                    el.style.transition = 'opacity 0.8s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    el.style.opacity = '1';
+                    el.style.transform = `rotate(${obj.rotate}deg) translate(0, 0) scale(1)`;
+                }, delay);
             });
             updateCollect();
         }
@@ -704,10 +802,51 @@
             const count = Object.keys(explored).length;
             collectNum.textContent = count;
 
+            // 7个以上解锁隐藏内容
+            if (count >= 7) {
+                showHiddenContent();
+            }
+
             if (count >= 10) {
                 summaryText.classList.add('unlocked');
                 summaryHint.style.display = 'none';
             }
+        }
+
+        // 隐藏内容 — 毛泽东手稿
+        let hiddenShown = false;
+        function showHiddenContent() {
+            if (hiddenShown) return;
+            hiddenShown = true;
+
+            const hidden = document.createElement('div');
+            hidden.className = 'hidden-manuscript';
+            hidden.innerHTML = `
+                <div class="manuscript-paper">
+                    <div class="manuscript-title">隐藏发现</div>
+                    <div class="manuscript-text">
+                        "遵义会议后，红军好像忽然活过来了。<br>
+                        我们不再盲目地走，而是有目的地走。<br>
+                        不再被动地打，而是主动地打。"
+                    </div>
+                    <div class="manuscript-source">—— 周恩来</div>
+                    <div class="manuscript-close" onclick="this.parentElement.parentElement.remove()">×</div>
+                </div>
+            `;
+            document.body.appendChild(hidden);
+
+            // 淡入
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    hidden.classList.add('visible');
+                });
+            });
+
+            // 8秒后自动淡出
+            setTimeout(() => {
+                hidden.classList.add('fade-out');
+                setTimeout(() => hidden.remove(), 1000);
+            }, 8000);
         }
 
         // 重置探索

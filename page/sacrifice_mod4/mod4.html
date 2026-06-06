@@ -22,6 +22,36 @@
             cursor: none;
         }
 
+        /* 开场黑屏 */
+        .mod4-intro {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1.5s ease;
+        }
+
+        .mod4-intro.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .mod4-intro-text {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 4px;
+            opacity: 0;
+            animation: introFadeIn 2s ease 1s forwards;
+        }
+
+        @keyframes introFadeIn {
+            to { opacity: 1; }
+        }
+
         /* ========== 三层光晕 ========== */
         .glow-outer {
             position: fixed;
@@ -299,6 +329,18 @@
             100% { transform: scale(1.1, 0.9) rotate(3deg); }
         }
 
+        /* 风吹效果 */
+        .mini-flame.on.wind {
+            animation: miniFlameWind 0.4s ease-in-out;
+        }
+
+        @keyframes miniFlameWind {
+            0% { transform: scale(1) rotate(0deg); }
+            30% { transform: scale(0.8, 1.2) rotate(-12deg); }
+            60% { transform: scale(1.1, 0.9) rotate(8deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
         /* ========== 终极信息 ========== */
         .final-message {
             position: fixed;
@@ -394,6 +436,11 @@
 </head>
 
 <body>
+    <!-- 开场黑屏 -->
+    <div class="mod4-intro" id="mod4Intro">
+        <div class="mod4-intro-text">黑暗中，有人在等你发现</div>
+    </div>
+
     <!-- 三层光晕 -->
     <div class="glow-outer" id="glowOuter"></div>
     <div class="glow-mid" id="glowMid"></div>
@@ -432,13 +479,83 @@
 
     <!-- 底部导航 -->
     <div class="bottom-nav">
-        <a href="../greatman_mod5/mod5.html" onclick="event.preventDefault(); filmstripTransition('../greatman_mod5/mod5.html');">
+        <a href="../greatman_mod5/mod5.html" onclick="event.preventDefault(); filmstripTransition('../greatman_mod5/mod5.html', '但有一个人，他的选择改变了一切。');">
             下一个穿越：新中国之父 <i class="fas fa-arrow-right"></i>
         </a>
     </div>
 
     <script src="../filmstrip.js"></script>
     <script>
+        checkNarrativeTransition();
+
+        // 开场黑屏 + 呼吸声
+        const mod4Intro = document.getElementById('mod4Intro');
+        let audioCtx = null;
+
+        // 呼吸声（Web Audio API — 低频噪声脉冲）
+        function startBreathing() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                // 创建噪声源
+                const bufferSize = audioCtx.sampleRate * 2;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * 0.15;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                noise.loop = true;
+
+                // 低通滤波 — 让噪声听起来像呼吸
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 300;
+
+                // 增益控制 — 呼吸节奏脉冲
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0;
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                noise.start();
+
+                // 呼吸节奏：0→0.15→0，4秒一个周期
+                function breathe() {
+                    const now = audioCtx.currentTime;
+                    gain.gain.cancelScheduledValues(now);
+                    gain.gain.setValueAtTime(0, now);
+                    gain.gain.linearRampToValueAtTime(0.08, now + 1.5);
+                    gain.gain.linearRampToValueAtTime(0, now + 3.5);
+                }
+                breathe();
+                const breathInterval = setInterval(breathe, 4000);
+
+                // 6秒后淡出并停止
+                setTimeout(() => {
+                    clearInterval(breathInterval);
+                    const now = audioCtx.currentTime;
+                    gain.gain.cancelScheduledValues(now);
+                    gain.gain.linearRampToValueAtTime(0, now + 2);
+                    setTimeout(() => {
+                        noise.stop();
+                        audioCtx.close();
+                    }, 2500);
+                }, 6000);
+            } catch(e) { /* 静默失败 */ }
+        }
+
+        // 3秒后淡出黑屏
+        setTimeout(() => {
+            startBreathing();
+        }, 500);
+
+        setTimeout(() => {
+            mod4Intro.classList.add('fade-out');
+            setTimeout(() => mod4Intro.remove(), 1500);
+        }, 3000);
+
         // 人物数据
         const heroes = [
             { name: '钱学森', years: '1911 — 2009', quote: '我的事业在中国，我的成就在中国，我的归宿在中国。', source: '—— 钱学森回国后接受采访时说' },
@@ -652,6 +769,18 @@
         if (discoveredSet.size >= 12) {
             setTimeout(showFinalMessage, 6000);
         }
+
+        // 蜡烛"风"效果 — 每隔随机时间，所有已点亮的蜡烛同时摇摆
+        function triggerWind() {
+            const onFlames = document.querySelectorAll('.mini-flame.on');
+            onFlames.forEach(flame => flame.classList.add('wind'));
+            setTimeout(() => {
+                onFlames.forEach(flame => flame.classList.remove('wind'));
+            }, 400);
+            // 下一次风吹：3-8秒后
+            setTimeout(triggerWind, 3000 + Math.random() * 5000);
+        }
+        setTimeout(triggerWind, 5000 + Math.random() * 3000);
     </script>
 </body>
 

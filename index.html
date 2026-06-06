@@ -21,7 +21,7 @@
             overflow-x: hidden;
         }
 
-        /* ========== 开场黑屏 + 钩子文字 ========== */
+        /* ========== 开场黑屏 + 数字递减 + 钩子文字 ========== */
         .intro-overlay {
             position: fixed;
             top: 0;
@@ -35,6 +35,7 @@
             justify-content: center;
             flex-direction: column;
             transition: opacity 1.2s ease;
+            cursor: pointer;
         }
 
         .intro-overlay.fade-out {
@@ -42,19 +43,81 @@
             pointer-events: none;
         }
 
-        .hook-text {
-            font-size: 2rem;
-            color: rgba(255, 215, 0, 0.9);
-            letter-spacing: 4px;
-            line-height: 1.8;
-            text-align: center;
+        /* 大数字 */
+        .intro-number {
+            font-size: 7rem;
+            font-weight: bold;
+            color: #ff3333;
+            text-shadow: 0 0 60px rgba(255, 0, 0, 0.4);
+            font-variant-numeric: tabular-nums;
             opacity: 0;
-            transition: opacity 1.5s ease;
-            max-width: 90%;
+            transition: opacity 0.5s ease;
+            letter-spacing: 4px;
         }
 
-        .intro-overlay.show-text .hook-text {
+        .intro-number.visible {
             opacity: 1;
+        }
+
+        .intro-number.gold {
+            color: #ffd700;
+            text-shadow: 0 0 60px rgba(255, 215, 0, 0.4);
+        }
+
+        /* 递减说明 */
+        .intro-count-label {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 3px;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .intro-count-label.visible {
+            opacity: 1;
+        }
+
+        /* 逐行白字 */
+        .intro-lines {
+            position: absolute;
+            bottom: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            width: 90%;
+        }
+
+        .intro-line {
+            font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 2px;
+            line-height: 2.2;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .intro-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .intro-line.accent {
+            color: rgba(255, 215, 0, 0.9);
+            font-size: 1.3rem;
+        }
+
+        .intro-line.hint {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+            margin-top: 20px;
+            animation: hintPulse 2s infinite;
+        }
+
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
 
         /* ========== 主内容区 ========== */
@@ -309,9 +372,14 @@
 
         /* ========== 响应式 ========== */
         @media (max-width: 768px) {
-            .hook-text {
-                font-size: 1.5rem;
-                letter-spacing: 2px;
+            .intro-number {
+                font-size: 4.5rem;
+            }
+            .intro-count-label {
+                font-size: 0.85rem;
+            }
+            .intro-line {
+                font-size: 1rem;
             }
 
             .scene-title h1 {
@@ -361,8 +429,15 @@
         }
 
         @media (max-width: 480px) {
-            .hook-text {
-                font-size: 1.2rem;
+            .intro-number {
+                font-size: 3.5rem;
+            }
+            .intro-count-label {
+                font-size: 0.8rem;
+            }
+            .intro-line {
+                font-size: 0.9rem;
+                letter-spacing: 1px;
             }
 
             .scene-title h1 {
@@ -408,7 +483,14 @@
 <body>
     <!-- 开场黑屏 -->
     <div class="intro-overlay" id="introOverlay">
-        <div class="hook-text">如果你能穿越回过去，<br>你最想回到哪一年？</div>
+        <div class="intro-number" id="introNumber">86000</div>
+        <div class="intro-count-label" id="introCountLabel">名红军战士，从江西瑞金出发</div>
+        <div class="intro-lines" id="introLines">
+            <div class="intro-line">1934年，86000人从江西出发。</div>
+            <div class="intro-line">两年后，7000人到达陕北。</div>
+            <div class="intro-line accent">这不是故事。这是真实发生的事。</div>
+            <div class="intro-line hint">点击任意处，开始走这条路</div>
+        </div>
     </div>
 
     <!-- 主场景 -->
@@ -498,31 +580,87 @@
 
     <script src="page/filmstrip.js"></script>
     <script>
-        // 开场动画
         const introOverlay = document.getElementById('introOverlay');
+        const introNumber = document.getElementById('introNumber');
+        const introCountLabel = document.getElementById('introCountLabel');
+        const introLines = document.querySelectorAll('.intro-line');
         const mainScene = document.getElementById('mainScene');
+        let introFinished = false;
 
-        // 1s 黑屏 → 显示钩子文字
+        // 开场动画序列
+        // 1s 黑屏 → 显示数字
         setTimeout(() => {
-            introOverlay.classList.add('show-text');
+            introNumber.classList.add('visible');
         }, 1000);
 
-        // 3s 后淡出（1s黑屏 + 2s文字停留）
+        // 1.5s 后开始数字递减 86000→7000
         setTimeout(() => {
+            animateIntroNumber(86000, 7000, 4000);
+        }, 1500);
+
+        // 数字递减动画
+        function animateIntroNumber(from, to, duration) {
+            const startTime = performance.now();
+            function update(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // easeOutExpo
+                const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                const current = Math.round(from - (from - to) * eased);
+                introNumber.textContent = current.toLocaleString();
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    onCountdownEnd();
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        // 数字递减结束后
+        function onCountdownEnd() {
+            // 数字变金色
+            introNumber.classList.add('gold');
+            // 显示说明文字
+            setTimeout(() => {
+                introCountLabel.classList.add('visible');
+            }, 300);
+            // 逐行显示白字
+            introLines.forEach((line, i) => {
+                setTimeout(() => {
+                    line.classList.add('visible');
+                }, 800 + i * 700);
+            });
+            // 5s 后标记可点击
+            setTimeout(() => {
+                introFinished = true;
+            }, 3000);
+        }
+
+        // 点击任意处进入
+        introOverlay.addEventListener('click', () => {
+            if (!introFinished) return;
             introOverlay.classList.add('fade-out');
             mainScene.classList.add('visible');
-        }, 3500);
+            setTimeout(() => {
+                introOverlay.style.display = 'none';
+            }, 1200);
+        });
 
-        // 完全移除 overlay
-        setTimeout(() => {
-            introOverlay.style.display = 'none';
-        }, 4700);
-
-        // 路标点击 → 胶片转场
+        // 路标点击 → 胶片转场（带叙事文字）
+        const narratives = {
+            'page/longfight_rouit_mod1/mod1.html': '1934年10月。江西瑞金。86000人出发了。',
+            'page/timeriver_museum_mod3/mod3.html': '湘江之后，他们开始思考：这一切到底是为了什么。',
+            'page/sacrifice_mod4/mod4.html': '有些名字被记住了。更多的，连名字都没有留下。',
+            'page/greatman_mod5/mod5.html': '但有一个人，他的选择改变了一切。',
+            'page/china_power_mod6/mod6.html': '他选择的路，通向了今天。',
+            'page/chess_mod2/mod2.html': '而今天的中国，需要你理解——什么是胜利。'
+        };
         document.querySelectorAll('.marker').forEach(marker => {
             marker.addEventListener('click', () => {
                 const url = marker.dataset.url;
-                filmstripTransition(url);
+                const narrative = narratives[url] || '';
+                filmstripTransition(url, narrative);
             });
         });
     </script>

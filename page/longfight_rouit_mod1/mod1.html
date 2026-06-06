@@ -482,13 +482,15 @@
 
     <!-- 底部导航 -->
     <div class="bottom-nav">
-        <a href="../timeriver_museum_mod3/mod3.html" onclick="event.preventDefault(); filmstripTransition('../timeriver_museum_mod3/mod3.html');">
+        <a href="../timeriver_museum_mod3/mod3.html" onclick="event.preventDefault(); filmstripTransition('../timeriver_museum_mod3/mod3.html', '湘江之后，他们开始思考：这一切到底是为了什么。');">
             下一个穿越：时间博物馆 <i class="fas fa-arrow-right"></i>
         </a>
     </div>
 
     <script src="../filmstrip.js"></script>
     <script>
+        checkNarrativeTransition();
+
         // 状态
         const stages = document.querySelectorAll('.stage');
         const indicators = document.querySelectorAll('.indicator-dot');
@@ -572,20 +574,26 @@
             requestAnimationFrame(update);
         }
 
-        // 强制停顿 — 冲击序列：血色渐染→震动→遮罩
+        // 强制停顿 — 冲击序列：粒子burst→血色渐染→震动→遮罩
         function triggerPause() {
             if (pauseShown) return;
             pauseShown = true;
 
-            // 1. 血色渐染
-            bloodWash.classList.add('active');
+            // 1. 粒子burst
+            const xiangNum = document.getElementById('xiangNumber');
+            burstParticles(xiangNum, 800);
 
-            // 2. 0.5s后开始震动
+            // 2. 0.8s后血色渐染
+            setTimeout(() => {
+                bloodWash.classList.add('active');
+            }, 800);
+
+            // 3. 1.3s后开始震动
             setTimeout(() => {
                 document.body.classList.add('shake');
-            }, 500);
+            }, 1300);
 
-            // 3. 2s后停止震动，显示遮罩
+            // 4. 3s后停止震动，显示遮罩
             setTimeout(() => {
                 document.body.classList.remove('shake');
                 bloodWash.classList.remove('active');
@@ -595,7 +603,65 @@
                 setTimeout(() => {
                     pauseOverlay.classList.remove('active');
                 }, 3000);
-            }, 2000);
+            }, 3000);
+        }
+
+        // 粒子burst效果
+        function burstParticles(element, count) {
+            const rect = element.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            const canvas = document.createElement('canvas');
+            canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:1998;pointer-events:none;';
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            document.body.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+
+            const particles = [];
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 1 + Math.random() * 4;
+                particles.push({
+                    x: cx, y: cy,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 1.5,
+                    life: 1,
+                    decay: 0.003 + Math.random() * 0.008,
+                    size: 1 + Math.random() * 2.5,
+                    r: 255, g: Math.floor(50 + Math.random() * 50), b: Math.floor(30 + Math.random() * 30)
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+                for (const p of particles) {
+                    if (p.life <= 0) continue;
+                    alive = true;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy -= 0.02; // 向上漂
+                    p.life -= p.decay;
+                    // 颜色从红→金
+                    const t = 1 - p.life;
+                    const r = Math.round(p.r + (255 - p.r) * t);
+                    const g = Math.round(p.g + (215 - p.g) * t);
+                    const b = Math.round(p.b + (0 - p.b) * t);
+                    ctx.globalAlpha = p.life * 0.8;
+                    ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                if (alive) {
+                    requestAnimationFrame(animate);
+                } else {
+                    canvas.remove();
+                }
+            }
+            requestAnimationFrame(animate);
         }
 
         // 指示器点击跳转
