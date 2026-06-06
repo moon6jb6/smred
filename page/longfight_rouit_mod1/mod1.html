@@ -347,7 +347,7 @@
 
         .choice-options {
             display: flex;
-            gap: 20px;
+            gap: 40px;
             justify-content: center;
         }
 
@@ -383,11 +383,10 @@
         }
 
         .choice-hint {
-            margin-top: 30px;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.25);
-            letter-spacing: 2px;
-            animation: hintPulse 2s infinite;
+            margin-top: 40px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 3px;
         }
 
         /* 后果展示遮罩 */
@@ -488,6 +487,14 @@
             text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
         }
 
+        .reality-sub {
+            display: block;
+            margin-top: 15px;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+        }
+
         .reality-continue {
             margin-top: 40px;
             font-size: 0.9rem;
@@ -526,6 +533,7 @@
             .choice-options {
                 flex-direction: column;
                 align-items: center;
+                gap: 20px;
             }
             .choice-btn {
                 min-width: 240px;
@@ -706,7 +714,7 @@
                     <div class="choice-btn-desc">丢掉辎重，从缝隙中穿过去</div>
                 </button>
             </div>
-            <div class="choice-hint">你的选择，决定他们的命运</div>
+            <div class="choice-hint">选一个</div>
         </div>
     </div>
 
@@ -884,21 +892,21 @@
         const consequenceFlow = {
             attack: {
                 from: 86000, to: 30000,
-                duration: 2500,
+                duration: 2000,
                 text: '湘江一战，56000人再也没有回来。<span class="consequence-sub">江水被染红了三天。</span>',
                 particleColor: 'red',
                 particleCount: 800,
-                shakeIntensity: 8,
-                realityLine: '但历史没有如果。<br><span class="reality-highlight">博古选择了正面强渡。</span><br>这是真实发生的事。'
+                shakeIntensity: 6,
+                realityLine: '但历史没有如果。<br><span class="reality-highlight">博古选择了正面强渡。</span><br>56000人死了。因为你选了正面强渡。<br>但你没有。博古选了。<br><span class="reality-sub">如果你是博古，你会选另一条路吗？</span>'
             },
             retreat: {
                 from: 86000, to: 45000,
-                duration: 1800,
+                duration: 1500,
                 text: '丢掉了所有辎重。大炮、印刷机、X光机……全部沉入江中。<span class="consequence-sub">但大多数人活了下来。</span>',
                 particleColor: 'gold',
                 particleCount: 400,
-                shakeIntensity: 3,
-                realityLine: '但历史没有如果。<br><span class="reality-highlight">博古选择了正面强渡。</span><br>这是真实发生的事。'
+                shakeIntensity: 2,
+                realityLine: '但历史没有如果。<br><span class="reality-highlight">博古选择了正面强渡。</span><br>41000人活了下来。但历史选了另一条路。<br><span class="reality-sub">如果你是博古，你会选另一条路吗？</span>'
             }
         };
 
@@ -924,38 +932,34 @@
             // 1. 数字递减
             await animateConsequenceNumber(config.from, config.to, config.duration);
 
-            // 2. 显示文字
-            await delay(500);
+            // 2. 文字 + 粒子 + 震动 同时触发
             consequenceText.classList.add('visible');
-
-            // 3. 粒子爆发
             burstParticlesFromCenter(config.particleCount, config.particleColor, path === 'attack' ? 'up' : 'down');
-
-            // 4. 震动
             document.body.classList.add('shake');
             setTimeout(() => {
                 document.body.classList.remove('shake');
             }, config.shakeIntensity * 100);
 
-            // 5. 等待
-            await delay(3000);
-
-            // 6. 血色渐染（仅攻击路线）
+            // 3. 攻击路线：血色渐染
             if (path === 'attack') {
+                await delay(300);
                 bloodWash.classList.add('active');
-                await delay(800);
+                await delay(600);
                 bloodWash.classList.remove('active');
             }
 
-            // 7. 隐藏后果内容，显示反转
+            // 4. 等待阅读
+            await delay(1800);
+
+            // 5. 切换到反转
             consequenceContent.style.opacity = '0';
-            await delay(800);
+            await delay(600);
             realityCheck.style.display = 'block';
-            await delay(300);
+            await delay(200);
             realityText.classList.add('visible');
 
-            // 8. 显示继续按钮
-            await delay(2500);
+            // 6. 显示继续按钮
+            await delay(2000);
             realityContinue.style.opacity = '1';
             realityContinue.addEventListener('click', finishConsequence, { once: true });
         }
