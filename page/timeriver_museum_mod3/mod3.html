@@ -555,6 +555,8 @@
 
     <script src="../filmstrip.js"></script>
     <script>
+        if (typeof filmstripTransition !== 'function') window.filmstripTransition = function(url) { window.location.href = url; };
+        if (typeof checkNarrativeTransition !== 'function') window.checkNarrativeTransition = function(cb) { if (cb) cb(); };
         checkNarrativeTransition();
 
         // 10个历史物件
@@ -741,7 +743,7 @@
             // 标记已探索（首次发现时播放光柱效果）
             if (!explored[index]) {
                 explored[index] = true;
-                localStorage.setItem('mod3_explored', JSON.stringify(explored));
+                try { localStorage.setItem('mod3_explored', JSON.stringify(explored)); } catch(e) {}
                 const el = document.querySelector(`.history-object[data-index="${index}"]`);
                 if (el) el.classList.add('explored');
                 updateCollect();
@@ -830,7 +832,7 @@
                         不再被动地打，而是主动地打。"
                     </div>
                     <div class="manuscript-source">—— 周恩来</div>
-                    <div class="manuscript-close" onclick="this.parentElement.parentElement.remove()">×</div>
+                    <div class="manuscript-close" onclick="this.closest('.manuscript-overlay').remove()">×</div>
                 </div>
             `;
             document.body.appendChild(hidden);

@@ -759,8 +759,8 @@
 
     <script src="../filmstrip.js"></script>
     <script>
-        checkNarrativeTransition();
-
+        if (typeof filmstripTransition !== 'function') window.filmstripTransition = function(url) { window.location.href = url; };
+        if (typeof checkNarrativeTransition !== 'function') window.checkNarrativeTransition = function(cb) { if (cb) cb(); };
         const scenes = document.querySelectorAll('.scene');
         const sceneIndex = new Map([...scenes].map((s, i) => [s, i]));
         const progressBar = document.getElementById('progressBar');
@@ -781,11 +781,12 @@
 
         // IntersectionObserver
         const autoFlipped = new Set();
+        const flipTimers = new Map();
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
+                const idx = sceneIndex.get(entry.target);
                 if (entry.isIntersecting) {
-                    const idx = sceneIndex.get(entry.target);
                     currentScene = idx;
                     entry.target.classList.add('active');
                     const progress = (idx / (scenes.length - 1)) * 100;
@@ -797,23 +798,33 @@
                         autoFlipped.add(idx);
                         const flipScene = entry.target.querySelector('.flip-scene');
                         // 1.2s后呼吸效果
-                        setTimeout(() => {
+                        const t1 = setTimeout(() => {
                             if (flipScene) flipScene.classList.add('breathing');
                         }, 1200);
                         // 2s后自动翻转
-                        setTimeout(() => {
+                        const t2 = setTimeout(() => {
                             entry.target.classList.add('flipped');
                         }, 2000);
+                        flipTimers.set(idx, [t1, t2]);
                     }
+                } else {
+                    // 场景离开视口时取消待执行的翻转定时器
+                    if (flipTimers.has(idx)) {
+                        flipTimers.get(idx).forEach(t => clearTimeout(t));
+                        flipTimers.delete(idx);
+                    }
+                    entry.target.classList.remove('active');
                 }
             });
-        }, { threshold: 0.5 });
+        }, { threshold: 0.3 });
 
         scenes.forEach(scene => observer.observe(scene));
 
-        // 初始激活
-        document.getElementById('scene-0').classList.add('active');
-        dots[0].classList.add('active');
+        // 初始激活（在叙述叠加层结束后）
+        checkNarrativeTransition(() => {
+            document.getElementById('scene-0').classList.add('active');
+            dots[0].classList.add('active');
+        });
     </script>
 </body>
 

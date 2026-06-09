@@ -3,8 +3,11 @@
  * 用法：filmstripTransition(targetUrl, narrativeText)
  *   narrativeText: 可选，转场后在目标页面显示的叙事文字
  */
+if (typeof window._filmstripLoaded === 'undefined') window._filmstripLoaded = true;
+let _filmstripActive = false;
 function filmstripTransition(targetUrl, narrativeText) {
-    if (document.querySelector('.filmstrip-overlay')) return;
+    if (_filmstripActive) return;
+    _filmstripActive = true;
 
     // 如果有叙事文字，存入 sessionStorage
     if (narrativeText) {
@@ -44,7 +47,10 @@ function checkNarrativeTransition(callback) {
     // 创建叙事遮罩
     const overlay = document.createElement('div');
     overlay.className = 'narrative-overlay';
-    overlay.innerHTML = `<div class="narrative-text">${text}</div>`;
+    const textEl = document.createElement('div');
+    textEl.className = 'narrative-text';
+    textEl.textContent = text;
+    overlay.appendChild(textEl);
     document.body.appendChild(overlay);
 
     // 淡入

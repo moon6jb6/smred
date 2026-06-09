@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>赓续红色血脉，传承奋斗精神</title>
+    <meta name="description" content="赓续红色血脉，传承奋斗精神 — 红色文化数字媒体互动体验网站，六次穿越，一段不能忘却的记忆">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⭐</text></svg>">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -339,11 +342,39 @@
             transition: all 0.4s ease;
         }
 
-        .marker:hover .marker-glow {
+        .marker:hover .marker-glow,
+        .marker:focus .marker-glow {
             background: rgba(255, 215, 0, 0.6);
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
             width: 16px;
             height: 16px;
+        }
+
+        /* 键盘焦点样式 */
+        .marker:focus {
+            outline: none;
+        }
+        .marker:focus .marker-post {
+            height: 70px;
+            background: linear-gradient(180deg, #ffd700, #8b6914);
+        }
+        .marker:focus .marker-sign {
+            border-color: rgba(255, 215, 0, 0.8);
+            background: linear-gradient(135deg, #3a2010, #6a4a2a);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.2);
+            transform: translateX(-50%) translateY(-5px);
+        }
+        .marker:focus .sign-icon {
+            color: #ffea00;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+        .marker:focus .sign-name {
+            color: #ffd700;
+        }
+        .marker:focus .sign-preview {
+            color: rgba(255, 215, 0, 0.7);
+            max-height: 50px;
+            margin-top: 6px;
         }
 
         /* 路标位置 — 沿路分布 */
@@ -494,12 +525,12 @@
     </div>
 
     <!-- 主场景 -->
-    <div class="main-scene" id="mainScene">
+    <main class="main-scene" id="mainScene">
         <!-- 题目 -->
-        <div class="scene-title">
+        <header class="scene-title">
             <h1>赓续红色血脉，传承奋斗精神</h1>
             <p>六次穿越，一段不能忘却的记忆</p>
-        </div>
+        </header>
 
         <!-- 道路 -->
         <div class="road-container">
@@ -512,7 +543,8 @@
         <div class="year-label year-end">2026</div>
 
         <!-- 路标 -->
-        <div class="marker marker-1" data-url="page/longfight_rouit_mod1/mod1.html">
+        <nav aria-label="历史模块导航">
+        <div class="marker marker-1" role="link" tabindex="0" aria-label="重走长征路 — 86000人出发，7000人到达" data-url="page/longfight_rouit_mod1/mod1.html">
             <div class="marker-sign">
                 <i class="sign-icon fas fa-route"></i>
                 <div class="sign-name">重走长征路</div>
@@ -522,7 +554,7 @@
             <div class="marker-glow"></div>
         </div>
 
-        <div class="marker marker-2" data-url="page/timeriver_museum_mod3/mod3.html">
+        <div class="marker marker-2" role="link" tabindex="0" aria-label="时间博物馆 — 10个历史物件，触摸历史的温度" data-url="page/timeriver_museum_mod3/mod3.html">
             <div class="marker-sign">
                 <i class="sign-icon fas fa-landmark"></i>
                 <div class="sign-name">时间博物馆</div>
@@ -532,7 +564,7 @@
             <div class="marker-glow"></div>
         </div>
 
-        <div class="marker marker-3" data-url="page/sacrifice_mod4/mod4.html">
+        <div class="marker marker-3" role="link" tabindex="0" aria-label="祭祀大典 — 黑暗中发现12颗星，点亮蜡烛" data-url="page/sacrifice_mod4/mod4.html">
             <div class="marker-sign">
                 <i class="sign-icon fas fa-hands-praying"></i>
                 <div class="sign-name">祭祀大典</div>
@@ -542,7 +574,7 @@
             <div class="marker-glow"></div>
         </div>
 
-        <div class="marker marker-4" data-url="page/greatman_mod5/mod5.html">
+        <div class="marker marker-4" role="link" tabindex="0" aria-label="新中国之父 — 三次选择，改变一个国家的命运" data-url="page/greatman_mod5/mod5.html">
             <div class="marker-sign">
                 <i class="sign-icon fas fa-user-tie"></i>
                 <div class="sign-name">新中国之父</div>
@@ -552,7 +584,7 @@
             <div class="marker-glow"></div>
         </div>
 
-        <div class="marker marker-5" data-url="page/china_power_mod6/mod6.html">
+        <div class="marker marker-5" role="link" tabindex="0" aria-label="中国力量 — 一条线、一张表、一张图" data-url="page/china_power_mod6/mod6.html">
             <div class="marker-sign">
                 <i class="sign-icon fas fa-globe-asia"></i>
                 <div class="sign-name">中国力量</div>
@@ -562,7 +594,7 @@
             <div class="marker-glow"></div>
         </div>
 
-        <div class="marker marker-6" data-url="page/chess_mod2/mod2.html">
+        <div class="marker marker-6" role="link" tabindex="0" aria-label="象棋之战 — 指挥一场战役，感受战争的代价" data-url="page/chess_mod2/mod2.html">
             <div class="marker-sign">
                 <i class="sign-icon fas fa-chess-board"></i>
                 <div class="sign-name">象棋之战</div>
@@ -571,14 +603,24 @@
             <div class="marker-post"></div>
             <div class="marker-glow"></div>
         </div>
+        </nav>
 
         <!-- 底部 -->
         <div class="scene-footer">
             <p>赓续红色血脉 · 传承奋斗精神 · 争做时代新人</p>
         </div>
-    </div>
+    </main>
 
     <script src="page/filmstrip.js"></script>
+    <script>
+        // Fallback if filmstrip.js fails to load
+        if (typeof filmstripTransition !== 'function') {
+            window.filmstripTransition = function(url) { window.location.href = url; };
+        }
+        if (typeof checkNarrativeTransition !== 'function') {
+            window.checkNarrativeTransition = function(cb) { if (cb) cb(); };
+        }
+    </script>
     <script>
         const introOverlay = document.getElementById('introOverlay');
         const introNumber = document.getElementById('introNumber');
@@ -637,14 +679,28 @@
             }, 1500);
         }
 
-        // 点击任意处进入
-        introOverlay.addEventListener('click', () => {
-            if (!introFinished) return;
+        // 点击/按键进入（动画中可跳过到结尾）
+        function skipOrEnter() {
+            if (!introFinished) {
+                introNumber.textContent = '7,000';
+                introNumber.classList.add('visible', 'gold');
+                introCountLabel.classList.add('visible');
+                introLines.forEach(line => line.classList.add('visible'));
+                introFinished = true;
+                return;
+            }
             introOverlay.classList.add('fade-out');
             mainScene.classList.add('visible');
             setTimeout(() => {
                 introOverlay.style.display = 'none';
             }, 1200);
+        }
+        introOverlay.addEventListener('click', skipOrEnter);
+        introOverlay.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                skipOrEnter();
+            }
         });
 
         // 路标点击 → 胶片转场（带叙事文字）
@@ -661,6 +717,14 @@
                 const url = marker.dataset.url;
                 const narrative = narratives[url] || '';
                 filmstripTransition(url, narrative);
+            });
+            marker.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const url = marker.dataset.url;
+                    const narrative = narratives[url] || '';
+                    filmstripTransition(url, narrative);
+                }
             });
         });
     </script>

@@ -9,7 +9,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./mod2.css">
 <script src="../filmstrip.js"></script>
-<script>checkNarrativeTransition();</script>
+<script>
+    if (typeof filmstripTransition !== 'function') window.filmstripTransition = function(url) { window.location.href = url; };
+    if (typeof checkNarrativeTransition !== 'function') window.checkNarrativeTransition = function(cb) { if (cb) cb(); };
+    checkNarrativeTransition();
+</script>
 <script>
     // PyScript loading timeout — 15秒后提示
     setTimeout(function() {
@@ -557,11 +561,30 @@
         
         def move_to(self, col, row):
             global selected_piece, current_turn, move_history
-            
+
             # 保存移动前的状态用于悔棋
             old_col, old_row = self.col, self.row
             captured_piece = get_piece_at(col, row)
-            
+
+            # 自查：模拟移动后检查己方将帅是否被将军或将帅对脸
+            original_col, original_row = self.col, self.row
+            self.col, self.row = col, row
+            captured_alive = False
+            if captured_piece:
+                captured_alive = captured_piece.alive
+                captured_piece.alive = False
+            if is_in_check(self.color) or check_flying_general():
+                # 撤销模拟
+                self.col, self.row = original_col, original_row
+                if captured_piece:
+                    captured_piece.alive = captured_alive
+                js.document.getElementById("status-msg").textContent = "违规！该走法会让将帅暴露或将帅对脸"
+                return
+            # 撤销模拟（正式走子逻辑下面再执行）
+            self.col, self.row = original_col, original_row
+            if captured_piece:
+                captured_piece.alive = captured_alive
+
             # 移动棋子到新位置
             left = col * CELL_SIZE
             top = row * CELL_SIZE
@@ -635,6 +658,94 @@
                 return piece
         return None
 
+    def setTimeout_once(callback, delay):
+        """创建一次性 setTimeout proxy，执行后自动销毁"""
+        def wrapper():
+            callback()
+            proxy.destroy()
+        proxy = create_proxy(wrapper)
+        js.setTimeout(proxy, delay)
+
+    def is_in_check(color):
+        """检查指定颜色的将/帅是否被将军（被敌方棋子攻击）"""
+        general = None
+        for piece in chess_pieces:
+            if piece.alive and piece.color == color and piece.name in ("帅", "将"):
+                general = piece
+                break
+        if not general:
+            return False
+        opponent_color = "black" if color == "red" else "red"
+        # 检查所有敌方棋子是否能攻击到将/帅
+        for piece in chess_pieces:
+            if not piece.alive or piece.color != opponent_color:
+                continue
+            # 计算该棋子的原始移动范围（不做递归过滤）
+            raw_moves = []
+            if piece.name in ("车", "俥", "军"):
+                directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                for dx, dy in directions:
+                    for i in range(1, max(BOARD_WIDTH, BOARD_HEIGHT)):
+                        nc, nr = piece.col + dx * i, piece.row + dy * i
+                        if not (0 <= nc < BOARD_WIDTH and 0 <= nr < BOARD_HEIGHT):
+                            break
+                        target = get_piece_at(nc, nr)
+                        if target:
+                            if target.color != piece.color:
+                                raw_moves.append((nc, nr))
+                            break
+                        raw_moves.append((nc, nr))
+            elif piece.name in ("马", "傌"):
+                moves = [(1,2),(2,1),(2,-1),(1,-2),(-1,-2),(-2,-1),(-2,1),(-1,2)]
+                blocks = [(0,1),(1,0),(1,0),(0,-1),(0,-1),(-1,0),(-1,0),(0,1)]
+                for i, (dx, dy) in enumerate(moves):
+                    nc, nr = piece.col + dx, piece.row + dy
+                    if not (0 <= nc < BOARD_WIDTH and 0 <= nr < BOARD_HEIGHT):
+                        continue
+                    bx, by = blocks[i]
+                    if get_piece_at(piece.col + bx, piece.row + by):
+                        continue
+                    target = get_piece_at(nc, nr)
+                    if not target or target.color != piece.color:
+                        raw_moves.append((nc, nr))
+            elif piece.name in ("炮", "砲"):
+                directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                for dx, dy in directions:
+                    found = False
+                    for i in range(1, max(BOARD_WIDTH, BOARD_HEIGHT)):
+                        nc, nr = piece.col + dx * i, piece.row + dy * i
+                        if not (0 <= nc < BOARD_WIDTH and 0 <= nr < BOARD_HEIGHT):
+                            break
+                        target = get_piece_at(nc, nr)
+                        if not found:
+                            if target:
+                                found = True
+                        else:
+                            if target:
+                                if target.color != piece.color:
+                                    raw_moves.append((nc, nr))
+                                break
+            elif piece.name in ("兵", "卒"):
+                if piece.color == "red":
+                    dirs = [(0, -1)]
+                    if piece.row < 5:
+                        dirs.extend([(1, 0), (-1, 0)])
+                else:
+                    dirs = [(0, 1)]
+                    if piece.row > 4:
+                        dirs.extend([(1, 0), (-1, 0)])
+                for dx, dy in dirs:
+                    nc, nr = piece.col + dx, piece.row + dy
+                    if 0 <= nc < BOARD_WIDTH and 0 <= nr < BOARD_HEIGHT:
+                        target = get_piece_at(nc, nr)
+                        if not target or target.color != piece.color:
+                            raw_moves.append((nc, nr))
+            # 将/帅和仕/士的攻击范围在九宫格内，对check影响较小，暂略
+            # 检查是否攻击到将/帅
+            if (general.col, general.row) in raw_moves:
+                return True
+        return False
+
     def update_piece_counter():
         counter_list = js.document.getElementById("piece-counter-list")
         counter_list.replaceChildren()
@@ -697,27 +808,33 @@
             js.alert("恭喜完成所有关卡！")
     def check_flying_general():
         """检查将帅是否对脸（在同一列且中间无棋子）"""
-        red_general = None
-        black_general = None
+        red_generals = []
+        black_generals = []
         for piece in chess_pieces:
             if not piece.alive:
                 continue
             if piece.color == "red" and piece.name == "帅":
-                red_general = piece
+                red_generals.append(piece)
             elif piece.color == "black" and piece.name == "将":
-                black_general = piece
-        if not red_general or not black_general:
+                black_generals.append(piece)
+        if not red_generals or not black_generals:
             return False
-        if red_general.col != black_general.col:
-            return False
-        # 同一列，检查中间是否有棋子
-        col = red_general.col
-        min_row = min(red_general.row, black_general.row)
-        max_row = max(red_general.row, black_general.row)
-        for piece in chess_pieces:
-            if piece.alive and piece.col == col and min_row < piece.row < max_row:
-                return False  # 中间有棋子，不算对脸
-        return True  # 将帅对脸
+        # 检查所有红帅-黑将组合
+        for rg in red_generals:
+            for bg in black_generals:
+                if rg.col != bg.col:
+                    continue
+                col = rg.col
+                min_row = min(rg.row, bg.row)
+                max_row = max(rg.row, bg.row)
+                blocked = False
+                for piece in chess_pieces:
+                    if piece.alive and piece.col == col and min_row < piece.row < max_row:
+                        blocked = True
+                        break
+                if not blocked:
+                    return True
+        return False
 
     def check_game_end():
         global user_max_level
@@ -729,19 +846,18 @@
             # 红方失败 - 显示终局冲击
             ending = js.document.getElementById("endingLose")
             ending.style.display = "flex"
-            js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
+            setTimeout_once(lambda: ending.classList.add("active"), 50)
         elif check_flying_general():
-            # current_turn已切换，所以上一手走棋的人违规
-            violator = "黑" if current_turn == "red" else "红"
-            winner = current_turn  # 当前回合方是赢家
-            loser = violator
-            js.document.getElementById("status-msg").textContent = f"将帅对脸！{loser}方违规判负"
+            # 将帅对脸：当前回合方的将帅暴露，判负
+            violator = "红" if current_turn == "red" else "黑"
+            winner = "黑" if current_turn == "red" else "红"
+            js.document.getElementById("status-msg").textContent = f"将帅对脸！{violator}方违规判负"
             if winner == "红":
                 ending = js.document.getElementById("endingWin")
             else:
                 ending = js.document.getElementById("endingLose")
             ending.style.display = "flex"
-            js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
+            setTimeout_once(lambda: ending.classList.add("active"), 50)
         elif not black_general_exists:
             # 红方胜利 - 显示终局冲击
             level_info = level_data[current_level]
@@ -752,7 +868,7 @@
             js.document.getElementById("endingWinText").textContent = tips
             js.document.getElementById("endingWinSub").textContent = tit
             ending.style.display = "flex"
-            js.setTimeout(create_proxy(lambda: ending.classList.add("active")), 50)
+            setTimeout_once(lambda: ending.classList.add("active"), 50)
 
             # 更新用户进度
             if current_level >= user_max_level:
@@ -998,23 +1114,32 @@
         else:
             js.document.getElementById("status-msg").textContent = "关卡数据不存在"
 
+    level_select_proxies = []
+
     def show_level_select():
         modal = js.document.getElementById("level-select-modal")
         modal.style.display = "flex"
-        
+
+        # 清理旧 proxy
+        for proxy in level_select_proxies:
+            proxy.destroy()
+        level_select_proxies.clear()
+
         # 生成关卡按钮
         levels_grid = js.document.getElementById("levels-grid")
         levels_grid.innerHTML = ""
-        
+
         for i in range(total_levels):
             btn = js.document.createElement("button")
             btn.className = "level-btn"
             btn.textContent = str(i)
-            
+
             # 检查关卡是否解锁
             if i <= user_max_level:
                 btn.classList.add("unlocked")
-                btn.addEventListener("click", create_proxy(lambda e, level=i: select_level(level)))
+                proxy = create_proxy(lambda e, level=i: select_level(level))
+                level_select_proxies.append(proxy)
+                btn.addEventListener("click", proxy)
             else:
                 btn.classList.add("locked")
                 btn.title = "请先通过前置关卡"

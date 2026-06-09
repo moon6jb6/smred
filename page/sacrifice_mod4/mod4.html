@@ -19,7 +19,12 @@
             font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
-            cursor: none;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            body {
+                cursor: none;
+            }
         }
 
         /* 开场黑屏 */
@@ -486,6 +491,8 @@
 
     <script src="../filmstrip.js"></script>
     <script>
+        if (typeof filmstripTransition !== 'function') window.filmstripTransition = function(url) { window.location.href = url; };
+        if (typeof checkNarrativeTransition !== 'function') window.checkNarrativeTransition = function(cb) { if (cb) cb(); };
         checkNarrativeTransition();
 
         // 开场黑屏 + 呼吸声
@@ -496,6 +503,10 @@
         function startBreathing() {
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                // 确保 AudioContext 处于运行状态
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
                 // 创建噪声源
                 const bufferSize = audioCtx.sampleRate * 2;
                 const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
@@ -551,6 +562,17 @@
             startBreathing();
         }, 500);
 
+        // 用户首次交互时恢复被阻止的 AudioContext
+        function resumeAudio() {
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            document.removeEventListener('click', resumeAudio);
+            document.removeEventListener('touchstart', resumeAudio);
+        }
+        document.addEventListener('click', resumeAudio);
+        document.addEventListener('touchstart', resumeAudio);
+
         setTimeout(() => {
             mod4Intro.classList.add('fade-out');
             setTimeout(() => mod4Intro.remove(), 1500);
@@ -581,7 +603,8 @@
         ];
 
         // 状态
-        const discovered = JSON.parse(localStorage.getItem('mod4_candles') || '{}');
+        let discovered = {};
+        try { discovered = JSON.parse(localStorage.getItem('mod4_candles') || '{}'); } catch(e) { discovered = {}; }
         const container = document.getElementById('silContainer');
         const glowOuter = document.getElementById('glowOuter');
         const glowMid = document.getElementById('glowMid');
@@ -726,7 +749,7 @@
             if (!discoveredSet.has(index)) {
                 discoveredSet.add(index);
                 discovered[index] = true;
-                localStorage.setItem('mod4_candles', JSON.stringify(discovered));
+                try { localStorage.setItem('mod4_candles', JSON.stringify(discovered)); } catch(e) {}
 
                 el.classList.add('discovered');
 

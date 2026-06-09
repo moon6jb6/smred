@@ -745,6 +745,8 @@
 
     <script src="../filmstrip.js"></script>
     <script>
+        if (typeof filmstripTransition !== 'function') window.filmstripTransition = function(url) { window.location.href = url; };
+        if (typeof checkNarrativeTransition !== 'function') window.checkNarrativeTransition = function(cb) { if (cb) cb(); };
         checkNarrativeTransition();
 
         // 状态
@@ -775,10 +777,10 @@
         }
 
         function saveChoiceState(path) {
-            sessionStorage.setItem('mod1_xiangjiang_choice', JSON.stringify({
+            try { sessionStorage.setItem('mod1_xiangjiang_choice', JSON.stringify({
                 path: path,
                 timestamp: Date.now()
-            }));
+            })); } catch(e) {}
         }
 
         // IntersectionObserver 检测当前阶段
@@ -935,10 +937,13 @@
             // 2. 文字 + 粒子 + 震动 同时触发
             consequenceText.classList.add('visible');
             burstParticlesFromCenter(config.particleCount, config.particleColor, path === 'attack' ? 'up' : 'down');
-            document.body.classList.add('shake');
-            setTimeout(() => {
-                document.body.classList.remove('shake');
-            }, config.shakeIntensity * 100);
+            const activeStage = document.querySelector('.stage.active');
+            if (activeStage) {
+                activeStage.classList.add('shake');
+                setTimeout(() => {
+                    activeStage.classList.remove('shake');
+                }, config.shakeIntensity * 100);
+            }
 
             // 3. 攻击路线：血色渐染
             if (path === 'attack') {
