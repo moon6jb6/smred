@@ -319,6 +319,69 @@
             letter-spacing: 1px;
         }
 
+        /* ========== 出生年关联 ========== */
+        .birth-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: #0a0a0a;
+        }
+
+        .birth-prompt {
+            font-size: 1.1rem;
+            color: rgba(255, 215, 0, 0.5);
+            letter-spacing: 2px;
+            line-height: 2;
+            margin-bottom: 20px;
+        }
+
+        .birth-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            font-size: 1.3rem;
+            padding: 10px 20px;
+            border-radius: 8px;
+            width: 120px;
+            text-align: center;
+            font-family: inherit;
+        }
+
+        .birth-input:focus {
+            outline: none;
+            border-color: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+        }
+
+        .birth-result {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: rgba(255, 215, 0, 0.5);
+            line-height: 2;
+            min-height: 2em;
+        }
+
+        .birth-highlight-node {
+            position: relative;
+        }
+
+        .birth-highlight-node::after {
+            content: '你在这里';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #ffd700;
+            white-space: nowrap;
+            letter-spacing: 2px;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
         /* ========== 底部导航 ========== */
         .bottom-nav {
             text-align: center;
@@ -531,6 +594,16 @@
         <div class="ending-sub">赓续红色血脉 · 传承奋斗精神</div>
     </div>
 
+    <!-- 出生年关联 -->
+    <div class="birth-section" id="birthSection">
+        <div class="birth-prompt">你是哪一年出生的？<br><span style="font-size:0.8rem;color:rgba(255,255,255,0.3)">找到你在我这条时间线上的位置</span></div>
+        <input type="number" class="birth-input" id="birthInput" min="1949" max="2026" placeholder="2004">
+        <div class="birth-result" id="birthResult"></div>
+    </div>
+
+    <!-- 粒子 Canvas -->
+    <canvas id="particleCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;"></canvas>
+
     <!-- 底部导航 -->
     <div class="bottom-nav">
         <a href="../chess_mod2/mod2.html" onclick="event.preventDefault(); filmstripTransition('../chess_mod2/mod2.html', '而今天的中国，需要你理解——什么是胜利。');">
@@ -607,7 +680,106 @@
                 }
             }
             requestAnimationFrame(update);
+
+            // 粒子爆发
+            const rect = el.getBoundingClientRect();
+            emitParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 12);
         }
+
+        // ========== 数据粒子系统 ==========
+        const pCanvas = document.getElementById('particleCanvas');
+        const pCtx = pCanvas.getContext('2d');
+        let particles = [];
+
+        function resizePCanvas() {
+            pCanvas.width = window.innerWidth;
+            pCanvas.height = window.innerHeight;
+        }
+        resizePCanvas();
+        window.addEventListener('resize', resizePCanvas);
+
+        function emitParticles(x, y, count) {
+            for (let i = 0; i < count; i++) {
+                const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+                const speed = 2 + Math.random() * 3;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 1.5,
+                    size: 2 + Math.random() * 3,
+                    life: 1,
+                    decay: 0.02 + Math.random() * 0.015,
+                    color: `hsl(${40 + Math.random() * 15}, 70%, ${55 + Math.random() * 20}%)`
+                });
+            }
+        }
+
+        function animateParticles() {
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.08;
+                p.life -= p.decay;
+                if (p.life > 0) {
+                    pCtx.globalAlpha = p.life;
+                    pCtx.fillStyle = p.color;
+                    pCtx.beginPath();
+                    pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+                    pCtx.fill();
+                }
+            });
+            pCtx.globalAlpha = 1;
+            particles = particles.filter(p => p.life > 0);
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // ========== 出生年关联 ==========
+        const birthInput = document.getElementById('birthInput');
+        const birthResult = document.getElementById('birthResult');
+        const timelineYears = [1949, 1964, 1970, 1978, 1988, 1997, 2001, 2008, 2010, 2020, 2026];
+        const timelineLabels = ['新中国成立', '原子弹', '卫星', '改革开放', '经济发展', '香港回归', '加入WTO', '北京奥运', '上海世博', '全面脱贫', '今天'];
+
+        birthInput.addEventListener('input', () => {
+            const val = parseInt(birthInput.value);
+            if (!val || val < 1949 || val > 2026) {
+                birthResult.textContent = '';
+                document.querySelectorAll('.timeline-node').forEach(n => n.classList.remove('birth-highlight-node'));
+                return;
+            }
+
+            // 找最近的年份
+            let closestIdx = 0;
+            let closestDist = Infinity;
+            timelineYears.forEach((y, i) => {
+                const dist = Math.abs(y - val);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestIdx = i;
+                }
+            });
+
+            // 高亮对应的 timeline-node
+            document.querySelectorAll('.timeline-node').forEach(n => n.classList.remove('birth-highlight-node'));
+            const nodes = document.querySelectorAll('.timeline-node');
+            if (nodes[closestIdx]) {
+                nodes[closestIdx].classList.add('birth-highlight-node');
+                nodes[closestIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            const gap = val - timelineYears[closestIdx];
+            const label = timelineLabels[closestIdx];
+            if (gap === 0) {
+                birthResult.innerHTML = `你出生的那年，${label}。<br>你是这段历史的一部分。`;
+            } else {
+                birthResult.innerHTML = `你出生时，距离${label}已过去 ${gap} 年。<br>你继承了这段历史的全部重量。`;
+            }
+
+            // 粒子爆发
+            const rect = birthInput.getBoundingClientRect();
+            emitParticles(rect.left + rect.width / 2, rect.top, 20);
+        });
     </script>
 </body>
 

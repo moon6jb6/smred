@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史显影 — 赓续红色血脉</title>
+    <meta name="description" content="用触摸让历史显影，用碎片拼出真相。">
+    <link rel="stylesheet" href="mod10.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+    <a href="#photo-area" class="skip-link">跳转到内容</a>
+
+    <!-- 叙事文字 -->
+    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite">
+        有些历史，被时间冲淡了。<br>用你的手指，<br>让它们重新显影。
+    </div>
+
+    <!-- 进度 -->
+    <div class="progress-bar" aria-label="显影进度">
+        <div id="progress-fill" class="progress-fill"></div>
+        <span id="progress-text" class="progress-text">0 / 6</span>
+    </div>
+
+    <!-- 拍立得照片区域 -->
+    <main id="photo-area" class="photo-area" aria-label="历史照片显影"></main>
+
+    <!-- 照片详情面板 -->
+    <div id="detail-panel" class="detail-panel" role="dialog" aria-modal="true">
+        <div class="detail-inner">
+            <div id="detail-photo" class="detail-photo"></div>
+            <h2 id="detail-title" class="detail-title"></h2>
+            <p id="detail-date" class="detail-date"></p>
+            <p id="detail-desc" class="detail-desc"></p>
+            <div id="detail-handwriting" class="detail-handwriting">
+                <svg id="handwriting-svg" viewBox="0 0 300 80" class="handwriting-svg"></svg>
+            </div>
+            <button id="detail-close" class="detail-close-btn">继续显影</button>
+        </div>
+    </div>
+
+    <!-- 结尾 -->
+    <div id="ending" class="ending" aria-label="结束">
+        <h2 class="ending-title">历史已经显影</h2>
+        <p class="ending-text">
+            6张照片，6个瞬间。<br>
+            每一张都是真实的记录。<br><br>
+            有些东西，时间冲不淡。<br>
+            因为有人记得。
+        </p>
+        <div class="ending-grid" id="ending-grid"></div>
+    </div>
+
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/audio-engine.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <script src="mod10.js"></script>
+    <script>createNavigation(10);</script>
+</body>
+</html>

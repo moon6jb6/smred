@@ -1,0 +1,79 @@
+/* ============================================================
+   模块底部导航 — 返回首页 + 下一个穿越
+   ============================================================ */
+
+.module-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.95));
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.module-nav a,
+.module-nav button {
+    pointer-events: auto;
+    color: var(--gold);
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.4rem;
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.module-nav a:hover,
+.module-nav button:hover,
+.module-nav a:focus-visible,
+.module-nav button:focus-visible {
+    background: var(--gold);
+    color: var(--bg-primary);
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(201, 169, 110, 0.3);
+}
+
+.module-nav .nav-home::before {
+    content: '\2190';  /* ← */
+    font-size: 1.1em;
+}
+
+.module-nav .nav-next::after {
+    content: '\2192';  /* → */
+    font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+    .module-nav {
+        padding: 0.8rem 1rem;
+    }
+    .module-nav a,
+    .module-nav button {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .module-nav {
+        padding: 0.6rem 0.6rem;
+        gap: 0.5rem;
+    }
+    .module-nav a,
+    .module-nav button {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+}

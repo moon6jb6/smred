@@ -1,0 +1,355 @@
+/* ============================================================
+   Mod8 暗线 — 黑暗潜伏 + 元游戏三层揭示
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    background: #000;
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* 叙事文字 */
+.narrative-text {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.98); color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem; letter-spacing: 2px; line-height: 2.2; text-align: center;
+    padding: 2rem; z-index: 5000;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.narrative-text.visible { opacity: 1; visibility: visible; }
+
+/* 黑暗层 */
+.dark-layer {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1000;
+    background: #000;
+    cursor: none;
+}
+
+.light-circle {
+    position: fixed;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(201, 169, 110, 0.35) 0%, rgba(201, 169, 110, 0.1) 30%, transparent 70%);
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    mix-blend-mode: screen;
+    transition: width 0.3s, height 0.3s;
+}
+.light-circle.large {
+    width: 200px; height: 200px;
+}
+
+/* 发现计数 */
+.found-counter {
+    position: fixed; top: 1rem; left: 1.5rem; z-index: 1100;
+    font-size: 0.8rem; color: var(--text-dim);
+    opacity: 0; transition: opacity 0.5s;
+}
+.found-counter.visible { opacity: 1; }
+.found-counter span { color: var(--gold); font-weight: 600; }
+
+/* 主内容 */
+.main-content {
+    position: relative; z-index: 500;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* 线索元素 */
+.clue {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    cursor: pointer;
+    pointer-events: auto;
+}
+.clue.revealed { opacity: 1; }
+
+.clue-text {
+    font-size: 0.85rem; color: var(--gold-dim);
+    line-height: 1.6; max-width: 200px;
+    text-shadow: 0 0 10px rgba(201, 169, 110, 0.3);
+}
+.clue-photo {
+    width: 80px; height: 80px;
+    border: 1px solid rgba(201, 169, 110, 0.2);
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    filter: grayscale(0.8) brightness(0.6);
+    transition: filter 0.5s;
+}
+.clue-photo.revealed-active {
+    filter: grayscale(0) brightness(1);
+}
+.clue-code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem; color: var(--red-accent);
+    letter-spacing: 1px;
+    opacity: 0.6;
+}
+.clue-object {
+    width: 50px; height: 50px;
+    border: 1px solid rgba(201, 169, 110, 0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(201, 169, 110, 0.05);
+}
+
+/* 故事面板 */
+.story-panel {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-secondary);
+    border: 1px solid rgba(201, 169, 110, 0.15);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 420px; width: 90%;
+    z-index: 2000;
+    text-align: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.5s, visibility 0.5s;
+}
+.story-panel.active { opacity: 1; visibility: visible; }
+
+.story-text {
+    font-size: 0.95rem; color: var(--text-primary);
+    line-height: 2; margin-bottom: 1.5rem;
+}
+.story-close-btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.85rem; font-family: inherit;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold); border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+}
+.story-close-btn:hover { background: var(--gold); color: #000; }
+
+/* ========== 第二层：故障效果 ========== */
+.glitch-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #000; z-index: 8000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+.glitch-overlay.active {
+    opacity: 1; visibility: visible;
+    animation: glitchBg 0.1s infinite;
+}
+
+@keyframes glitchBg {
+    0% { background: #000; }
+    20% { background: #0a0000; }
+    40% { background: #000; }
+    60% { background: #000a00; }
+    80% { background: #000; }
+    100% { background: #000005; }
+}
+
+.glitch-text {
+    display: flex; flex-direction: column; gap: 1.5rem;
+    text-align: center;
+}
+.glitch-line {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem; color: var(--red-accent);
+    letter-spacing: 1px;
+    opacity: 0;
+    animation: none;
+}
+.glitch-overlay.active .glitch-line:nth-child(1) { animation: glitchLine 0.5s 0.3s forwards; }
+.glitch-overlay.active .glitch-line:nth-child(2) { animation: glitchLine 0.5s 1.2s forwards; }
+.glitch-overlay.active .glitch-line:nth-child(3) { animation: glitchLine 0.5s 2.4s forwards; }
+.glitch-overlay.active .glitch-line:nth-child(4) { animation: glitchLine 0.5s 3.6s forwards; }
+
+@keyframes glitchLine {
+    0% { opacity: 0; transform: translateX(-5px); }
+    20% { opacity: 1; transform: translateX(3px); }
+    40% { opacity: 0.7; transform: translateX(-2px); }
+    60% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+/* 屏幕撕裂效果 */
+.glitch-overlay::before {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(201, 169, 110, 0.03) 2px,
+        rgba(201, 169, 110, 0.03) 4px
+    );
+    pointer-events: none;
+}
+
+/* ========== 第三层：真相揭示 ========== */
+.truth-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.97); z-index: 9000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 1s, visibility 1s;
+}
+.truth-overlay.active { opacity: 1; visibility: visible; }
+
+.truth-content {
+    max-width: 500px; width: 90%; text-align: center;
+    padding: 2rem;
+}
+.truth-title {
+    font-size: 1.6rem; color: var(--gold); font-weight: 600;
+    letter-spacing: 4px; margin-bottom: 2rem;
+}
+.truth-text {
+    font-size: 1rem; color: var(--text-primary);
+    line-height: 2.2; margin-bottom: 2rem;
+}
+.truth-names {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    justify-content: center; margin-bottom: 2rem;
+}
+.truth-name {
+    font-size: 0.8rem; color: var(--gold-dim);
+    padding: 0.3rem 0.8rem;
+    border: 1px solid rgba(201, 169, 110, 0.15);
+    border-radius: 3px;
+    opacity: 0;
+    animation: nameFade 0.5s forwards;
+}
+.truth-name:nth-child(1) { animation-delay: 0.5s; }
+.truth-name:nth-child(2) { animation-delay: 0.8s; }
+.truth-name:nth-child(3) { animation-delay: 1.1s; }
+.truth-name:nth-child(4) { animation-delay: 1.4s; }
+.truth-name:nth-child(5) { animation-delay: 1.7s; }
+.truth-name:nth-child(6) { animation-delay: 2.0s; }
+
+@keyframes nameFade {
+    to { opacity: 1; }
+}
+
+.truth-quote {
+    font-size: 0.9rem; color: var(--text-secondary);
+    font-style: italic; line-height: 1.8;
+    margin-bottom: 2rem;
+    opacity: 0; animation: nameFade 1s 2.5s forwards;
+}
+
+/* 行为追踪揭示 */
+.truth-tracking {
+    margin-bottom: 2rem;
+    text-align: left;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    opacity: 0; animation: nameFade 1s 3s forwards;
+}
+.tracking-title {
+    font-size: 0.8rem; color: rgba(255,215,0,0.4);
+    letter-spacing: 2px; margin-bottom: 12px;
+    text-transform: uppercase;
+}
+.tracking-data {
+    font-size: 0.85rem; color: rgba(255,255,255,0.5);
+    padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-family: 'Courier New', monospace;
+}
+.tracking-reveal {
+    font-size: 0.9rem; color: var(--gold);
+    margin-top: 12px; line-height: 1.8;
+}
+.truth-btn {
+    padding: 0.8rem 2rem;
+    font-size: 0.95rem; font-family: inherit;
+    background: var(--gold); color: #000;
+    border: none; border-radius: 4px;
+    cursor: pointer;
+    opacity: 0; animation: nameFade 0.5s 3s forwards;
+    transition: background 0.3s;
+}
+.truth-btn:hover { background: var(--gold-bright); }
+
+/* ========== 结尾纪念碑 ========== */
+.memorial-end {
+    max-width: 600px; margin: 0 auto;
+    padding: 3rem 1.5rem 8rem; text-align: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 1s, visibility 1s;
+}
+.memorial-end.active { opacity: 1; visibility: visible; }
+
+.memorial-title {
+    font-size: 1.3rem; color: var(--gold);
+    letter-spacing: 3px; margin-bottom: 2rem;
+}
+.memorial-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+}
+.memorial-card {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(201, 169, 110, 0.1);
+    border-radius: 6px; padding: 1rem;
+    text-align: center;
+}
+.memorial-card .card-name {
+    font-size: 0.85rem; color: var(--gold); font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+.memorial-card .card-role {
+    font-size: 0.7rem; color: var(--text-dim);
+    margin-bottom: 0.2rem;
+}
+.memorial-card .card-years {
+    font-size: 0.7rem; color: var(--text-secondary);
+}
+.memorial-quote {
+    font-size: 0.9rem; color: var(--text-secondary);
+    font-style: italic; line-height: 1.8;
+    margin-top: 1rem;
+}
+
+/* 移动端触控提示 */
+.touch-hint {
+    position: fixed; bottom: 5rem; left: 50%;
+    transform: translateX(-50%); z-index: 1100;
+    font-size: 0.75rem; color: var(--text-dim);
+    opacity: 0; transition: opacity 0.5s;
+    pointer-events: none;
+}
+.touch-hint.visible { opacity: 1; }
+
+/* 无障碍 */
+@media (prefers-reduced-motion: reduce) {
+    .glitch-overlay.active { animation: none; }
+    .glitch-overlay.active .glitch-line { animation: none; opacity: 1; }
+    .glitch-overlay::before { display: none; }
+    .light-circle { transition: none; }
+    .clue { transition: none; }
+    .truth-name, .truth-quote, .truth-btn { animation: none; opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .light-circle { width: 80px; height: 80px; }
+    .light-circle.large { width: 140px; height: 140px; }
+    .memorial-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+    .truth-content { padding: 1.5rem 1rem; }
+    .truth-title { font-size: 1.3rem; }
+}

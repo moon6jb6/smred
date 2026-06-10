@@ -1,0 +1,481 @@
+/* ============================================================
+   Mod14 最后一步 — 冲锋→倒下→纪念
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+}
+
+/* ============================================================
+   开场黑屏
+   ============================================================ */
+
+.intro-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    transition: opacity 1s ease;
+}
+.intro-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+.intro-text {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 3px;
+    line-height: 2.5;
+    opacity: 0;
+    transition: opacity 1.5s ease;
+}
+.intro-text.visible {
+    opacity: 1;
+}
+.start-btn {
+    margin-top: 2rem;
+    padding: 0.8rem 2.5rem;
+    font-size: 1rem;
+    font-family: inherit;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 1s ease, background 0.3s, color 0.3s;
+}
+.start-btn.visible {
+    opacity: 1;
+}
+.start-btn:hover {
+    background: var(--gold);
+    color: #000;
+}
+
+/* ============================================================
+   冲锋画面
+   ============================================================ */
+
+.charge-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 8000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+.charge-screen.active {
+    opacity: 1;
+}
+
+/* 地面线 */
+.ground-line {
+    position: absolute;
+    bottom: 30%;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.3), transparent);
+}
+
+/* 剪影人物 */
+.charge-silhouette {
+    position: absolute;
+    bottom: 32%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 80px;
+    background: var(--text-dim);
+    clip-path: polygon(35% 0%, 65% 0%, 70% 15%, 80% 15%, 80% 35%, 60% 35%, 60% 50%, 75% 50%, 75% 100%, 25% 100%, 25% 50%, 40% 50%, 40% 35%, 20% 35%, 20% 15%, 30% 15%);
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+.charge-silhouette.visible {
+    opacity: 0.6;
+}
+.charge-silhouette.running {
+    animation: run-forward 3s ease-in forwards;
+}
+.charge-silhouette.fallen {
+    animation: fall-down 1s ease-in forwards;
+}
+
+@keyframes run-forward {
+    0% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
+    100% { transform: translateX(-50%) translateY(-100px) scale(0.5); opacity: 0.3; }
+}
+@keyframes fall-down {
+    0% { transform: translateX(-50%) rotate(0deg); opacity: 0.6; }
+    100% { transform: translateX(-50%) rotate(90deg) translateY(20px); opacity: 0; }
+}
+
+/* 冲锋文字 */
+.charge-text {
+    position: absolute;
+    bottom: 15%;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 2px;
+    opacity: 0;
+    transition: opacity 1s;
+}
+.charge-text.visible {
+    opacity: 1;
+}
+
+/* 心跳屏闪 */
+.heartbeat-flash {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(139, 0, 0, 0.05);
+    pointer-events: none;
+    z-index: 7999;
+    opacity: 0;
+}
+.heartbeat-flash.pulse {
+    animation: heartbeat-pulse 0.3s ease-out;
+}
+@keyframes heartbeat-pulse {
+    0% { opacity: 0.3; }
+    100% { opacity: 0; }
+}
+
+/* ============================================================
+   纪念画面
+   ============================================================ */
+
+.memorial-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    z-index: 8500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.5s ease, visibility 1.5s ease;
+}
+.memorial-screen.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 光点→光束→文字 */
+.light-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold-bright);
+    box-shadow: 0 0 20px var(--gold-bright), 0 0 40px var(--gold);
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.8s, transform 0.8s;
+}
+.light-dot.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+.light-dot.expand {
+    width: 2px;
+    height: 60px;
+    border-radius: 1px;
+    box-shadow: 0 0 30px var(--gold-bright), 0 0 60px var(--gold);
+    transition: width 0.8s, height 0.8s;
+}
+
+.martyr-name {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 700;
+    color: var(--gold-bright);
+    letter-spacing: 6px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s ease, transform 1s ease;
+    text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+}
+.martyr-name.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.martyr-info {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 2;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+.martyr-info.visible {
+    opacity: 1;
+}
+.martyr-info .info-line {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.martyr-info .info-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 名字回响 */
+.name-echo {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+.echo-name {
+    position: absolute;
+    font-size: 1rem;
+    color: rgba(201, 169, 110, 0.08);
+    letter-spacing: 2px;
+    white-space: nowrap;
+    animation: echo-fade 8s ease-out forwards;
+}
+@keyframes echo-fade {
+    0% { opacity: 0.08; }
+    100% { opacity: 0.02; }
+}
+
+/* ============================================================
+   再起按钮
+   ============================================================ */
+
+.rise-again {
+    margin-top: 2rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+.rise-again.visible {
+    opacity: 1;
+}
+
+.rise-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--gold-bright);
+    box-shadow: 0 0 15px var(--gold), 0 0 30px rgba(201, 169, 110, 0.3);
+    cursor: pointer;
+    margin: 0 auto 0.5rem;
+    transition: transform 0.3s;
+    animation: rise-pulse 2s infinite;
+}
+.rise-dot:hover {
+    transform: scale(1.5);
+}
+@keyframes rise-pulse {
+    0%, 100% { box-shadow: 0 0 15px var(--gold), 0 0 30px rgba(201, 169, 110, 0.3); }
+    50% { box-shadow: 0 0 25px var(--gold-bright), 0 0 50px rgba(201, 169, 110, 0.5); }
+}
+
+.rise-label {
+    font-size: 0.85rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+}
+
+/* ============================================================
+   站起动画
+   ============================================================ */
+
+.stand-up-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    z-index: 9500;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1s ease, visibility 1s ease;
+}
+.stand-up-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.stand-silhouette {
+    width: 50px;
+    height: 100px;
+    background: var(--gold);
+    clip-path: polygon(35% 0%, 65% 0%, 70% 15%, 80% 15%, 80% 35%, 60% 35%, 60% 50%, 75% 50%, 75% 100%, 25% 100%, 25% 50%, 40% 50%, 40% 35%, 20% 35%, 20% 15%, 30% 15%);
+    opacity: 0;
+    transform: translateY(50px) scaleY(0.3);
+    transition: opacity 1.5s ease, transform 1.5s ease;
+    margin-bottom: 20%;
+}
+.stand-silhouette.rising {
+    opacity: 0.7;
+    transform: translateY(0) scaleY(1);
+}
+
+/* ============================================================
+   纪念碑结尾
+   ============================================================ */
+
+.monument-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #000;
+    z-index: 9600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.5s ease, visibility 1.5s ease;
+}
+.monument-screen.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.monument {
+    width: min(80vw, 300px);
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, var(--bg-secondary), #0a0a0a);
+    padding: 2rem 1.5rem;
+    margin-bottom: 2rem;
+}
+.monument-title {
+    font-size: 1rem;
+    color: var(--gold);
+    letter-spacing: 4px;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--gold-dim);
+    padding-bottom: 0.8rem;
+}
+.monument-names {
+    max-height: 200px;
+    overflow-y: auto;
+}
+.monument-name {
+    font-size: 0.8rem;
+    color: var(--gold-dim);
+    line-height: 2;
+    letter-spacing: 1px;
+}
+
+.monument-count {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 700;
+    color: var(--gold-bright);
+    margin-bottom: 0.5rem;
+}
+.monument-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.monument-return {
+    margin-top: 2rem;
+    padding: 0.7rem 2rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+}
+.monument-return:hover {
+    background: var(--gold);
+    color: #000;
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .martyr-name { letter-spacing: 3px; }
+    .monument { width: 90vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .charge-silhouette.running,
+    .charge-silhouette.fallen,
+    .heartbeat-flash.pulse,
+    .rise-dot,
+    .echo-name { animation: none; }
+    .light-dot { transition: none; }
+}
+
+/* ========== 名字输入弹窗 ========== */
+.name-ask-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.95); z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 1s ease;
+}
+.name-ask-modal.active { opacity: 1; }
+.name-ask-content { text-align: center; }
+.name-ask-text {
+    font-size: 1.2rem; color: rgba(255,215,0,0.6);
+    letter-spacing: 3px; margin-bottom: 2rem; line-height: 2;
+}
+.name-ask-input {
+    background: transparent; border: none; border-bottom: 1px solid rgba(255,215,0,0.3);
+    color: #ffd700; font-size: 1.5rem; padding: 8px 0; text-align: center;
+    font-family: inherit; width: 200px; letter-spacing: 4px;
+}
+.name-ask-input:focus {
+    outline: none; border-bottom-color: #ffd700;
+}
+.name-ask-btn {
+    display: block; margin: 2rem auto 0;
+    background: transparent; border: 1px solid rgba(255,215,0,0.3);
+    color: rgba(255,215,0,0.6); padding: 10px 30px; font-size: 1rem;
+    font-family: inherit; letter-spacing: 3px; cursor: pointer;
+    transition: all 0.3s;
+}
+.name-ask-btn:hover {
+    border-color: #ffd700; color: #ffd700;
+    box-shadow: 0 0 20px rgba(255,215,0,0.2);
+}
+
+/* 用户名字特殊样式 */
+.monument-name-user {
+    color: #ffd700 !important;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+}

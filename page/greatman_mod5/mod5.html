@@ -594,6 +594,89 @@
                 padding: 40px 20px;
             }
         }
+
+        /* ========== 签名场景 ========== */
+        .scene-signature {
+            background: radial-gradient(ellipse at center, #1a0800 0%, #0a0a0a 70%);
+            flex-direction: column;
+        }
+
+        .signature-content {
+            text-align: center;
+            max-width: 650px;
+            width: 90%;
+        }
+
+        .signature-prompt {
+            font-size: 1.15rem;
+            color: rgba(255, 215, 0, 0.6);
+            letter-spacing: 2px;
+            line-height: 2;
+            margin-bottom: 30px;
+        }
+
+        .signature-canvas {
+            width: 100%;
+            max-width: 600px;
+            height: 200px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .signature-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .sig-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.6);
+            padding: 10px 28px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .sig-btn:hover {
+            border-color: rgba(255, 215, 0, 0.4);
+            color: rgba(255, 215, 0, 0.8);
+        }
+
+        .sig-btn-primary {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+        }
+
+        .signature-result {
+            margin-top: 25px;
+            font-size: 1rem;
+            color: rgba(255, 215, 0, 0.5);
+            line-height: 2;
+            min-height: 3em;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .signature-result.visible {
+            opacity: 1;
+        }
+
+        .sig-stroke-count {
+            font-size: 2.5rem;
+            color: #ffd700;
+            font-weight: bold;
+            display: block;
+            margin: 10px 0;
+        }
     </style>
 </head>
 
@@ -757,6 +840,19 @@
         </a>
     </div>
 
+    <!-- 签名场景 -->
+    <div class="scene scene-signature" id="scene-5">
+        <div class="signature-content">
+            <div class="signature-prompt">毛泽东一生题写了无数笔墨。<br>现在，轮到你了。</div>
+            <canvas id="signatureCanvas" class="signature-canvas" width="600" height="300"></canvas>
+            <div class="signature-controls">
+                <button id="sigClear" class="sig-btn">重写</button>
+                <button id="sigDone" class="sig-btn sig-btn-primary">完成</button>
+            </div>
+            <div id="sigResult" class="signature-result"></div>
+        </div>
+    </div>
+
     <script src="../filmstrip.js"></script>
     <script>
         if (typeof filmstripTransition !== 'function') window.filmstripTransition = function(url) { window.location.href = url; };
@@ -825,6 +921,104 @@
             document.getElementById('scene-0').classList.add('active');
             dots[0].classList.add('active');
         });
+
+        // ========== 签名 Canvas ==========
+        (function() {
+            const canvas = document.getElementById('signatureCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            let strokeCount = 0;
+            let totalLength = 0;
+            let lastX, lastY;
+
+            function resize() {
+                const rect = canvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.scale(dpr, dpr);
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const t = e.touches ? e.touches[0] : e;
+                return { x: t.clientX - rect.left, y: t.clientY - rect.top };
+            }
+
+            function onStart(e) {
+                e.preventDefault();
+                drawing = true;
+                strokeCount++;
+                const p = getPos(e);
+                lastX = p.x; lastY = p.y;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+                ctx.lineWidth = 2.5;
+            }
+
+            function onMove(e) {
+                if (!drawing) return;
+                e.preventDefault();
+                const p = getPos(e);
+                const dx = p.x - lastX;
+                const dy = p.y - lastY;
+                totalLength += Math.sqrt(dx * dx + dy * dy);
+                // 笔画粗细随速度变化
+                const speed = Math.sqrt(dx * dx + dy * dy);
+                ctx.lineWidth = Math.max(1.5, 4 - speed * 0.05);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                lastX = p.x; lastY = p.y;
+            }
+
+            function onEnd() { drawing = false; }
+
+            canvas.addEventListener('mousedown', onStart);
+            canvas.addEventListener('mousemove', onMove);
+            canvas.addEventListener('mouseup', onEnd);
+            canvas.addEventListener('mouseleave', onEnd);
+            canvas.addEventListener('touchstart', onStart, { passive: false });
+            canvas.addEventListener('touchmove', onMove, { passive: false });
+            canvas.addEventListener('touchend', onEnd);
+
+            // 重写
+            document.getElementById('sigClear').addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                strokeCount = 0;
+                totalLength = 0;
+                document.getElementById('sigResult').classList.remove('visible');
+            });
+
+            // 完成
+            document.getElementById('sigDone').addEventListener('click', () => {
+                if (strokeCount === 0) return;
+                const result = document.getElementById('sigResult');
+                // 毛泽东书法特点：笔力遒劲，气势磅礴
+                const avgLen = totalLength / strokeCount;
+                const verdict = strokeCount > 8
+                    ? '笔画丰富，有毛泽东书法的豪放之气。'
+                    : strokeCount > 4
+                    ? '笔画简洁有力，有务实之风。'
+                    : '笔画凝练，大道至简。';
+
+                result.innerHTML =
+                    '你写了 <span class="sig-stroke-count">' + strokeCount + '</span> 笔' +
+                    '<br>总笔迹长度约 ' + Math.round(totalLength) + ' 像素' +
+                    '<br><br>' + verdict +
+                    '<br><br><span style="font-size:0.85rem;color:rgba(255,255,255,0.3)">' +
+                    '毛泽东的书法，笔走龙蛇，是他性格的写照——<br>' +
+                    '不拘一格，大开大合，敢于打破常规。</span>';
+                result.classList.add('visible');
+            });
+        })();
     </script>
 </body>
 

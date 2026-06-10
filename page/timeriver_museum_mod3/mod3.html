@@ -235,6 +235,91 @@
             background: rgba(255, 215, 0, 0.08);
         }
 
+        /* 3D 悬浮旋转 */
+        .object-icon {
+            perspective: 300px;
+            transform-style: preserve-3d;
+        }
+
+        .history-object:hover .object-icon .artifact-shape {
+            animation: artifactFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes artifactFloat {
+            0%, 100% { transform: rotateY(0deg) translateY(0); }
+            25% { transform: rotateY(15deg) translateY(-4px); }
+            50% { transform: rotateY(0deg) translateY(-8px); }
+            75% { transform: rotateY(-15deg) translateY(-4px); }
+        }
+
+        /* 出生年高亮 */
+        .history-object.birth-highlight .object-icon {
+            border-color: rgba(255, 215, 0, 0.9) !important;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.15) !important;
+            background: rgba(255, 215, 0, 0.15) !important;
+        }
+
+        .history-object.birth-highlight .object-label {
+            color: #ffd700 !important;
+        }
+
+        .history-object.birth-highlight::after {
+            content: '你的时代';
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: #ffd700;
+            white-space: nowrap;
+            letter-spacing: 2px;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* 出生年输入区 */
+        .birth-section {
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 10px;
+        }
+
+        .birth-section label {
+            color: rgba(255, 215, 0, 0.5);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+
+        .birth-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+            font-size: 1.2rem;
+            padding: 8px 16px;
+            border-radius: 8px;
+            width: 100px;
+            text-align: center;
+            margin: 10px;
+            font-family: inherit;
+        }
+
+        .birth-input:focus {
+            outline: none;
+            border-color: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
+        }
+
+        .birth-result {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            margin-top: 8px;
+            min-height: 1.5em;
+        }
+
         .history-object.explored .object-icon {
             border-color: rgba(255, 215, 0, 0.5);
             background: rgba(255, 215, 0, 0.1);
@@ -530,6 +615,13 @@
             你触摸过的每一个物件，都是河流中的一滴水。
         </div>
         <div class="summary-hint" id="summaryHint">探索全部 10 个历史瞬间，解锁完整寄语</div>
+    </div>
+
+    <!-- 出生年关联 -->
+    <div class="birth-section">
+        <label>输入你的出生年，找到属于你的历史坐标</label><br>
+        <input type="number" class="birth-input" id="birthInput" min="1920" max="2026" placeholder="2004">
+        <div class="birth-result" id="birthResult"></div>
     </div>
 
     <!-- 底部导航 -->
@@ -859,6 +951,49 @@
 
         // 初始化
         createObjects();
+
+        // 出生年关联
+        const birthInput = document.getElementById('birthInput');
+        const birthResult = document.getElementById('birthResult');
+        const objectYears = objects.map(o => parseInt(o.year));
+
+        birthInput.addEventListener('input', () => {
+            const val = parseInt(birthInput.value);
+            if (!val || val < 1920 || val > 2026) {
+                birthResult.textContent = '';
+                document.querySelectorAll('.history-object').forEach(el => el.classList.remove('birth-highlight'));
+                return;
+            }
+
+            // 找最近的物件
+            let closestIdx = 0;
+            let closestDist = Infinity;
+            objectYears.forEach((y, i) => {
+                const dist = Math.abs(y - val);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestIdx = i;
+                }
+            });
+
+            // 高亮
+            document.querySelectorAll('.history-object').forEach(el => el.classList.remove('birth-highlight'));
+            const target = document.querySelector(`.history-object[data-index="${closestIdx}"]`);
+            if (target) {
+                target.classList.add('birth-highlight');
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            const obj = objects[closestIdx];
+            const gap = val - objectYears[closestIdx];
+            if (gap === 0) {
+                birthResult.textContent = `你出生的那年，正是${obj.name}发生的年份。`;
+            } else if (gap > 0) {
+                birthResult.textContent = `距离${obj.name}已过去 ${gap} 年。你出生时，这段历史已经过去了 ${gap} 年。`;
+            } else {
+                birthResult.textContent = `${obj.name}发生在你出生前 ${-gap} 年。那是你祖辈的时代。`;
+            }
+        });
     </script>
 </body>
 

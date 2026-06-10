@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暗线 — 赓续红色血脉</title>
+    <meta name="description" content="在黑暗中潜伏，寻找真相。">
+    <link rel="stylesheet" href="mod8.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">跳转到内容</a>
+
+    <!-- 叙事文字 -->
+    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite">
+        黑暗中，有人在看着你。<br>不要发出声音。<br>用光找到他们。
+    </div>
+
+    <!-- 光源跟随层 -->
+    <div id="dark-layer" class="dark-layer" aria-label="黑暗探索区域，移动鼠标或手指发现隐藏内容">
+        <div id="light-circle" class="light-circle"></div>
+    </div>
+
+    <!-- 发现计数 -->
+    <div id="found-counter" class="found-counter" aria-live="polite">
+        已发现 <span id="found-num">0</span> / <span id="total-num">0</span>
+    </div>
+
+    <!-- 主内容区（隐藏的线索） -->
+    <main id="main-content" class="main-content">
+        <!-- 线索会通过JS动态生成 -->
+    </main>
+
+    <!-- 故事面板 -->
+    <div id="story-panel" class="story-panel" role="dialog" aria-modal="true">
+        <div id="story-text" class="story-text"></div>
+        <button id="story-close" class="story-close-btn">继续探索</button>
+    </div>
+
+    <!-- 第二层：系统故障覆盖 -->
+    <div id="glitch-overlay" class="glitch-overlay" aria-live="assertive">
+        <div class="glitch-text">
+            <span class="glitch-line">系统检测到异常访问...</span>
+            <span class="glitch-line">正在清除浏览记录...</span>
+            <span class="glitch-line">错误 0x4F2A：数据已损坏</span>
+            <span class="glitch-line">警告：你正在被监控</span>
+        </div>
+    </div>
+
+    <!-- 第三层：真相揭示 -->
+    <div id="truth-overlay" class="truth-overlay" role="dialog" aria-modal="true">
+        <div class="truth-content">
+            <h2 class="truth-title">你通过了考验</h2>
+            <p class="truth-text">
+                那些在黑暗中潜伏的人，<br>
+                他们的一生都在"故障"中度过。<br><br>
+                身份是假的，名字是假的，<br>
+                连死亡都可能是假的。<br><br>
+                但他们的信仰，从未改变。
+            </p>
+            <div class="truth-names" id="truth-names"></div>
+            <p class="truth-quote">
+                "你们的名字无人知晓，<br>
+                你们的功勋永世长存。"
+            </p>
+            <div id="truth-tracking" class="truth-tracking"></div>
+            <button id="truth-btn" class="truth-btn">我记住了</button>
+        </div>
+    </div>
+
+    <!-- 结尾纪念碑 -->
+    <div id="memorial-end" class="memorial-end" aria-label="纪念">
+        <h2 class="memorial-title">暗线英雄</h2>
+        <div class="memorial-grid" id="memorial-grid"></div>
+        <p class="memorial-quote">他们没有站在阳光下，却照亮了整个时代。</p>
+    </div>
+
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/audio-engine.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <script src="mod8.js"></script>
+    <script>createNavigation(8);</script>
+</body>
+</html>

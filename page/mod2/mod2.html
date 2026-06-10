@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>象棋之战 — 赓续红色血脉</title>
+    <meta name="description" content="以象棋模拟历史战役，感受战争的代价。">
+    <link rel="stylesheet" href="mod2.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+    <a href="#chess-board" class="skip-link">跳转到棋盘</a>
+
+    <!-- 叙事文字 -->
+    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite"></div>
+
+    <!-- 关卡标题 -->
+    <header class="level-header">
+        <h1 id="level-name" class="level-name">教学关 — 学会走棋</h1>
+    </header>
+
+    <!-- 游戏信息 -->
+    <div id="game-info" class="game-info" role="status" aria-live="polite">红方走棋（你的回合）</div>
+
+    <!-- 代价显示 -->
+    <div id="cost-display" class="cost-display" aria-live="polite"></div>
+
+    <!-- 棋盘 -->
+    <main class="chess-board-wrapper">
+        <div id="chess-board" class="chess-board" role="grid" aria-label="象棋棋盘"></div>
+    </main>
+
+    <!-- 控制按钮 -->
+    <div class="game-controls">
+        <button id="undo-btn" class="btn-undo" aria-label="悔棋，撤回上一步">悔棋</button>
+    </div>
+
+    <!-- 终局覆盖层 -->
+    <div id="endgame-overlay" class="endgame-overlay" role="dialog" aria-modal="true" aria-labelledby="endgame-title">
+        <h2 id="endgame-title" class="endgame-title"></h2>
+        <p id="endgame-text" class="endgame-text"></p>
+        <button id="endgame-btn" class="endgame-btn"></button>
+    </div>
+
+    <!-- 公共JS -->
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <script src="../../shared/js/audio-engine.js"></script>
+    <!-- 模块JS -->
+    <script src="mod2.js"></script>
+    <script>createNavigation(2);</script>
+</body>
+</html>

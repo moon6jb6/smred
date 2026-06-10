@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电报战士 — 赓续红色血脉</title>
+    <meta name="description" content="调频接收历史电报，解密战争通讯。">
+    <link rel="stylesheet" href="mod7.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+    <a href="#radio-station" class="skip-link">跳转到电台</a>
+
+    <!-- 叙事文字 -->
+    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite">
+        电波穿过黑夜。<br>有些信号，永远不会被听到。<br>但今天，你能听到。
+    </div>
+
+    <!-- 头部 -->
+    <header class="mod7-header">
+        <h1>电报战士</h1>
+        <p>旋转旋钮调频，接收历史电报</p>
+    </header>
+
+    <main>
+        <!-- 电台界面 -->
+        <section id="radio-station" class="radio-station" aria-label="电台调频">
+            <div id="freq-display" class="frequency-display">5.0<span class="frequency-unit">MHz</span></div>
+            <div class="signal-bar"><div id="signal-fill" class="signal-fill"></div></div>
+            <canvas id="spectrum-canvas" class="spectrum-canvas" aria-hidden="true"></canvas>
+            <input type="range" id="freq-slider" class="freq-slider" min="4.0" max="10.0" step="0.1" value="5.0"
+                   aria-label="频率调节，从4.0到10.0MHz">
+            <div id="tuning-knob" class="tuning-knob" role="slider" aria-label="调频旋钮" aria-valuenow="5.0" tabindex="0">
+                <div class="knob-indicator"></div>
+            </div>
+            <div id="radio-status" class="radio-status">搜索信号中...</div>
+        </section>
+
+        <!-- 电报内容 -->
+        <section id="telegram-panel" class="telegram-panel" aria-label="电报内容">
+            <div class="telegram-header">
+                <span id="tg-date" class="telegram-date"></span>
+                <span id="tg-sender" class="telegram-sender"></span>
+            </div>
+            <div id="tg-body" class="telegram-body"></div>
+        </section>
+
+        <!-- 电台日记 -->
+        <section class="diary-section" aria-label="电台日记">
+            <h2 class="diary-title">电台日记</h2>
+            <div id="diary-list"></div>
+        </section>
+    </main>
+
+    <!-- 紧急电报 -->
+    <div id="emergency-overlay" class="emergency-overlay" role="alertdialog" aria-modal="true" aria-label="紧急电报">
+        <div class="emergency-text">紧急电报</div>
+        <div id="emergency-countdown" class="emergency-countdown">10</div>
+        <button id="emergency-recv" class="emergency-btn" aria-label="接收紧急电报">接收</button>
+    </div>
+
+    <!-- 公共JS -->
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/audio-engine.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <!-- 模块JS -->
+    <script src="mod7.js"></script>
+    <script>createNavigation(7);</script>
+</body>
+</html>

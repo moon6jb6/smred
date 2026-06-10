@@ -1,0 +1,255 @@
+/* ============================================================
+   Mod10 历史显影 — 拍立得摩擦显影 + 碎片拼合
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* 叙事文字 */
+.narrative-text {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.95); color: rgba(255, 255, 255, 0.85);
+    font-size: 1.1rem; letter-spacing: 2px; line-height: 2.2; text-align: center;
+    padding: 2rem; z-index: 5000;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.narrative-text.visible { opacity: 1; visibility: visible; }
+
+/* 进度条 */
+.progress-bar {
+    position: fixed; top: 0; left: 0; width: 100%; height: 3px;
+    background: rgba(201, 169, 110, 0.1); z-index: 100;
+}
+.progress-fill {
+    height: 100%; width: 0;
+    background: var(--gold);
+    transition: width 0.5s ease;
+}
+.progress-text {
+    position: fixed; top: 0.8rem; right: 1.5rem;
+    font-size: 0.75rem; color: var(--text-dim); z-index: 100;
+}
+
+/* 照片区域 */
+.photo-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    max-width: 900px; margin: 0 auto;
+    padding: 4rem 1.5rem 8rem;
+}
+
+/* 拍立得卡片 */
+.polaroid {
+    background: #f5f0e8;
+    border-radius: 2px;
+    padding: 12px 12px 50px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    transform: rotate(var(--rotate, 0deg));
+    transition: transform 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+.polaroid:hover { transform: rotate(0deg) scale(1.02); }
+.polaroid:nth-child(2n) { --rotate: -2deg; }
+.polaroid:nth-child(3n) { --rotate: 1.5deg; }
+.polaroid:nth-child(5n) { --rotate: -1deg; }
+
+/* 照片区域（需要摩擦的部分） */
+.photo-frame {
+    position: relative;
+    width: 100%; aspect-ratio: 4/3;
+    overflow: hidden;
+    background: #d4cfc5;
+    border-radius: 1px;
+}
+
+.photo-content {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 3rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.photo-content.revealed { opacity: 1; }
+
+.photo-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+.photo-label {
+    font-size: 0.8rem; color: #555;
+    font-family: 'Courier New', monospace;
+}
+
+/* 遮罩层（需要被摩擦擦除） */
+.photo-mask {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #c8c2b8;
+    cursor: pointer;
+    touch-action: none;
+}
+.photo-mask.developing {
+    background: linear-gradient(135deg, #c8c2b8 0%, #b8b2a8 50%, #a8a298 100%);
+}
+
+/* 摩擦进度指示 */
+.friction-progress {
+    position: absolute; bottom: 8px; right: 8px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.5rem; color: #fff;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.friction-progress.visible { opacity: 1; }
+
+/* 拍立得底部文字区 */
+.polaroid-caption {
+    position: absolute; bottom: 8px; left: 12px; right: 12px;
+    text-align: center;
+}
+.polaroid-caption .caption-date {
+    font-size: 0.65rem; color: #888;
+    font-family: 'Courier New', monospace;
+}
+.polaroid-caption .caption-text {
+    font-size: 0.75rem; color: #444;
+    margin-top: 2px;
+    font-family: 'Courier New', monospace;
+    opacity: 0; transition: opacity 0.5s;
+}
+.polaroid-caption .caption-text.visible { opacity: 1; }
+
+/* 已完成标记 */
+.polaroid.done {
+    box-shadow: 0 4px 20px rgba(201, 169, 110, 0.2);
+}
+.polaroid.done .photo-mask {
+    opacity: 0; transition: opacity 0.5s;
+    pointer-events: none;
+}
+
+/* ========== 详情面板 ========== */
+.detail-panel {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92); z-index: 6000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.5s, visibility 0.5s;
+}
+.detail-panel.active { opacity: 1; visibility: visible; }
+
+.detail-inner {
+    max-width: 450px; width: 90%;
+    text-align: center; padding: 2rem;
+}
+.detail-photo {
+    font-size: 4rem; margin-bottom: 1.5rem;
+}
+.detail-title {
+    font-size: 1.2rem; color: var(--gold);
+    font-weight: 600; margin-bottom: 0.5rem;
+}
+.detail-date {
+    font-size: 0.75rem; color: var(--text-dim);
+    margin-bottom: 1rem;
+}
+.detail-desc {
+    font-size: 0.9rem; color: var(--text-primary);
+    line-height: 2; margin-bottom: 1.5rem;
+}
+
+/* 手写动画 */
+.handwriting-svg {
+    width: 100%; max-width: 300px; height: 80px;
+    margin: 0 auto 1.5rem;
+    display: block;
+}
+.handwriting-path {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: var(--path-length);
+    stroke-dashoffset: var(--path-length);
+    transition: stroke-dashoffset 1.5s ease;
+}
+.handwriting-path.animate {
+    stroke-dashoffset: 0;
+}
+
+.detail-close-btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.85rem; font-family: inherit;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold); border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+}
+.detail-close-btn:hover { background: var(--gold); color: #000; }
+
+/* ========== 结尾 ========== */
+.ending {
+    max-width: 700px; margin: 0 auto;
+    padding: 3rem 1.5rem 8rem; text-align: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 1s, visibility 1s;
+}
+.ending.active { opacity: 1; visibility: visible; }
+.ending-title {
+    font-size: 1.3rem; color: var(--gold);
+    letter-spacing: 3px; margin-bottom: 1.5rem;
+}
+.ending-text {
+    font-size: 0.95rem; color: var(--text-primary);
+    line-height: 2; margin-bottom: 2rem;
+}
+.ending-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+.ending-thumb {
+    background: #f5f0e8;
+    border-radius: 2px;
+    padding: 8px 8px 30px;
+    font-size: 2rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+.ending-thumb .thumb-caption {
+    font-size: 0.6rem; color: #666;
+    font-family: 'Courier New', monospace;
+    margin-top: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .polaroid { transition: none; }
+    .photo-content { transition: none; }
+    .photo-mask { transition: none; }
+    .handwriting-path { transition: none; stroke-dashoffset: 0; }
+}
+
+@media (max-width: 768px) {
+    .photo-area {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.5rem; padding: 3rem 1rem 6rem;
+    }
+    .ending-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+    .photo-area { grid-template-columns: 1fr; gap: 1.2rem; }
+    .polaroid { padding: 8px 8px 40px; }
+}

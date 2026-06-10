@@ -710,7 +710,13 @@
         // 触摸支持
         document.addEventListener('touchmove', (e) => {
             const t = e.touches[0];
-            document.querySelectorAll('.silhouette').forEach(el => {
+            glowOuter.style.left = t.clientX + 'px';
+            glowOuter.style.top = t.clientY + 'px';
+            glowMid.style.left = t.clientX + 'px';
+            glowMid.style.top = t.clientY + 'px';
+            glowInner.style.left = t.clientX + 'px';
+            glowInner.style.top = t.clientY + 'px';
+            cachedSilhouettes.forEach(el => {
                 const rect = el.getBoundingClientRect();
                 const cx = rect.left + rect.width / 2;
                 const cy = rect.top + rect.height / 2;
@@ -722,6 +728,42 @@
                 }
             });
         });
+
+        // 设备倾斜控制光晕（移动端）
+        if (window.DeviceOrientationEvent) {
+            let tiltActive = false;
+            const startTilt = (e) => {
+                if (e.gamma === null) return;
+                tiltActive = true;
+                const x = window.innerWidth * (0.5 + e.gamma / 60);
+                const y = window.innerHeight * (0.5 + e.beta / 60);
+                glowOuter.style.left = x + 'px';
+                glowOuter.style.top = y + 'px';
+                glowMid.style.left = x + 'px';
+                glowMid.style.top = y + 'px';
+                glowInner.style.left = x + 'px';
+                glowInner.style.top = y + 'px';
+                cachedSilhouettes.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    const cx = rect.left + rect.width / 2;
+                    const cy = rect.top + rect.height / 2;
+                    const dist = Math.hypot(x - cx, y - cy);
+                    if (dist < 180) el.classList.add('glow');
+                    else el.classList.remove('glow');
+                });
+            };
+            // iOS 13+ 需要请求权限
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                document.addEventListener('click', function reqPerm() {
+                    DeviceOrientationEvent.requestPermission().then(r => {
+                        if (r === 'granted') window.addEventListener('deviceorientation', startTilt);
+                    });
+                    document.removeEventListener('click', reqPerm);
+                }, { once: true });
+            } else {
+                window.addEventListener('deviceorientation', startTilt);
+            }
+        }
 
         // 点击剪影 → 语录浮现（无需弹层）
         function revealQuote(index) {
@@ -772,16 +814,50 @@
             }, 5000);
         }
 
-        // 全部点亮 → 终极信息
+        // 全部点亮 → 终极信息 + 光晕汇聚纪念碑
         function showFinalMessage() {
-            // 先隐藏语录
             quoteFloat.classList.remove('active');
-            finalMessage.classList.add('active');
 
-            // 8秒后淡出
+            // 光晕汇聚到屏幕中央
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            glowOuter.style.transition = 'all 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            glowMid.style.transition = 'all 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            glowInner.style.transition = 'all 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            glowOuter.style.left = cx + 'px';
+            glowOuter.style.top = cy + 'px';
+            glowOuter.style.width = '600px';
+            glowOuter.style.height = '600px';
+            glowOuter.style.background = 'radial-gradient(circle, rgba(255,215,0,0.08) 0%, transparent 60%)';
+            glowMid.style.left = cx + 'px';
+            glowMid.style.top = cy + 'px';
+            glowMid.style.width = '400px';
+            glowMid.style.height = '400px';
+            glowMid.style.background = 'radial-gradient(circle, rgba(255,215,0,0.12) 0%, rgba(255,180,0,0.05) 40%, transparent 70%)';
+            glowInner.style.left = cx + 'px';
+            glowInner.style.top = cy + 'px';
+            glowInner.style.width = '200px';
+            glowInner.style.height = '200px';
+            glowInner.style.background = 'radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(255,180,0,0.08) 40%, transparent 70%)';
+
+            // 剪影们缓缓走向中心
+            cachedSilhouettes.forEach((el, i) => {
+                el.style.transition = 'all 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                el.style.left = '50%';
+                el.style.top = '50%';
+                el.style.opacity = '0.3';
+                el.style.transform = 'translate(-50%, -50%) scale(0.6)';
+            });
+
+            setTimeout(() => finalMessage.classList.add('active'), 2000);
+
             setTimeout(() => {
                 finalMessage.classList.remove('active');
-            }, 8000);
+                // 恢复光晕跟随
+                glowOuter.style.transition = 'left 0.4s ease-out, top 0.4s ease-out';
+                glowMid.style.transition = 'left 0.25s ease-out, top 0.25s ease-out';
+                glowInner.style.transition = 'left 0.12s ease-out, top 0.12s ease-out';
+            }, 10000);
         }
 
         // 初始化

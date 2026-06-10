@@ -1,0 +1,253 @@
+/* ============================================================
+   Mod11 历史星图 — 地铁线路图式因果链
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* 叙事文字 */
+.narrative-text {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.95); color: rgba(255, 255, 255, 0.85);
+    font-size: 1.1rem; letter-spacing: 2px; line-height: 2.2; text-align: center;
+    padding: 2rem; z-index: 5000;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.narrative-text.visible { opacity: 1; visibility: visible; }
+
+/* 图例 */
+.legend {
+    position: fixed; top: 1rem; left: 1.5rem; z-index: 100;
+    display: flex; gap: 1rem; flex-wrap: wrap;
+}
+.legend-item {
+    display: flex; align-items: center; gap: 0.3rem;
+    font-size: 0.7rem; color: var(--text-dim);
+}
+.legend-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+}
+.legend-line {
+    width: 16px; height: 2px;
+    background: linear-gradient(90deg, var(--gold-dim), transparent);
+}
+
+/* 发现计数 */
+.discovery-counter {
+    position: fixed; top: 1rem; right: 1.5rem; z-index: 100;
+    font-size: 0.75rem; color: var(--text-dim);
+}
+.discovery-counter span { color: var(--gold); font-weight: 600; }
+
+/* 星图容器 */
+.star-map {
+    width: 100%; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem 1rem;
+    overflow-x: auto;
+}
+
+.map-svg {
+    width: 100%; max-width: 800px;
+    height: auto;
+}
+
+/* SVG节点样式 */
+.node-circle {
+    fill: rgba(201, 169, 110, 0.15);
+    stroke: var(--gold-dim);
+    stroke-width: 1.5;
+    cursor: pointer;
+    transition: fill 0.3s, stroke 0.3s, r 0.3s;
+}
+.node-circle:hover {
+    fill: rgba(201, 169, 110, 0.3);
+    stroke: var(--gold);
+}
+.node-circle.explored {
+    fill: var(--gold);
+    stroke: var(--gold-bright);
+}
+
+.node-label {
+    fill: var(--text-dim);
+    font-size: 10px;
+    text-anchor: middle;
+    pointer-events: none;
+    transition: fill 0.3s;
+}
+.node-label.explored { fill: var(--gold); }
+
+.node-year {
+    fill: var(--text-dim);
+    font-size: 8px;
+    text-anchor: middle;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* 连线 */
+.link-line {
+    stroke: rgba(201, 169, 110, 0.1);
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 4 4;
+    transition: stroke 0.5s, stroke-dasharray 0.5s;
+}
+.link-line.discovered {
+    stroke: rgba(201, 169, 110, 0.5);
+    stroke-dasharray: none;
+    stroke-width: 2.5;
+}
+
+/* 因果连线动画 */
+.link-animated {
+    stroke: var(--gold);
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 8 4;
+    animation: flowDash 1.5s linear infinite;
+}
+@keyframes flowDash {
+    to { stroke-dashoffset: -24; }
+}
+
+/* ========== 节点详情 ========== */
+.node-detail {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9); z-index: 6000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.5s, visibility 0.5s;
+}
+.node-detail.active { opacity: 1; visibility: visible; }
+
+.detail-inner {
+    max-width: 450px; width: 90%; text-align: center;
+    padding: 2rem;
+}
+.detail-year {
+    font-size: 0.75rem; color: var(--gold-dim);
+    letter-spacing: 2px; margin-bottom: 0.5rem;
+}
+.detail-title {
+    font-size: 1.3rem; color: var(--gold);
+    font-weight: 600; margin-bottom: 1rem;
+}
+.detail-desc {
+    font-size: 0.9rem; color: var(--text-primary);
+    line-height: 2; margin-bottom: 1.5rem;
+}
+.detail-causes {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    justify-content: center; margin-bottom: 1.5rem;
+}
+.cause-tag {
+    font-size: 0.7rem; color: var(--gold-dim);
+    padding: 0.3rem 0.6rem;
+    border: 1px solid rgba(201, 169, 110, 0.2);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+}
+.cause-tag:hover { background: var(--gold); color: #000; }
+.cause-tag::before { content: '← '; }
+
+.detail-btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.85rem; font-family: inherit;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold); border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+}
+.detail-btn:hover { background: var(--gold); color: #000; }
+
+/* ========== 结尾 ========== */
+.ending {
+    max-width: 600px; margin: 0 auto;
+    padding: 3rem 1.5rem 8rem; text-align: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 1s, visibility 1s;
+}
+.ending.active { opacity: 1; visibility: visible; }
+.ending-title {
+    font-size: 1.3rem; color: var(--gold);
+    letter-spacing: 3px; margin-bottom: 1.5rem;
+}
+.ending-text {
+    font-size: 0.95rem; color: var(--text-primary);
+    line-height: 2; margin-bottom: 2rem;
+}
+.ending-stats {
+    display: flex; gap: 2rem; justify-content: center;
+    flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-num {
+    font-size: 2rem; font-weight: 700;
+    color: var(--gold);
+}
+.stat-label {
+    font-size: 0.75rem; color: var(--text-dim);
+    margin-top: 0.3rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .link-animated { animation: none; stroke-dasharray: none; }
+    .node-circle, .node-label { transition: none; }
+}
+
+@media (max-width: 768px) {
+    .legend { flex-direction: column; gap: 0.3rem; }
+    .star-map { padding: 4rem 0.5rem 2rem; }
+}
+
+@media (max-width: 480px) {
+    .detail-inner { padding: 1.5rem 1rem; }
+    .detail-title { font-size: 1.1rem; }
+}
+
+/* ========== 个人历史图谱 ========== */
+.personal-section {
+    text-align: center; padding: 3rem 1.5rem;
+}
+.personal-label {
+    font-size: 0.9rem; color: rgba(255,215,0,0.4); letter-spacing: 2px;
+}
+.personal-input {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2);
+    color: var(--gold); font-size: 1.2rem; padding: 8px 16px; border-radius: 8px;
+    width: 100px; text-align: center; margin-top: 12px; font-family: inherit;
+}
+.personal-input:focus {
+    outline: none; border-color: rgba(255,215,0,0.6);
+    box-shadow: 0 0 15px rgba(255,215,0,0.15);
+}
+.personal-result {
+    margin-top: 15px; font-size: 0.85rem; color: var(--text-secondary); line-height: 2;
+}
+
+/* 节点生命期状态 */
+.node-group.in-lifetime .node-circle {
+    fill: rgba(255,215,0,0.15); stroke: var(--gold); stroke-width: 2;
+}
+.node-group.in-lifetime .node-label {
+    fill: var(--gold);
+}
+.node-group.before-lifetime .node-circle {
+    opacity: 0.4;
+}
+.node-group.before-lifetime .node-label {
+    opacity: 0.4;
+}

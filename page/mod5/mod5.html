@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三次选择 — 赓续红色血脉</title>
+    <meta name="description" content="毛泽东的三次关键选择，改变了一个国家的命运。">
+    <link rel="stylesheet" href="mod5.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+    <a href="#scene-0" class="skip-link">跳转到内容</a>
+
+    <!-- 叙事文字 -->
+    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite"></div>
+
+    <!-- 进度条 -->
+    <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div id="progress-fill" class="progress-fill"></div>
+    </div>
+
+    <!-- 场景指示器 -->
+    <div class="scene-indicators" aria-hidden="true">
+        <div class="scene-dot active"></div>
+        <div class="scene-dot"></div>
+        <div class="scene-dot"></div>
+        <div class="scene-dot"></div>
+        <div class="scene-dot"></div>
+    </div>
+
+    <!-- 场景0：开场 -->
+    <section id="scene-0" class="scene" data-scene="0">
+        <div class="scene-year">1927</div>
+        <h1 class="scene-title">三次选择</h1>
+        <p class="scene-text">
+            1927年到1935年，毛泽东做出了三个关键选择。<br>
+            每一个选择，都改变了中国革命的走向。<br><br>
+            这一次，你来感受选择的重量。
+        </p>
+        <div class="ink-quote">
+            "星星之火，可以燎原。"
+            <span class="attribution">——毛泽东，1930年</span>
+        </div>
+    </section>
+
+    <!-- 场景1：秋收起义——拖拽决策 -->
+    <section class="scene" data-scene="1">
+        <div class="scene-year">1927</div>
+        <h2 class="scene-title">第一次选择：秋收起义</h2>
+        <p class="scene-text">
+            秋收起义失败后，革命力量该往哪里去？<br>
+            进攻城市，还是转向农村？
+        </p>
+
+        <div class="drag-container">
+            <div id="target-city" class="drag-target" role="button" aria-label="选择进攻城市">
+                <div class="target-icon">🏙️</div>
+                <div class="target-label">进攻城市</div>
+                <div class="target-desc">按照苏联模式，以城市为中心</div>
+            </div>
+            <div id="target-country" class="drag-target" role="button" aria-label="选择转向农村">
+                <div class="target-icon">🌾</div>
+                <div class="target-label">转向农村</div>
+                <div class="target-desc">走一条没有人走过的路</div>
+            </div>
+        </div>
+        <div id="drag-item-1" class="drag-item" role="button" aria-label="拖拽革命力量到一侧" tabindex="0">
+            革命力量 → 拖拽选择
+        </div>
+        <p class="scene-text" style="font-size:0.8rem;color:var(--text-dim)">
+            拖拽"革命力量"到一侧，或直接点击目标
+        </p>
+    </section>
+
+    <!-- 场景2：井冈山——地图标注 -->
+    <section class="scene" data-scene="2">
+        <div class="scene-year">1928</div>
+        <h2 class="scene-title">第二次选择：根据地建在哪里？</h2>
+        <p class="scene-text">
+            需要选择一个地方建立革命根据地。<br>
+            点击地图上你认为合适的位置。
+        </p>
+
+        <div class="map-container">
+            <svg id="china-map" class="china-map" viewBox="0 0 100 80" aria-label="中国地图，点击选择根据地位置">
+                <!-- 简化中国地图轮廓 -->
+                <path class="province" d="M15,10 L85,10 L90,25 L85,40 L80,50 L75,55 L70,60 L65,65 L55,70 L45,72 L35,70 L25,65 L20,55 L15,45 L12,30 Z"/>
+                <!-- 区域标注 -->
+                <text x="35" y="25" fill="#666" font-size="3">陕西</text>
+                <text x="68" y="60" fill="#666" font-size="3">江西</text>
+                <text x="50" y="55" fill="#666" font-size="3">贵州</text>
+                <text x="40" y="40" fill="#666" font-size="3">四川</text>
+                <!-- 标记点 -->
+                <circle id="map-marker-2" class="map-marker" cx="0" cy="0" r="2"/>
+                <text id="map-label-2" class="map-label" x="0" y="0">你的选择</text>
+            </svg>
+            <p class="map-hint">点击地图上的任意位置</p>
+        </div>
+    </section>
+
+    <!-- 场景3：长征路线——Canvas绘制 -->
+    <section class="scene" data-scene="3">
+        <div class="scene-year">1934</div>
+        <h2 class="scene-title">第三次选择：长征路线</h2>
+        <p class="scene-text">
+            从江西出发，到陕北结束。<br>
+            画出你认为的长征路线。
+        </p>
+
+        <div class="route-container">
+            <canvas id="route-canvas" class="route-canvas" aria-label="在地图上画出长征路线"></canvas>
+            <div class="route-controls">
+                <button id="route-clear" class="btn">清除重画</button>
+                <button id="route-done" class="btn">画完了</button>
+            </div>
+            <p class="route-hint">在画布上用鼠标/手指画出路线，然后点击"画完了"</p>
+        </div>
+    </section>
+
+    <!-- 场景4：总结 -->
+    <section class="scene" data-scene="4">
+        <div class="scene-year">1949</div>
+        <h2 class="scene-title">三次选择，一个结果</h2>
+        <p class="scene-text">
+            从秋收起义到井冈山，从井冈山到长征，从长征到新中国。<br>
+            每一次选择，都是在没有路的地方走出路来。
+        </p>
+
+        <div class="timeline">
+            <div class="timeline-node">
+                <div class="node-year">1927</div>
+                <div class="node-dot"></div>
+                <div class="node-text">秋收起义</div>
+            </div>
+            <div class="timeline-node">
+                <div class="node-year">1928</div>
+                <div class="node-dot"></div>
+                <div class="node-text">井冈山</div>
+            </div>
+            <div class="timeline-node">
+                <div class="node-year">1935</div>
+                <div class="node-dot"></div>
+                <div class="node-text">长征</div>
+            </div>
+            <div class="timeline-node">
+                <div class="node-year">1949</div>
+                <div class="node-dot"></div>
+                <div class="node-text">新中国</div>
+            </div>
+        </div>
+
+        <div class="ink-quote">
+            "我们不但善于破坏一个旧世界，我们还将善于建设一个新世界。"
+            <span class="attribution">——毛泽东，1949年</span>
+        </div>
+    </section>
+
+    <!-- 结果覆盖层 -->
+    <div id="result-overlay" class="result-overlay" role="dialog" aria-modal="true">
+        <p id="result-alternative" class="result-alternative"></p>
+        <p id="result-truth" class="result-truth"></p>
+        <div id="result-cost" class="result-cost"></div>
+        <button id="result-btn" class="result-btn">继续</button>
+    </div>
+
+    <!-- 公共JS -->
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <!-- 模块JS -->
+    <script src="mod5.js"></script>
+    <script>createNavigation(5);</script>
+</body>
+</html>

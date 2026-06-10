@@ -1,0 +1,177 @@
+/* ============================================================
+   Mod13 节拍革命 — 节拍同步 + 历史节点
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    user-select: none;
+}
+
+/* 叙事文字 */
+.narrative-text {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.95); color: rgba(255, 255, 255, 0.85);
+    font-size: 1.1rem; letter-spacing: 2px; line-height: 2.2; text-align: center;
+    padding: 2rem; z-index: 5000;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.narrative-text.visible { opacity: 1; visibility: visible; }
+
+/* Canvas */
+.particle-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 100; pointer-events: none;
+}
+
+/* BPM显示 */
+.bpm-display {
+    position: fixed; top: 1rem; right: 1.5rem; z-index: 200;
+    font-size: 0.8rem; color: var(--text-dim);
+}
+.bpm-display span {
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--gold); font-variant-numeric: tabular-nums;
+}
+
+/* 时间线 */
+.timeline-strip {
+    position: fixed; top: 0; left: 0; width: 100%; height: 3px;
+    background: rgba(201, 169, 110, 0.1); z-index: 200;
+    display: flex;
+}
+.timeline-dot {
+    flex: 1; height: 100%;
+    background: rgba(201, 169, 110, 0.05);
+    transition: background 0.3s;
+}
+.timeline-dot.active {
+    background: var(--gold);
+}
+.timeline-dot.passed {
+    background: var(--gold-dim);
+}
+
+/* 节拍区域 */
+.beat-area {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 100vh; padding: 2rem;
+    position: relative; z-index: 150;
+}
+
+/* 节拍环 */
+.beat-ring {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    border: 2px solid var(--gold-dim);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.1s;
+    position: relative;
+}
+.beat-ring::before {
+    content: '';
+    position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
+    border-radius: 50%;
+    border: 1px solid rgba(201, 169, 110, 0.1);
+}
+.beat-ring.pulse {
+    border-color: var(--gold);
+    transform: scale(1.05);
+}
+.beat-ring.hit {
+    border-color: var(--gold-bright);
+    transform: scale(0.95);
+}
+
+.beat-center {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 1px solid rgba(201, 169, 110, 0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: var(--gold);
+    transition: background 0.15s;
+}
+.beat-ring.hit .beat-center {
+    background: rgba(201, 169, 110, 0.15);
+}
+
+.beat-label { font-weight: 600; }
+
+.beat-hint {
+    font-size: 0.8rem; color: var(--text-dim);
+    margin-top: 1.5rem; text-align: center;
+}
+
+/* 当前事件 */
+.event-display {
+    position: fixed; bottom: 6rem; left: 50%;
+    transform: translateX(-50%); z-index: 200;
+    text-align: center; opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+}
+.event-display.visible { opacity: 1; }
+.event-year {
+    font-size: 0.75rem; color: var(--gold-dim);
+    letter-spacing: 2px;
+}
+.event-title {
+    font-size: 1.1rem; color: var(--gold);
+    font-weight: 600; margin-top: 0.3rem;
+}
+
+/* ========== 结尾 ========== */
+.ending {
+    max-width: 600px; margin: 0 auto;
+    padding: 3rem 1.5rem 8rem; text-align: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity 1s, visibility 1s;
+    position: relative; z-index: 150;
+}
+.ending.active { opacity: 1; visibility: visible; }
+.ending-title {
+    font-size: 1.5rem; color: var(--gold);
+    letter-spacing: 4px; margin-bottom: 1.5rem;
+}
+.ending-text {
+    font-size: 0.95rem; color: var(--text-primary);
+    line-height: 2; margin-bottom: 2rem;
+}
+.ending-events {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    justify-content: center;
+}
+.ending-event {
+    font-size: 0.7rem; color: var(--gold-dim);
+    padding: 0.2rem 0.5rem;
+    border: 1px solid rgba(201, 169, 110, 0.15);
+    border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .beat-ring { transition: none; }
+    .beat-ring.pulse, .beat-ring.hit { transform: none; }
+    .event-display { transition: none; }
+}
+
+@media (max-width: 768px) {
+    .beat-ring { width: 130px; height: 130px; }
+    .beat-center { width: 65px; height: 65px; font-size: 1.2rem; }
+}
+
+@media (max-width: 480px) {
+    .beat-ring { width: 110px; height: 110px; }
+    .beat-center { width: 55px; height: 55px; }
+    .beat-hint { font-size: 0.7rem; }
+}

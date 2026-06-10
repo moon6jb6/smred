@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国力量 — 赓续红色血脉</title>
+    <meta name="description" content="70年，从35岁到78岁，从134元到今天。看见普通人的中国力量。">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="mod6.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+    <a href="#data-cards" class="skip-link">跳转到数据</a>
+
+    <!-- 叙事文字 -->
+    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite"></div>
+
+    <!-- 颜色闪烁背景 -->
+    <div id="color-flash" class="color-flash"></div>
+
+    <!-- 头部 -->
+    <header class="mod6-header">
+        <h1>中国力量</h1>
+        <p>70年，每一个数字背后，都是无数个你不知道名字的人</p>
+    </header>
+
+    <main>
+        <!-- 时间轴滑块 -->
+        <section class="timeline-section" aria-label="时间轴">
+            <div id="year-display" class="year-display" aria-live="polite">1949</div>
+            <input type="range" id="year-slider" class="year-slider"
+                   min="1949" max="2026" value="1949" step="1"
+                   aria-label="选择年份，从1949到2026"
+                   aria-valuetext="1949年">
+            <div class="year-labels">
+                <span>1949</span>
+                <span>1978</span>
+                <span>2000</span>
+                <span>2026</span>
+            </div>
+        </section>
+
+        <!-- 数据卡片 -->
+        <section id="data-cards" class="data-cards" aria-label="历史数据">
+        </section>
+
+        <!-- 个人关联 -->
+        <section class="personal-section" aria-label="个人关联">
+            <h2>你出生那年，中国发生了什么？</h2>
+            <div class="birth-input">
+                <input type="number" id="birth-year" placeholder="如 2003"
+                       min="1949" max="2026" aria-label="输入你的出生年份">
+                <button id="birth-btn" aria-label="查看你出生那年的历史">查看</button>
+            </div>
+            <div id="personal-result" class="personal-result" aria-live="polite"></div>
+        </section>
+
+        <!-- 70年一屏 -->
+        <section class="panorama-section" aria-label="70年全景">
+            <h2>70年一屏</h2>
+            <div id="panorama-grid" class="panorama-grid"></div>
+        </section>
+
+        <!-- 结尾 -->
+        <section class="mod6-ending" aria-label="结语">
+            <div class="ending-text">
+                2026年。<br>
+                这些数字不是终点。<br>
+                它们是 86000 人出发时，<br>
+                谁都没有想到的结局。<br>
+                <span class="number-big">86000</span>
+            </div>
+        </section>
+    </main>
+
+    <!-- 公共JS -->
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <!-- 模块JS -->
+    <script src="mod6.js"></script>
+    <script>createNavigation(6);</script>
+</body>
+</html>

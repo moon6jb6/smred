@@ -743,11 +743,170 @@
         </a>
     </div>
 
+    <!-- 86000→7000 光点层 -->
+    <canvas id="particleLayer" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:50;pointer-events:none;"></canvas>
+    <!-- 出生年关联 -->
+    <div id="personalSection" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:3000;background:rgba(0,0,0,0.95);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;">
+        <div style="font-size:0.8rem;color:rgba(255,255,255,0.4);letter-spacing:3px;margin-bottom:1rem;">长征与你</div>
+        <div style="font-size:1.1rem;color:rgba(255,255,255,0.8);line-height:2;margin-bottom:2rem;">你出生在哪一年？</div>
+        <input id="birthYearInput" type="number" min="1949" max="2026" placeholder="如：2003" style="width:160px;padding:0.8rem;font-size:1.2rem;text-align:center;background:transparent;border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:6px;outline:none;font-family:inherit;">
+        <button id="birthYearBtn" style="margin-top:1rem;padding:0.6rem 2rem;font-size:0.9rem;background:transparent;border:1px solid rgba(255,215,0,0.4);color:#ffd700;border-radius:4px;cursor:pointer;font-family:inherit;">确认</button>
+        <div id="personalResult" style="margin-top:2rem;font-size:1rem;color:rgba(255,255,255,0.7);line-height:2.2;max-width:400px;"></div>
+        <button id="personalClose" style="display:none;margin-top:2rem;padding:0.6rem 2rem;font-size:0.85rem;background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);border-radius:4px;cursor:pointer;font-family:inherit;">返回首页</button>
+    </div>
+
     <script src="../filmstrip.js"></script>
     <script>
         if (typeof filmstripTransition !== 'function') window.filmstripTransition = function(url) { window.location.href = url; };
         if (typeof checkNarrativeTransition !== 'function') window.checkNarrativeTransition = function(cb) { if (cb) cb(); };
         checkNarrativeTransition();
+
+        // ========== 86000→7000 光点系统 ==========
+        (function() {
+            const canvas = document.getElementById('particleLayer');
+            const ctx = canvas.getContext('2d');
+            let W, H;
+            const TOTAL = 860;
+            const particles = [];
+            let currentCount = TOTAL;
+
+            function resize() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // 初始化粒子
+            for (let i = 0; i < TOTAL; i++) {
+                particles.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    alive: true,
+                    size: 1.5 + Math.random() * 1.5,
+                    alpha: 0.3 + Math.random() * 0.4
+                });
+            }
+
+            // 根据滚动位置计算存活比例
+            function updateAliveCount() {
+                const scrollH = document.documentElement.scrollHeight - window.innerHeight;
+                const progress = scrollH > 0 ? window.scrollY / scrollH : 0;
+                // 86000→7000，progress 0→1
+                const targetRatio = 1 - progress * 0.92;
+                const targetCount = Math.round(TOTAL * targetRatio);
+                if (targetCount < currentCount) {
+                    // 随机杀死多余粒子
+                    let toKill = currentCount - targetCount;
+                    for (let i = particles.length - 1; i >= 0 && toKill > 0; i--) {
+                        if (particles[i].alive) {
+                            particles[i].alive = false;
+                            particles[i].deathAnim = 1;
+                            toKill--;
+                        }
+                    }
+                    currentCount = targetCount;
+                }
+            }
+
+            window.addEventListener('scroll', updateAliveCount, { passive: true });
+
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                for (const p of particles) {
+                    if (p.alive) {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        if (p.x < 0) p.x = W;
+                        if (p.x > W) p.x = 0;
+                        if (p.y < 0) p.y = H;
+                        if (p.y > H) p.y = 0;
+                        ctx.globalAlpha = p.alpha;
+                        ctx.fillStyle = '#ffd700';
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (p.deathAnim > 0) {
+                        // 死亡动画：变红→缩小→消失
+                        p.deathAnim -= 0.02;
+                        ctx.globalAlpha = p.deathAnim * 0.6;
+                        ctx.fillStyle = '#ff3030';
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size * p.deathAnim, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+
+        // ========== 出生年个人关联 ==========
+        (function() {
+            const section = document.getElementById('personalSection');
+            const input = document.getElementById('birthYearInput');
+            const btn = document.getElementById('birthYearBtn');
+            const result = document.getElementById('personalResult');
+            const closeBtn = document.getElementById('personalClose');
+
+            // 在最后一个阶段显示"与你关联"入口
+            const lastStage = document.querySelector('.stage:last-child');
+            if (lastStage) {
+                const link = document.createElement('div');
+                link.style.cssText = 'margin-top:2rem;font-size:0.85rem;color:rgba(255,215,0,0.5);cursor:pointer;letter-spacing:2px;';
+                link.textContent = '→ 这段历史，与你何干？';
+                link.addEventListener('click', () => {
+                    section.style.display = 'flex';
+                });
+                lastStage.querySelector('.stage-inner')?.appendChild(link);
+            }
+
+            btn.addEventListener('click', showPersonal);
+            input.addEventListener('keydown', e => { if (e.key === 'Enter') showPersonal(); });
+
+            function showPersonal() {
+                const year = parseInt(input.value);
+                if (!year || year < 1949 || year > 2026) {
+                    result.textContent = '请输入1949-2026之间的年份';
+                    return;
+                }
+                const longMarchEnd = 1936;
+                const yearsDiff = year - longMarchEnd;
+                const events = {
+                    1949: '中华人民共和国成立',
+                    1950: '抗美援朝',
+                    1964: '第一颗原子弹',
+                    1970: '东方红一号',
+                    1978: '改革开放',
+                    1997: '香港回归',
+                    2001: '中国加入WTO',
+                    2003: '神舟五号',
+                    2008: '北京奥运会',
+                    2020: '全面脱贫',
+                    2021: '建党百年'
+                };
+                let eventText = '';
+                // 找最近的事件
+                const eventYears = Object.keys(events).map(Number).sort();
+                for (const ey of eventYears) {
+                    if (ey <= year) eventText = events[ey];
+                }
+
+                result.innerHTML = `
+                    你出生于 <span style="color:#ffd700;font-size:1.3rem;font-weight:700;">${year}</span> 年。<br>
+                    距离长征结束，已经过去了 <span style="color:#ffd700;font-size:1.3rem;font-weight:700;">${yearsDiff}</span> 年。<br><br>
+                    那一年的中国：${eventText || '正在建设中'}。<br><br>
+                    <span style="color:rgba(255,255,255,0.5);font-size:0.85rem;">86000人走过的路，<br>换来了你出生时的中国。</span>
+                `;
+                closeBtn.style.display = 'inline-block';
+            }
+
+            closeBtn.addEventListener('click', () => {
+                section.style.display = 'none';
+            });
+        })();
 
         // 状态
         const stages = document.querySelectorAll('.stage');

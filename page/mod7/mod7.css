@@ -1,0 +1,367 @@
+/* ============================================================
+   Mod7 电报战士 — 电台调频+信号干扰+解密
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+}
+
+/* 叙事文字 */
+.narrative-text {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.95);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    line-height: 2;
+    text-align: center;
+    padding: 2rem;
+    z-index: 5000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.narrative-text.visible { opacity: 1; visibility: visible; }
+
+/* 页面头部 */
+.mod7-header {
+    text-align: center;
+    padding: 2rem 1.5rem 1rem;
+}
+.mod7-header h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 3px;
+}
+.mod7-header p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+}
+
+/* ============================================================
+   电台界面
+   ============================================================ */
+
+.radio-station {
+    max-width: 500px;
+    margin: 1rem auto;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--gold-dim);
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* 频率显示 */
+.frequency-display {
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 700;
+    color: var(--gold-bright);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+.frequency-unit {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-left: 0.3rem;
+}
+
+/* 信号强度条 */
+.signal-bar {
+    height: 4px;
+    background: var(--bg-primary);
+    border-radius: 2px;
+    margin: 0.5rem 0;
+    overflow: hidden;
+}
+.signal-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--red-accent), var(--gold));
+    border-radius: 2px;
+    transition: width 0.3s;
+}
+
+/* 频谱可视化 */
+.spectrum-canvas {
+    width: 100%;
+    height: 60px;
+    margin: 0.5rem 0;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* 旋钮 */
+.tuning-knob {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 1rem auto;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #333, #111);
+    border: 3px solid var(--gold-dim);
+    cursor: grab;
+    user-select: none;
+    transition: border-color 0.3s;
+}
+.tuning-knob:hover {
+    border-color: var(--gold);
+}
+.tuning-knob:active {
+    cursor: grabbing;
+}
+.knob-indicator {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--gold-bright);
+    border-radius: 2px;
+}
+
+/* 频率滑块（隐藏，辅助） */
+.freq-slider {
+    width: 100%;
+    margin: 0.5rem 0;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    background: var(--gold-dim);
+    border-radius: 1px;
+    outline: none;
+}
+.freq-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+}
+
+/* 状态文字 */
+.radio-status {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    min-height: 1.5em;
+}
+.radio-status.decoded {
+    color: var(--gold);
+}
+
+/* ============================================================
+   电报内容
+   ============================================================ */
+
+.telegram-panel {
+    max-width: 500px;
+    margin: 1rem auto;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid rgba(201, 169, 110, 0.1);
+    border-radius: 8px;
+    min-height: 150px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s, transform 0.5s;
+}
+.telegram-panel.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.telegram-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(201, 169, 110, 0.1);
+}
+.telegram-date {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+.telegram-sender {
+    font-size: 0.8rem;
+    color: var(--gold);
+}
+
+.telegram-body {
+    font-size: 0.95rem;
+    line-height: 2;
+    color: var(--text-primary);
+}
+.telegram-body .encrypted {
+    background: var(--bg-primary);
+    color: var(--gold);
+    padding: 0 0.3rem;
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid var(--gold-dim);
+    transition: background 0.3s;
+}
+.telegram-body .encrypted:hover {
+    background: rgba(201, 169, 110, 0.1);
+}
+.telegram-body .encrypted.revealed {
+    background: transparent;
+    border-color: transparent;
+    color: var(--gold-bright);
+}
+
+/* 解密选择 */
+.decode-options {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.8rem;
+}
+.decode-option {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-family: inherit;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+}
+.decode-option:hover {
+    background: var(--gold);
+    color: var(--bg-primary);
+}
+.decode-option.correct {
+    background: var(--gold);
+    color: var(--bg-primary);
+}
+.decode-option.wrong {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* ============================================================
+   紧急电报
+   ============================================================ */
+
+.emergency-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(139, 0, 0, 0.15);
+    z-index: 6000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    animation: emergency-flash 0.5s infinite;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+.emergency-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+@keyframes emergency-flash {
+    0%, 100% { background: rgba(139, 0, 0, 0.05); }
+    50% { background: rgba(139, 0, 0, 0.15); }
+}
+
+.emergency-text {
+    font-size: 1.5rem;
+    color: var(--red-bright);
+    font-weight: 700;
+    letter-spacing: 4px;
+    margin-bottom: 1rem;
+}
+.emergency-countdown {
+    font-size: 2rem;
+    color: var(--gold-bright);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+.emergency-btn {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--red-accent);
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.emergency-btn:hover {
+    background: var(--red-bright);
+}
+
+/* ============================================================
+   电台日记
+   ============================================================ */
+
+.diary-section {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+}
+.diary-title {
+    font-size: 1rem;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--gold-dim);
+    padding-bottom: 0.5rem;
+}
+.diary-entry {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgba(201, 169, 110, 0.05);
+}
+.diary-entry .entry-date {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 0.2rem;
+}
+.diary-entry .entry-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.diary-empty {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .tuning-knob { width: 100px; height: 100px; }
+    .radio-station { margin: 0.5rem; padding: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .emergency-overlay { animation: none; }
+}

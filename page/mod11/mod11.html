@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>历史星图 — 赓续红色血脉</title>
+    <meta name="description" content="地铁线路图式历史因果链。">
+    <link rel="stylesheet" href="mod11.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+    <a href="#star-map" class="skip-link">跳转到星图</a>
+
+    <!-- 叙事文字 -->
+    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite">
+        历史不是孤立的点，<br>而是一张因果之网。<br>找到它们之间的联系。
+    </div>
+
+    <!-- 图例 -->
+    <div class="legend" aria-label="图例">
+        <div class="legend-item"><span class="legend-dot" style="background: #c9a96e;"></span> 已探索</div>
+        <div class="legend-item"><span class="legend-dot" style="background: rgba(201, 169, 110, 0.3);"></span> 未探索</div>
+        <div class="legend-item"><span class="legend-line"></span> 因果关系</div>
+    </div>
+
+    <!-- 发现计数 -->
+    <div class="discovery-counter" aria-live="polite">
+        已发现因果 <span id="discovery-count">0</span> / <span id="discovery-total">0</span>
+    </div>
+
+    <!-- SVG星图 -->
+    <main id="star-map" class="star-map" aria-label="历史因果星图">
+        <svg id="map-svg" class="map-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet"></svg>
+    </main>
+
+    <!-- 节点详情 -->
+    <div id="node-detail" class="node-detail" role="dialog" aria-modal="true">
+        <div class="detail-inner">
+            <div class="detail-year" id="detail-year"></div>
+            <h2 class="detail-title" id="detail-title"></h2>
+            <p class="detail-desc" id="detail-desc"></p>
+            <div class="detail-causes" id="detail-causes"></div>
+            <button class="detail-btn" id="detail-btn">关闭</button>
+        </div>
+    </div>
+
+    <!-- 个人历史图谱 -->
+    <div class="personal-section">
+        <label class="personal-label">输入你的出生年，看看哪些历史在你的时代</label><br>
+        <input type="number" id="birth-year-input" class="personal-input" min="1840" max="2026" placeholder="2004">
+        <div id="personal-result" class="personal-result"></div>
+    </div>
+
+    <!-- 结尾 -->
+    <div id="ending" class="ending" aria-label="总结">
+        <h2 class="ending-title">因果之网</h2>
+        <p class="ending-text">
+            每一个事件都不是偶然。<br>
+            因为有了前面的因，才有了后面的果。<br><br>
+            历史是一条链，我们每个人都是其中的一环。
+        </p>
+        <div class="ending-stats" id="ending-stats"></div>
+    </div>
+
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/audio-engine.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <script src="mod11.js"></script>
+    <script>createNavigation(11);</script>
+</body>
+</html>

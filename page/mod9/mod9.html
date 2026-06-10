@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抉择电台 — 赓续红色血脉</title>
+    <meta name="description" content="先看后果，再做选择。感受历史决策的重量。">
+    <link rel="stylesheet" href="mod9.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+    <a href="#scene-container" class="skip-link">跳转到内容</a>
+
+    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite">
+        如果历史可以重来，<br>你会做出不同的选择吗？
+    </div>
+
+    <!-- 代价计数器 -->
+    <div class="cost-counter" aria-live="polite">
+        本次牺牲<br>
+        <span id="cost-number" class="count-number">0</span> 人
+    </div>
+
+    <header class="mod9-header">
+        <h1>抉择电台</h1>
+        <p>先看后果，再做选择</p>
+    </header>
+
+    <main id="scene-container" class="scene-container" aria-label="历史抉择场景"></main>
+
+    <!-- 后果覆盖层 -->
+    <div id="aftermath-overlay" class="aftermath-overlay" role="dialog" aria-modal="true">
+        <h2 id="aftermath-title" class="aftermath-title"></h2>
+        <p id="aftermath-desc" class="aftermath-desc"></p>
+        <div id="aftermath-cost" class="aftermath-cost"></div>
+        <button id="aftermath-btn" class="aftermath-btn">继续</button>
+    </div>
+
+    <!-- 历史对比 -->
+    <div id="comparison-section" class="comparison" aria-label="选择对比"></div>
+
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <script src="mod9.js"></script>
+    <script>createNavigation(9);</script>
+</body>
+</html>

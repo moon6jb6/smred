@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>节拍革命 — 赓续红色血脉</title>
+    <meta name="description" content="跟着节拍，敲出历史的脉搏。">
+    <link rel="stylesheet" href="mod13.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+    <a href="#beat-area" class="skip-link">跳转到节拍</a>
+
+    <!-- 叙事文字 -->
+    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite">
+        历史有它自己的节拍。<br>跟着脉搏，<br>敲出那些改变中国的瞬间。
+    </div>
+
+    <!-- Canvas粒子层 -->
+    <canvas id="particle-canvas" class="particle-canvas" aria-hidden="true"></canvas>
+
+    <!-- BPM显示 -->
+    <div class="bpm-display" aria-live="polite">
+        <span id="bpm-num">72</span> BPM
+    </div>
+
+    <!-- 历史时间线 -->
+    <div class="timeline-strip" id="timeline-strip" aria-label="历史时间线"></div>
+
+    <!-- 主节拍区域 -->
+    <main id="beat-area" class="beat-area">
+        <div class="beat-ring" id="beat-ring">
+            <div class="beat-center" id="beat-center">
+                <span class="beat-label">敲</span>
+            </div>
+        </div>
+        <div class="beat-hint">点击或按空格键，跟着节拍敲击</div>
+    </main>
+
+    <!-- 当前事件 -->
+    <div id="event-display" class="event-display">
+        <div id="event-year" class="event-year"></div>
+        <div id="event-title" class="event-title"></div>
+    </div>
+
+    <!-- 结尾 -->
+    <div id="ending" class="ending" aria-label="结束">
+        <h2 class="ending-title">脉搏</h2>
+        <p class="ending-text">
+            你敲击了 <span id="total-taps">0</span> 次。<br>
+            历史的脉搏，从未停歇。<br><br>
+            每一次敲击，都是一次心跳。<br>
+            每一次心跳，都连接着那段岁月。
+        </p>
+        <div class="ending-events" id="ending-events"></div>
+    </div>
+
+    <!-- Howler.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/audio-engine.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <script src="mod13.js"></script>
+    <script>createNavigation(13);</script>
+</body>
+</html>

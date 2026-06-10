@@ -1,0 +1,415 @@
+/* ============================================================
+   Mod6 中国力量 — 从零互动升级为多维互动
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* 叙事文字 */
+.narrative-text {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.95);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    line-height: 2;
+    text-align: center;
+    padding: 2rem;
+    z-index: 5000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.narrative-text.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 页面头部 */
+.mod6-header {
+    text-align: center;
+    padding: 3rem 1.5rem 2rem;
+}
+.mod6-header h1 {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-bottom: 0.5rem;
+}
+.mod6-header p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================================
+   时间轴滑块
+   ============================================================ */
+
+.timeline-section {
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    padding: 0 1.5rem;
+    text-align: center;
+}
+
+.year-display {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: 700;
+    color: var(--gold-bright);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+    transition: color 0.5s;
+}
+
+.year-slider {
+    width: 100%;
+    max-width: 500px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(90deg, var(--text-dim), var(--gold));
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    margin: 0.5rem 0;
+}
+.year-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--gold-bright);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.year-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+.year-slider::-moz-range-thumb {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--gold-bright);
+    border: none;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    cursor: pointer;
+}
+
+.year-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* ============================================================
+   事件颜色背景
+   ============================================================ */
+
+.color-flash {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.8s ease, background 0.8s ease;
+}
+.color-flash.active {
+    opacity: 0.08;
+}
+
+/* ============================================================
+   数据卡片
+   ============================================================ */
+
+.data-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+    padding: 0 1.5rem;
+}
+
+.data-card {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(201, 169, 110, 0.15);
+    border-radius: 8px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    cursor: pointer;
+}
+.data-card:hover {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 20px rgba(201, 169, 110, 0.1);
+    transform: translateY(-2px);
+}
+
+.data-card .card-icon {
+    font-size: 1.8rem;
+    color: var(--gold);
+    margin-bottom: 0.8rem;
+    opacity: 0.8;
+}
+
+.data-card .card-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.data-card .card-value {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    font-weight: 700;
+    color: var(--gold-bright);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+    margin-bottom: 0.3rem;
+    transition: transform 0.3s;
+}
+
+.data-card .card-unit {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.data-card .card-year {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
+/* 对比面板 */
+.data-card .compare-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, padding 0.5s ease;
+    padding: 0 0;
+}
+.data-card.expanded .compare-panel {
+    max-height: 200px;
+    padding: 1rem 0 0;
+}
+
+.compare-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    border-top: 1px solid rgba(201, 169, 110, 0.1);
+}
+.compare-row .year-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.compare-row .value-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gold);
+}
+.compare-row .arrow {
+    color: var(--gold-bright);
+    font-size: 0.9rem;
+    margin: 0 0.5rem;
+}
+
+/* ============================================================
+   个人关联
+   ============================================================ */
+
+.personal-section {
+    max-width: 600px;
+    margin: 0 auto 3rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    background: var(--bg-secondary);
+    border: 1px solid rgba(201, 169, 110, 0.1);
+    border-radius: 8px;
+}
+
+.personal-section h2 {
+    font-size: 1.2rem;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.birth-input {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.birth-input input {
+    width: 120px;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--bg-primary);
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    color: var(--gold-bright);
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s;
+    font-variant-numeric: tabular-nums;
+}
+.birth-input input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 10px rgba(201, 169, 110, 0.2);
+}
+
+.birth-input button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+}
+.birth-input button:hover {
+    background: var(--gold);
+    color: var(--bg-primary);
+}
+
+.personal-result {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    line-height: 1.8;
+    min-height: 2em;
+}
+.personal-result .highlight {
+    color: var(--gold-bright);
+    font-weight: 600;
+}
+
+/* ============================================================
+   结尾
+   ============================================================ */
+
+.mod6-ending {
+    text-align: center;
+    padding: 4rem 1.5rem 8rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.ending-text {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    line-height: 2.2;
+    margin-bottom: 2rem;
+}
+.ending-text .number-big {
+    display: block;
+    font-size: clamp(3rem, 10vw, 5rem);
+    font-weight: 700;
+    color: var(--gold-bright);
+    margin: 1rem 0;
+    text-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+    font-variant-numeric: tabular-nums;
+    animation: pulse-number 3s infinite;
+}
+
+@keyframes pulse-number {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* 70年一屏 */
+.panorama-section {
+    max-width: 1000px;
+    margin: 0 auto 3rem;
+    padding: 0 1.5rem;
+    text-align: center;
+}
+.panorama-section h2 {
+    font-size: 1.2rem;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.panorama-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.8rem;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.panorama-grid.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.panorama-item {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(201, 169, 110, 0.1);
+    border-radius: 6px;
+    padding: 0.8rem;
+    text-align: center;
+}
+.panorama-item .p-year {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 0.3rem;
+}
+.panorama-item .p-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+.panorama-item .p-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .data-cards {
+        grid-template-columns: 1fr;
+    }
+    .mod6-header { padding: 2rem 1rem 1.5rem; }
+}
+
+@media (max-width: 480px) {
+    .birth-input { flex-direction: column; }
+    .birth-input input { width: 100%; }
+    .panorama-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ending-text .number-big { animation: none; }
+    .color-flash { transition: none; }
+}

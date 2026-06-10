@@ -1,0 +1,188 @@
+/* ============================================================
+   Mod9 抉择电台 — 先看后果→再做选择
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.narrative-text {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 0, 0, 0.95); color: rgba(255, 255, 255, 0.85);
+    font-size: 1.2rem; letter-spacing: 3px; line-height: 2; text-align: center;
+    padding: 2rem; z-index: 5000; opacity: 0; visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.narrative-text.visible { opacity: 1; visibility: visible; }
+
+.mod9-header {
+    text-align: center; padding: 2rem 1.5rem 1rem;
+}
+.mod9-header h1 { font-size: clamp(1.5rem, 4vw, 2rem); color: var(--gold); font-weight: 600; letter-spacing: 3px; }
+.mod9-header p { font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.3rem; }
+
+/* 代价计数器 */
+.cost-counter {
+    position: fixed; top: 1rem; right: 1.5rem; z-index: 100;
+    font-size: 0.85rem; color: var(--red-accent); text-align: right;
+}
+.cost-counter .count-number {
+    font-size: 1.5rem; font-weight: 700; color: var(--red-bright);
+    font-variant-numeric: tabular-nums;
+}
+
+/* 场景容器 */
+.scene-container {
+    max-width: 600px; margin: 0 auto; padding: 1.5rem;
+}
+
+.scene-card {
+    background: var(--bg-secondary); border: 1px solid rgba(201, 169, 110, 0.1);
+    border-radius: 8px; padding: 2rem; margin-bottom: 2rem;
+    text-align: center;
+}
+
+.scene-title { font-size: 1.3rem; color: var(--gold); font-weight: 600; margin-bottom: 0.5rem; }
+.scene-year { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem; }
+.scene-desc { font-size: 0.95rem; color: var(--text-primary); line-height: 1.8; margin-bottom: 1.5rem; }
+
+/* 选择按钮 */
+.choice-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.choice-btn {
+    flex: 1; min-width: 200px; padding: 1rem;
+    font-size: 0.95rem; font-family: inherit;
+    background: transparent; border: 1px solid var(--gold-dim);
+    color: var(--gold); border-radius: 6px; cursor: pointer;
+    transition: background 0.3s, color 0.3s, border-color 0.3s, transform 0.2s;
+}
+.choice-btn:hover { background: rgba(201, 169, 110, 0.1); border-color: var(--gold); }
+.choice-btn:active { transform: scale(0.97); }
+.choice-btn.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
+
+/* 后果展示 */
+.aftermath-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92); z-index: 6000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 2rem;
+    opacity: 0; visibility: hidden; transition: opacity 0.8s, visibility 0.8s;
+}
+.aftermath-overlay.active { opacity: 1; visibility: visible; }
+
+.aftermath-title { font-size: 1.5rem; color: var(--red-bright); font-weight: 700; margin-bottom: 1rem; }
+.aftermath-desc { font-size: 1rem; color: var(--text-primary); line-height: 2; max-width: 450px; margin-bottom: 1rem; }
+.aftermath-cost { font-size: 2rem; font-weight: 700; color: var(--red-bright); margin-bottom: 1.5rem; }
+.aftermath-btn {
+    padding: 0.7rem 2rem; font-size: 0.95rem; font-family: inherit;
+    background: transparent; border: 1px solid var(--gold); color: var(--gold);
+    border-radius: 4px; cursor: pointer; transition: background 0.3s, color 0.3s;
+}
+.aftermath-btn:hover { background: var(--gold); color: var(--bg-primary); }
+
+/* 历史对比 */
+.comparison {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    max-width: 600px; margin: 0 auto 2rem; padding: 0 1.5rem;
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.5s, visibility 0.5s;
+}
+.comparison.active { opacity: 1; visibility: visible; }
+.comp-side {
+    background: var(--bg-secondary); border: 1px solid rgba(201, 169, 110, 0.1);
+    border-radius: 8px; padding: 1.5rem; text-align: center;
+}
+.comp-side h3 { font-size: 0.9rem; color: var(--gold); margin-bottom: 0.8rem; }
+.comp-side .comp-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.8; }
+.comp-side .comp-cost { font-size: 1.2rem; font-weight: 700; color: var(--red-bright); margin-top: 0.5rem; }
+
+/* 无法选择 */
+.no-choice {
+    text-align: center; padding: 3rem 1.5rem;
+}
+.no-choice-text { font-size: 1.1rem; color: var(--text-secondary); line-height: 2; }
+.no-choice-timer { font-size: 2rem; color: var(--text-dim); margin-top: 1rem; font-variant-numeric: tabular-nums; }
+
+/* 审判结尾 */
+.judgment {
+    max-width: 600px; margin: 0 auto; padding: 3rem 1.5rem 8rem; text-align: center;
+}
+.judgment-text { font-size: 1.1rem; color: var(--text-primary); line-height: 2.2; margin-bottom: 2rem; }
+.judgment-total { font-size: clamp(2rem, 6vw, 3rem); font-weight: 700; color: var(--red-bright); margin-bottom: 1rem; }
+.judgment-quote { font-size: 0.9rem; color: var(--text-secondary); font-style: italic; line-height: 1.8; }
+
+@media (max-width: 768px) { .comparison { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .choice-btn { transition: none; } }
+
+/* ========== VHS 倒带效果 ========== */
+.rewind-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 9999; background: rgba(0,0,0,0.85);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.3s;
+}
+.rewind-overlay.active { opacity: 1; }
+.rewind-lines {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        rgba(255,255,255,0.03) 1px,
+        transparent 2px,
+        transparent 4px
+    );
+    animation: rewindScan 0.3s linear infinite;
+}
+@keyframes rewindScan {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-4px); }
+}
+.rewind-text {
+    font-size: 1.5rem; color: rgba(255,255,255,0.6);
+    letter-spacing: 4px; z-index: 1;
+    animation: rewindBlink 0.2s infinite;
+}
+@keyframes rewindBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ========== 对比图表 ========== */
+.chart-container {
+    margin: 2rem 0; text-align: left;
+}
+.chart-legend {
+    display: flex; gap: 20px; justify-content: center;
+    margin-bottom: 1rem; font-size: 0.8rem;
+}
+.legend-user::before {
+    content: ''; display: inline-block; width: 12px; height: 12px;
+    background: var(--gold); border-radius: 2px; margin-right: 6px; vertical-align: middle;
+}
+.legend-hist::before {
+    content: ''; display: inline-block; width: 12px; height: 12px;
+    background: var(--red-accent); border-radius: 2px; margin-right: 6px; vertical-align: middle;
+}
+.chart-row {
+    margin-bottom: 0.8rem;
+}
+.chart-label {
+    font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;
+}
+.chart-bars {
+    display: flex; flex-direction: column; gap: 3px;
+}
+.chart-bar {
+    height: 20px; border-radius: 3px; position: relative;
+    min-width: 2px; width: 0;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding-right: 8px; font-size: 0.7rem; color: rgba(0,0,0,0.8);
+}
+.chart-bar-user { background: var(--gold); }
+.chart-bar-hist { background: var(--red-accent); color: rgba(255,255,255,0.8); }

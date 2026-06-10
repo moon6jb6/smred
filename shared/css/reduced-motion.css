@@ -1,0 +1,30 @@
+/* ============================================================
+   prefers-reduced-motion 降级样式
+   用户在系统设置中开启"减少动态效果"时自动生效
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    /* 粒子canvas降级：隐藏运动粒子，保留静态光点 */
+    .particle-canvas {
+        opacity: 0.5;
+    }
+
+    /* 屏幕震动降级 */
+    .shake-active {
+        animation: none !important;
+    }
+
+    /* 呼吸动画降级 */
+    .breathing {
+        animation: none !important;
+    }
+}

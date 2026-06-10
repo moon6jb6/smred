@@ -1,0 +1,368 @@
+/* ============================================================
+   Mod2 象棋之战 — 暗色+金色风格
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    overflow: hidden;
+}
+
+/* 叙事文字 */
+.narrative-text {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.95);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    line-height: 2;
+    text-align: center;
+    padding: 2rem;
+    z-index: 5000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.narrative-text.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 关卡标题 */
+.level-header {
+    text-align: center;
+    margin-bottom: 1rem;
+    padding-top: 1rem;
+}
+.level-name {
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+/* 游戏信息 */
+.game-info {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+    min-height: 1.5em;
+    transition: color 0.3s;
+}
+.game-info.check {
+    color: var(--red-bright);
+    font-weight: 600;
+}
+
+/* 代价显示 */
+.cost-display {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    transition: color 0.3s;
+}
+.cost-display.has-cost {
+    color: var(--red-accent);
+}
+
+/* ============================================================
+   棋盘
+   ============================================================ */
+
+.chess-board-wrapper {
+    position: relative;
+    padding: 1rem;
+}
+
+.chess-board {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: 0;
+    width: min(90vw, 450px);
+    height: min(100vw, 500px);
+    background: var(--bg-secondary);
+    border: 2px solid var(--gold-dim);
+    border-radius: 4px;
+    position: relative;
+    box-shadow: 0 0 40px rgba(201, 169, 110, 0.1);
+}
+
+/* 棋盘网格线（用伪元素绘制） */
+.chess-board::before {
+    content: '';
+    position: absolute;
+    top: 5%; left: 5.5%;
+    width: 89%; height: 90%;
+    background:
+        /* 横线 10条 */
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0%, transparent 9.5%,
+            var(--gold-dim) 9.5%, var(--gold-dim) 10%
+        ),
+        /* 竖线 9条 */
+        repeating-linear-gradient(
+            to right,
+            transparent 0%, transparent 10.5%,
+            var(--gold-dim) 10.5%, var(--gold-dim) 11.11%
+        );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 楚河汉界 */
+.chess-board::after {
+    content: '楚 河          汉 界';
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: clamp(0.8rem, 2vw, 1.2rem);
+    color: var(--gold);
+    letter-spacing: 8px;
+    font-weight: 600;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0.6;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 棋盘格子 */
+.chess-cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.chess-cell:hover {
+    background: rgba(201, 169, 110, 0.05);
+}
+
+/* ============================================================
+   棋子
+   ============================================================ */
+
+.chess-piece {
+    width: min(8vw, 42px);
+    height: min(8vw, 42px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    user-select: none;
+    position: relative;
+    z-index: 4;
+}
+
+.chess-piece.red {
+    background: radial-gradient(circle at 30% 30%, rgba(201, 169, 110, 0.4), rgba(201, 169, 110, 0.15));
+    color: var(--gold-bright);
+    border: 1.5px solid var(--gold);
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+}
+
+.chess-piece.black {
+    background: radial-gradient(circle at 30% 30%, rgba(200, 60, 60, 0.4), rgba(139, 0, 0, 0.2));
+    color: #e8a0a0;
+    border: 1.5px solid var(--red-accent);
+    text-shadow: 0 0 8px rgba(139, 0, 0, 0.5);
+}
+
+.chess-piece:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 15px rgba(201, 169, 110, 0.3);
+}
+
+/* 选中状态 */
+.chess-cell.selected {
+    background: rgba(201, 169, 110, 0.15);
+}
+.chess-cell.selected .chess-piece {
+    box-shadow: 0 0 20px var(--gold), 0 0 40px rgba(201, 169, 110, 0.3);
+    transform: scale(1.1);
+}
+
+/* 合法走法提示 */
+.chess-cell.valid-move::after {
+    content: '';
+    position: absolute;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: rgba(201, 169, 110, 0.4);
+    z-index: 5;
+    pointer-events: none;
+}
+.chess-cell.valid-capture::after {
+    width: 36px; height: 36px;
+    background: transparent;
+    border: 2px solid var(--red-bright);
+    animation: pulse-capture 1s infinite;
+}
+
+@keyframes pulse-capture {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+/* 代价红点 */
+.chess-cell.capture-dot::before {
+    content: '';
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red-accent);
+    z-index: 1;
+    opacity: 0.6;
+    box-shadow: 0 0 6px var(--red-accent);
+}
+
+/* ============================================================
+   按钮
+   ============================================================ */
+
+.game-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+.btn-undo {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.3s, color 0.3s;
+}
+.btn-undo:hover {
+    background: var(--gold);
+    color: var(--bg-primary);
+}
+.btn-undo:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* ============================================================
+   终局覆盖层
+   ============================================================ */
+
+.endgame-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 6000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.endgame-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.endgame-title {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 700;
+    color: var(--gold-bright);
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+}
+
+.endgame-text {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    line-height: 2;
+    max-width: 500px;
+    margin-bottom: 2rem;
+}
+
+.endgame-btn {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+}
+.endgame-btn:hover {
+    background: var(--gold);
+    color: var(--bg-primary);
+    box-shadow: 0 0 20px rgba(201, 169, 110, 0.4);
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .chess-board {
+        width: min(95vw, 380px);
+        height: min(106vw, 422px);
+    }
+    .chess-piece {
+        width: min(9vw, 36px);
+        height: min(9vw, 36px);
+        font-size: clamp(0.8rem, 2.2vw, 1.1rem);
+    }
+}
+
+@media (max-width: 480px) {
+    .chess-board {
+        width: 96vw;
+        height: calc(96vw * 10 / 9);
+    }
+    .chess-piece {
+        width: 9vw;
+        height: 9vw;
+        font-size: clamp(0.7rem, 2vw, 1rem);
+    }
+    .level-name { font-size: 1rem; }
+    .game-info { font-size: 0.85rem; }
+}
+
+/* prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    .chess-piece { transition: none; }
+    .chess-cell.valid-capture::after { animation: none; opacity: 0.6; }
+}

@@ -1,0 +1,454 @@
+/* ============================================================
+   Mod5 毛泽东——三次选择 — 三种不同交互
+   ============================================================ */
+
+@import url('../../shared/css/common.css');
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* 叙事文字 */
+.narrative-text {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.95);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    line-height: 2;
+    text-align: center;
+    padding: 2rem;
+    z-index: 5000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.narrative-text.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 进度条 */
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    z-index: 8000;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    width: 0;
+    transition: width 0.5s ease;
+}
+
+/* 场景指示器 */
+.scene-indicators {
+    position: fixed;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+}
+.scene-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    transition: background 0.3s, transform 0.3s;
+}
+.scene-dot.active {
+    background: var(--gold);
+    transform: scale(1.3);
+}
+
+/* ============================================================
+   全屏场景
+   ============================================================ */
+
+.scene {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    position: relative;
+    text-align: center;
+}
+
+.scene-title {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.scene-year {
+    font-size: clamp(3rem, 10vw, 6rem);
+    font-weight: 700;
+    color: var(--gold-bright);
+    opacity: 0.15;
+    position: absolute;
+    top: 15%;
+    font-variant-numeric: tabular-nums;
+}
+
+.scene-text {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    max-width: 500px;
+    margin-bottom: 2rem;
+}
+
+/* ============================================================
+   选择1：拖拽决策（秋收起义）
+   ============================================================ */
+
+.drag-container {
+    display: flex;
+    gap: 3rem;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    max-width: 600px;
+    margin: 1rem 0;
+}
+
+.drag-target {
+    flex: 1;
+    min-height: 200px;
+    background: var(--bg-secondary);
+    border: 2px dashed var(--gold-dim);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+.drag-target.highlight {
+    border-color: var(--gold);
+    background: rgba(201, 169, 110, 0.05);
+    box-shadow: 0 0 20px rgba(201, 169, 110, 0.1);
+}
+.drag-target .target-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+.drag-target .target-label {
+    font-size: 1.1rem;
+    color: var(--gold);
+    font-weight: 600;
+}
+.drag-target .target-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+}
+
+.drag-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    background: var(--gold);
+    color: var(--bg-primary);
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.3s, opacity 0.3s;
+    margin: 1.5rem auto;
+}
+.drag-item:active {
+    cursor: grabbing;
+    transform: scale(1.05);
+}
+.drag-item.dragging {
+    opacity: 0.5;
+}
+.drag-item.resistance {
+    cursor: grabbing;
+    transition: transform 0.1s;
+}
+
+/* ============================================================
+   选择2：SVG地图标注（井冈山）
+   ============================================================ */
+
+.map-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 1rem 0;
+    position: relative;
+}
+
+.china-map {
+    width: 100%;
+    height: auto;
+}
+
+.china-map .province {
+    fill: var(--bg-secondary);
+    stroke: var(--gold-dim);
+    stroke-width: 0.5;
+    transition: fill 0.3s;
+    cursor: pointer;
+}
+.china-map .province:hover {
+    fill: rgba(201, 169, 110, 0.1);
+}
+
+.map-marker {
+    fill: var(--red-bright);
+    opacity: 0;
+    transition: opacity 0.5s;
+    cursor: pointer;
+}
+.map-marker.visible {
+    opacity: 1;
+}
+
+.map-label {
+    font-size: 8px;
+    fill: var(--gold);
+    text-anchor: middle;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+.map-label.visible {
+    opacity: 1;
+}
+
+.map-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* ============================================================
+   选择3：Canvas路线绘制（长征路线）
+   ============================================================ */
+
+.route-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 1rem 0;
+    position: relative;
+}
+
+.route-canvas {
+    width: 100%;
+    height: 400px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.route-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 0.8rem;
+}
+
+.route-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* ============================================================
+   结果展示
+   ============================================================ */
+
+.result-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 6000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+.result-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.result-alternative {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.8;
+    max-width: 400px;
+}
+
+.result-truth {
+    font-size: 1.2rem;
+    color: var(--gold);
+    font-weight: 600;
+    line-height: 2;
+    max-width: 500px;
+    margin-bottom: 1.5rem;
+}
+
+.result-cost {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: 700;
+    color: var(--red-bright);
+    margin-bottom: 1.5rem;
+}
+
+.result-btn {
+    padding: 0.7rem 2rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+}
+.result-btn:hover {
+    background: var(--gold);
+    color: var(--bg-primary);
+}
+
+/* ============================================================
+   语录墨水晕开
+   ============================================================ */
+
+.ink-quote {
+    font-size: 1.1rem;
+    color: var(--gold);
+    font-style: italic;
+    max-width: 500px;
+    margin: 2rem auto;
+    line-height: 2;
+    filter: blur(8px);
+    opacity: 0;
+    transition: filter 1.5s ease, opacity 1.5s ease;
+}
+.ink-quote.revealed {
+    filter: blur(0);
+    opacity: 1;
+}
+.ink-quote .attribution {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-style: normal;
+    margin-top: 0.5rem;
+}
+
+/* ============================================================
+   总结时间线
+   ============================================================ */
+
+.summary {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    text-align: center;
+}
+
+.timeline {
+    display: flex;
+    gap: 0;
+    align-items: center;
+    margin: 2rem 0;
+    position: relative;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--gold-dim);
+    transform: translateY(-50%);
+}
+
+.timeline-node {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 2rem;
+}
+.timeline-node .node-year {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold-bright);
+    margin-bottom: 0.5rem;
+}
+.timeline-node .node-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 10px rgba(201, 169, 110, 0.5);
+    animation: pulse-dot 2s infinite;
+}
+.timeline-node .node-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+
+@media (max-width: 768px) {
+    .drag-container { flex-direction: column; gap: 1rem; }
+    .drag-target { min-height: 120px; }
+    .scene-indicators { right: 0.8rem; }
+    .timeline { flex-wrap: wrap; justify-content: center; gap: 1rem; }
+    .timeline::before { display: none; }
+    .timeline-node { padding: 0 1rem; }
+}
+
+@media (max-width: 480px) {
+    .scene { padding: 1.5rem 1rem; }
+    .scene-year { font-size: 3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .timeline-node .node-dot { animation: none; }
+    .ink-quote { transition: none; filter: none; opacity: 1; }
+}

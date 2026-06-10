@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最后一步 — 赓续红色血脉</title>
+    <meta name="description" content="他们迈出最后一步时，没有犹豫。记住他们的名字。">
+    <link rel="stylesheet" href="mod14.css">
+    <link rel="stylesheet" href="../../shared/css/navigation.css">
+    <link rel="stylesheet" href="../../shared/css/reduced-motion.css">
+</head>
+<body>
+
+    <!-- 开场黑屏 -->
+    <div id="intro-screen" class="intro-screen">
+        <p id="intro-text" class="intro-text">
+            他们知道，这一步迈出去，<br>
+            可能就回不来了。<br><br>
+            但他们还是迈了出去。
+        </p>
+        <button id="start-btn" class="start-btn" aria-label="开始体验">开始</button>
+    </div>
+
+    <!-- 冲锋画面 -->
+    <div id="charge-screen" class="charge-screen">
+        <div class="ground-line"></div>
+        <div id="charge-silhouette" class="charge-silhouette"></div>
+        <div id="charge-text" class="charge-text"></div>
+    </div>
+
+    <!-- 心跳屏闪 -->
+    <div id="heartbeat-flash" class="heartbeat-flash"></div>
+
+    <!-- 纪念画面 -->
+    <div id="memorial-screen" class="memorial-screen">
+        <div id="light-dot" class="light-dot"></div>
+        <h2 id="martyr-name" class="martyr-name"></h2>
+        <div id="martyr-info" class="martyr-info">
+            <div class="info-line"></div>
+            <div class="info-line"></div>
+            <div class="info-line"></div>
+        </div>
+        <div id="rise-again" class="rise-again">
+            <div id="rise-dot" class="rise-dot" role="button" aria-label="再起，继续冲锋" tabindex="0"></div>
+            <div class="rise-label">再起</div>
+        </div>
+    </div>
+
+    <!-- 名字回响层 -->
+    <div id="name-echo" class="name-echo" aria-hidden="true"></div>
+
+    <!-- 站起动画 -->
+    <div id="stand-up-overlay" class="stand-up-overlay">
+        <div id="stand-silhouette" class="stand-silhouette"></div>
+    </div>
+
+    <!-- 纪念碑结尾 -->
+    <div id="monument-screen" class="monument-screen">
+        <div class="monument">
+            <div class="monument-title">永 不 忘 记</div>
+            <div id="monument-names" class="monument-names"></div>
+        </div>
+        <div id="monument-count" class="monument-count"></div>
+        <p class="monument-subtitle">
+            他们平均年龄：22岁。<br>
+            他们没有留下照片。<br>
+            但他们留下了今天的中国。
+        </p>
+        <button id="monument-return" class="monument-return" aria-label="返回首页">返回首页</button>
+    </div>
+
+    <!-- 公共JS -->
+    <script src="../../page/filmstrip.js"></script>
+    <script src="../../shared/js/storage.js"></script>
+    <script src="../../shared/js/navigation.js"></script>
+    <script src="../../shared/js/audio-engine.js"></script>
+    <script src="../../shared/js/reduced-motion.js"></script>
+    <!-- 模块JS -->
+    <script src="mod14.js"></script>
+    <script>createNavigation(14);</script>
+</body>
+</html>
