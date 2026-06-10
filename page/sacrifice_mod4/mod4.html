@@ -208,11 +208,26 @@
         }
 
         .silhouette.glow .silhouette-shape {
-            background: rgba(255, 215, 0, 0.5);
+            background: var(--accent, rgba(255, 215, 0, 0.5));
         }
 
         .silhouette.discovered .silhouette-shape {
-            background: rgba(255, 215, 0, 0.3);
+            background: var(--accent, rgba(255, 215, 0, 0.3));
+            opacity: 0.8;
+        }
+
+        .silhouette-role {
+            font-size: 0.6rem;
+            color: rgba(201, 169, 110, 0.6);
+            text-align: center;
+            margin-top: 2px;
+            letter-spacing: 1px;
+            opacity: 0;
+            transition: opacity 0.6s;
+        }
+        .silhouette.glow .silhouette-role,
+        .silhouette.discovered .silhouette-role {
+            opacity: 1;
         }
 
         /* 剪影标签 */
@@ -293,6 +308,21 @@
             color: rgba(255, 215, 0, 0.12);
             font-family: serif;
             line-height: 1;
+        }
+
+        .quote-float .qf-title {
+            font-size: 0.85rem;
+            color: rgba(255, 215, 0, 0.6);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .quote-float .qf-detail {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.8;
+            margin-top: 10px;
+            padding: 0 20px;
         }
 
         .quote-float .qf-source {
@@ -466,7 +496,9 @@
 
     <!-- 浮现语录 -->
     <div class="quote-float" id="quoteFloat">
+        <div class="qf-title" id="qfTitle"></div>
         <div class="qf-text" id="qfText"></div>
+        <div class="qf-detail" id="qfDetail"></div>
         <div class="qf-source" id="qfSource"></div>
     </div>
 
@@ -580,18 +612,114 @@
 
         // 人物数据
         const heroes = [
-            { name: '钱学森', years: '1911 — 2009', quote: '我的事业在中国，我的成就在中国，我的归宿在中国。', source: '—— 钱学森回国后接受采访时说' },
-            { name: '袁隆平', years: '1930 — 2021', quote: '我毕生的追求就是让所有人远离饥饿。', source: '—— 袁隆平接受央视采访' },
-            { name: '黄旭华', years: '1926 — 2020', quote: '对国家的忠，就是对父母最大的孝。', source: '—— 黄旭华谈隐姓埋名30年' },
-            { name: '张富清', years: '1924 — 2022', quote: '我是党培养的，我要永远听党话，跟党走。', source: '—— 张富清在部队时说的话' },
-            { name: '邓稼先', years: '1924 — 1986', quote: '做好了这件事情，我这一生就过得很有意义，就是为它死了也值得。', source: '—— 邓稼先接受核武器研制任务时说' },
-            { name: '焦裕禄', years: '1922 — 1964', quote: '我们不是人民的上司，我们都是人民的勤务员。', source: '—— 焦裕禄在兰考工作时说' },
-            { name: '雷锋', years: '1940 — 1962', quote: '人的生命是有限的，可是，为人民服务是无限的，我要把有限的生命，投入到无限的为人民服务之中去。', source: '—— 《雷锋日记》' },
-            { name: '孙家栋', years: '1929 — 2023', quote: '国家需要，我就去做。', source: '—— 孙家栋谈一生航天事业' },
-            { name: '于敏', years: '1926 — 2019', quote: '一个人的名字，早晚是没有的，能把微薄的力量融进祖国的强盛之中，便足以自慰了。', source: '—— 于敏获国家最高科学技术奖后说' },
-            { name: '张自忠', years: '1891 — 1940', quote: '国家到了如此地步，除我等为其死，毫无其他办法。', source: '—— 张自忠殉国前致战友书' },
-            { name: '赵一曼', years: '1905 — 1936', quote: '未惜头颅新故国，甘将热血沃中华。', source: '—— 赵一曼就义前诗' },
-            { name: '杨靖宇', years: '1905 — 1940', quote: '我们中国人都投降了，还有中国吗？', source: '—— 杨靖宇殉国前对劝降者说' }
+            {
+                name: '钱学森', years: '1911 — 2009',
+                title: '中国航天之父',
+                role: '科学家', accent: 'rgba(100,180,255,0.4)',
+                achievement: '冲破美国阻挠回国，主持研制了中国第一枚导弹和第一颗人造卫星',
+                detail: '美国海军次长金布尔说："他无论走到哪里，都抵得上五个师的兵力。"钱学森被软禁5年，1955年终于回到祖国。他带领团队用算盘和手摇计算机，算出了导弹的轨道参数。',
+                quote: '我的事业在中国，我的成就在中国，我的归宿在中国。',
+                source: '—— 钱学森回国后接受采访时说'
+            },
+            {
+                name: '袁隆平', years: '1930 — 2021',
+                title: '杂交水稻之父',
+                role: '科学家', accent: 'rgba(100,200,100,0.4)',
+                achievement: '研发杂交水稻，让中国用世界7%的耕地养活了世界22%的人口',
+                detail: '袁隆平在稻田里蹲了半个世纪，找到了天然雄性不育株。他的杂交水稻让亩产从300公斤提高到800公斤。有人问他成功的秘诀，他说："我不在家就在试验田，不在试验田就在去试验田的路上。"',
+                quote: '我毕生的追求就是让所有人远离饥饿。',
+                source: '—— 袁隆平接受央视采访'
+            },
+            {
+                name: '黄旭华', years: '1926 — 2020',
+                title: '中国核潜艇之父',
+                role: '科学家', accent: 'rgba(80,150,220,0.4)',
+                achievement: '隐姓埋名30年，主持研制了中国第一代核潜艇',
+                detail: '1958年，黄旭华接到秘密任务，从此消失在家人视野中。30年里，母亲不知道他在做什么，只能从报纸上猜测。1987年，母亲看到一篇关于核潜艇的报道，才终于明白儿子在做什么。她说："三哥的事情，大家要谅解。"',
+                quote: '对国家的忠，就是对父母最大的孝。',
+                source: '—— 黄旭华谈隐姓埋名30年'
+            },
+            {
+                name: '张富清', years: '1924 — 2022',
+                title: '战斗英雄·人民公仆',
+                role: '战士', accent: 'rgba(220,120,100,0.4)',
+                achievement: '解放战争中立下特等功，却深藏功名60余年，在偏远山区默默奉献',
+                detail: '张富清在永丰战役中，一人炸毁敌人两座碉堡，缴获重机枪两挺。立下特等功的他，转业后主动申请到湖北最偏远的来凤县工作，一干就是一辈子。60多年里，连妻子都不知道他的战功。',
+                quote: '我是党培养的，我要永远听党话，跟党走。',
+                source: '—— 张富清在部队时说的话'
+            },
+            {
+                name: '邓稼先', years: '1924 — 1986',
+                title: '两弹元勋',
+                role: '科学家', accent: 'rgba(255,180,80,0.4)',
+                achievement: '主持研制了中国第一颗原子弹和第一颗氢弹',
+                detail: '1958年，邓稼先接到研制原子弹的任务。他告别妻子许鹿希，消失在戈壁滩。28年后他回来时，已经因为核辐射身患癌症。临终前他说："我对这一生没有遗憾。"',
+                quote: '做好了这件事情，我这一生就过得很有意义，就是为它死了也值得。',
+                source: '—— 邓稼先接受核武器研制任务时说'
+            },
+            {
+                name: '焦裕禄', years: '1922 — 1964',
+                title: '人民的好书记',
+                role: '公仆', accent: 'rgba(220,200,100,0.4)',
+                achievement: '在兰考带领群众治理风沙、内涝、盐碱三害，积劳成疾以身殉职',
+                detail: '焦裕禄到兰考上任时，正是兰考最困难的时期。他带着干部走遍全县149个大队，摸清了风口、沙丘、河渠的位置。他的藤椅右边被顶出一个大窟窿——那是肝疼时用来顶住的。他去世时年仅42岁。',
+                quote: '我们不是人民的上司，我们都是人民的勤务员。',
+                source: '—— 焦裕禄在兰考工作时说'
+            },
+            {
+                name: '雷锋', years: '1940 — 1962',
+                title: '人民的勤务兵',
+                role: '战士', accent: 'rgba(220,100,100,0.4)',
+                achievement: '用短暂的22年生命诠释了"为人民服务"的真谛',
+                detail: '雷锋7岁成为孤儿，是党和人民把他养大。他把每个月6元津贴中的大部分用来帮助别人。他在日记中写道："人的生命是有限的，可是，为人民服务是无限的。"22岁因公殉职，毛泽东亲笔题词"向雷锋同志学习"。',
+                quote: '人的生命是有限的，可是，为人民服务是无限的，我要把有限的生命，投入到无限的为人民服务之中去。',
+                source: '—— 《雷锋日记》'
+            },
+            {
+                name: '孙家栋', years: '1929 — 2023',
+                title: '卫星之父',
+                role: '科学家', accent: 'rgba(100,160,240,0.4)',
+                achievement: '主持研制了中国第一颗人造卫星"东方红一号"和北斗导航系统',
+                detail: '1970年4月24日，东方红一号卫星成功发射，太空中传来了《东方红》乐曲。孙家栋说那一刻他哭了。此后他又主持了北斗导航、嫦娥探月等重大工程。他说："国家需要，我就去做。"这句话他践行了一辈子。',
+                quote: '国家需要，我就去做。',
+                source: '—— 孙家栋谈一生航天事业'
+            },
+            {
+                name: '于敏', years: '1926 — 2019',
+                title: '氢弹之父',
+                role: '科学家', accent: 'rgba(240,160,80,0.4)',
+                achievement: '用2年8个月研制出中国第一颗氢弹，创造了世界最快纪录',
+                detail: '于敏从未出过国，被称为"土专家"。他带领团队用算盘和手摇计算机，完成了氢弹理论的突破。1967年6月17日，中国第一颗氢弹爆炸成功。从原子弹到氢弹，美国用了7年4个月，苏联用了6年3个月，中国只用了2年8个月。',
+                quote: '一个人的名字，早晚是没有的，能把微薄的力量融进祖国的强盛之中，便足以自慰了。',
+                source: '—— 于敏获国家最高科学技术奖后说'
+            },
+            {
+                name: '张自忠', years: '1891 — 1940',
+                title: '抗日名将·民族英雄',
+                role: '将军', accent: 'rgba(200,80,80,0.4)',
+                achievement: '枣宜会战中壮烈殉国，是二战中盟军牺牲的最高将领',
+                detail: '1940年5月，日军进攻枣阳。张自忠亲率1500人渡过襄河，与数万日军血战。部下劝他撤退，他说："我今天要血战到底！"身中数弹后，他仍然坚持指挥。殉国时，他的身上有7处伤口。日军发现他的遗体后，列队敬礼。',
+                quote: '国家到了如此地步，除我等为其死，毫无其他办法。',
+                source: '—— 张自忠殉国前致战友书'
+            },
+            {
+                name: '赵一曼', years: '1905 — 1936',
+                title: '抗日女英雄',
+                role: '抗联政委', accent: 'rgba(200,80,120,0.4)',
+                achievement: '领导东北抗日武装斗争，被捕后受尽酷刑仍不屈服',
+                detail: '赵一曼被日军俘虏后，遭受了长达9个月的酷刑。电刑、灌辣椒水、用烧红的烙铁烫……她始终没有泄露任何信息。临刑前，她给儿子写了一封遗书："母亲不用千言万语来教育你，就用实行来教育你。"',
+                quote: '未惜头颅新故国，甘将热血沃中华。',
+                source: '—— 赵一曼就义前诗'
+            },
+            {
+                name: '杨靖宇', years: '1905 — 1940',
+                title: '东北抗联总司令',
+                role: '抗联司令', accent: 'rgba(180,60,60,0.4)',
+                achievement: '在零下40度的林海雪原中孤身与日军周旋，战斗到最后一刻',
+                detail: '1940年2月，杨靖宇被日军包围在濛江县。他已经5天没有吃东西，身边只剩两个战士。他命令战士突围，自己留下掩护。牺牲后，日军剖开他的胃，发现里面只有棉絮、树皮和草根。连敌人都不得不敬佩他。',
+                quote: '我们中国人都投降了，还有中国吗？',
+                source: '—— 杨靖宇殉国前对劝降者说'
+            }
         ];
 
         // 剪影位置（环形排列）
@@ -611,7 +739,9 @@
         const glowInner = document.getElementById('glowInner');
         const hint = document.getElementById('hint');
         const quoteFloat = document.getElementById('quoteFloat');
+        const qfTitle = document.getElementById('qfTitle');
         const qfText = document.getElementById('qfText');
+        const qfDetail = document.getElementById('qfDetail');
         const qfSource = document.getElementById('qfSource');
         const candleGathering = document.getElementById('candleGathering');
         const finalMessage = document.getElementById('finalMessage');
@@ -646,10 +776,11 @@
                 }
 
                 el.innerHTML = `
-                    <div class="silhouette-shape"></div>
+                    <div class="silhouette-shape" style="--accent:${hero.accent || 'rgba(255,215,0,0.5)'}"></div>
+                    <div class="silhouette-role">${hero.role || ''}</div>
                     <div class="silhouette-label">
                         <span class="label-name">${hero.name}</span>
-                        <span class="label-years">${hero.years}</span>
+                        <span class="label-years">${hero.title || hero.years}</span>
                     </div>
                 `;
 
@@ -771,7 +902,9 @@
             const el = document.querySelector(`.silhouette[data-index="${index}"]`);
 
             // 设置语录内容
+            qfTitle.textContent = hero.name + ' · ' + (hero.title || '');
             qfText.textContent = hero.quote;
+            qfDetail.textContent = hero.achievement || '';
             qfSource.textContent = hero.source;
 
             // 定位语录到剪影附近

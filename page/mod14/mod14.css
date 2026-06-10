@@ -244,6 +244,18 @@ body {
     opacity: 1;
     transform: translateY(0);
 }
+.martyr-detail {
+    font-size: 0.8rem;
+    color: rgba(201,169,110,0.7);
+    line-height: 1.6;
+    max-width: 400px;
+    margin: 0.8rem auto 0;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+.martyr-detail.visible {
+    opacity: 1;
+}
 
 /* 名字回响 */
 .name-echo {

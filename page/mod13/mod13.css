@@ -130,6 +130,17 @@ body {
     font-size: 1.1rem; color: var(--gold);
     font-weight: 600; margin-top: 0.3rem;
 }
+.event-detail {
+    font-size: 0.65rem; color: rgba(201,169,110,0.6);
+    margin-top: 0.5rem; line-height: 1.4;
+    max-width: 280px;
+    max-height: 3.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
 
 /* ========== 结尾 ========== */
 .ending {
