@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>纸上谈兵——象棋</title>
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.4.1/core.css">
-    <script type="module" src="https://pyscript.net/releases/2024.4.1/core.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./mod2.css">
 <script src="../filmstrip.js"></script>
@@ -14,65 +12,51 @@
     if (typeof checkNarrativeTransition !== 'function') window.checkNarrativeTransition = function(cb) { if (cb) cb(); };
     checkNarrativeTransition();
 </script>
-<script>
-    // PyScript loading timeout — 15秒后提示
-    setTimeout(function() {
-        var loading = document.getElementById('loading');
-        if (loading && loading.style.display !== 'none') {
-            var text = loading.querySelector('.loading-text');
-            if (text) text.textContent = '加载较慢，请耐心等待...';
-        }
-    }, 15000);
-</script>
 </head>
 <body>
     <div class="button-container">
         <a href="../../index.html" class="nav-button" onclick="event.preventDefault(); filmstripTransition('../../index.html');">
             <i class="fas fa-arrow-left"></i> 返回首页
         </a>
-
     </div>
 
-    
     <h1>纸上谈兵——中国象棋</h1>
-    
+
     <button class="login-btn" id="login-btn" style="display:none">登录</button>
-    
+
     <button class="select-level-btn" id="select-level-btn">
         <i class="fas fa-list"></i> 选择关卡
     </button>
-    
+
     <div class="piece-counter">
         <h3>棋子存活统计</h3>
-        <div class="piece-list" id="piece-counter-list">
-            <!-- 动态生成棋子统计 -->
-        </div>
+        <div class="piece-list" id="piece-counter-list"></div>
     </div>
-    
+
     <div class="game-container">
         <div class="info-panel">
             <div class="level-info">
                 <h2>第 <span id="level-number">0</span> 关</h2>
-                <span id ="level_name"></span>
+                <span id="level_name"></span>
                 <p>残局挑战</p>
             </div>
-            
+
             <div class="turn-indicator red-turn" id="turn-indicator">
                 红方回合
             </div>
-            
+
             <div class="controls">
                 <button id="prev-btn">上一关</button>
                 <button id="next-btn">下一关</button>
                 <button id="reset-btn">重置棋盘</button>
                 <button id="undo-btn">悔棋</button>
             </div>
-            
+
             <div class="status-message" id="status-msg">
-                请登录开始游戏
+                欢迎来到象棋之战！
             </div>
         </div>
-        
+
         <div id="chess-board">
             <div id="level-display">第 0 关</div>
             <svg id="diagonal-lines" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -81,7 +65,7 @@
         <div id="victory-modal" class="victory-modal">
             <div class="modal-content victory-content">
                 <div class="victory-header">
-                    <h2>🎉 胜利！</h2>
+                    <h2>胜利！</h2>
                     <div class="level-badge">第 <span id="victory-level">0</span> 关</div>
                 </div>
                 <div class="victory-body">
@@ -92,12 +76,9 @@
                     <button id="next-level-btn" class="next-level-btn">
                         下一关 <i class="fas fa-arrow-right"></i>
                     </button>
-
-
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- 终局冲击：胜利 -->
@@ -128,832 +109,593 @@
         <div class="level-select-content">
             <button class="close-level-select" id="close-level-select">&times;</button>
             <h2>选择关卡</h2>
-            <div class="levels-grid" id="levels-grid">
-                <!-- 动态生成关卡按钮 -->
-            </div>
+            <div class="levels-grid" id="levels-grid"></div>
         </div>
     </div>
-    <py-script>
-    import js
-    from pyodide.ffi import create_proxy
-    import math
 
-    # 棋盘配置
-    CELL_SIZE = 70
-    BOARD_WIDTH = 9
-    BOARD_HEIGHT = 10
+<script>
+(function() {
+    'use strict';
 
-    # 游戏状态
-    current_level = 0
-    total_levels = 4  # 4关：教学 + 3场关键战役
-    selected_piece = None
-    chess_pieces = []  # 存储所有棋子对象
-    move_hints = []    # 存储移动提示元素
-    move_hint_proxies = []  # 存储proxy引用，避免内存泄漏
-    piece_proxies = []  # 存储棋子click proxy，避免内存泄漏
-    current_turn = "red"  # 当前回合，红方先行
-    move_history = []  # 移动历史，用于悔棋
-    user_max_level = 100
+    // 棋盘配置
+    const CELL_SIZE = 70;
+    const BOARD_WIDTH = 9;
+    const BOARD_HEIGHT = 10;
 
-        # 修改第0关数据
-    level_data = {
+    // 游戏状态
+    let current_level = 0;
+    const total_levels = 4;
+    let selected_piece = null;
+    let chess_pieces = [];
+    let move_hints = [];
+    let current_turn = 'red';
+    let move_history = [];
+    let user_max_level = 100;
+
+    const level_data = {
         0: {
-            “ground”: “#deb887”,
-            “hengxian”: 10,
-            “shuxian”: 9,
-            “pieces”: [
-                # 红方棋子
-                (“帅”, “red”, 4, 9),
-                (“炮”, “red”, 1, 7),
-                # 黑方棋子
-                (“将”, “black”, 4, 0),
-                (“兵”, “black”, 4, 3)
+            ground: '#deb887',
+            hengxian: 10,
+            shuxian: 9,
+            pieces: [
+                ['帅', 'red', 4, 9],
+                ['炮', 'red', 1, 7],
+                ['将', 'black', 4, 0],
+                ['兵', 'black', 4, 3]
             ],
-            “tips”: “基础教学”,
-            “tit”: “学习象棋基本规则和走法”,
-            “narrative”: “在你指挥战斗之前，先学会基本的规则。”
+            tips: '基础教学',
+            tit: '学习象棋基本规则和走法',
+            narrative: '在你指挥战斗之前，先学会基本的规则。'
         },
         1: {
-            “ground”: “#deb887”,
-            “hengxian”: 10,
-            “shuxian”: 9,
-            “pieces”: [
-                (“帅”, “red”, 4, 9),
-                (“炮”, “red”, 1, 7),
-                (“兵”, “red”, 4, 6),
-                (“将”, “black”, 4, 0),
-                (“车”, “black”, 4, 3)
+            ground: '#deb887',
+            hengxian: 10,
+            shuxian: 9,
+            pieces: [
+                ['帅', 'red', 4, 9],
+                ['炮', 'red', 1, 7],
+                ['兵', 'red', 4, 6],
+                ['将', 'black', 4, 0],
+                ['车', 'black', 4, 3]
             ],
-            “tips”: “血战湘江”,
-            “tit”: “1934年11月——红军突破国民党军第四道封锁线，虽损失惨重但粉碎敌人围歼企图，为长征保留核心力量”,
-            “narrative”: “1934年11月。湘江。86000人只剩30000。但战斗没有结束。”
+            tips: '血战湘江',
+            tit: '1934年11月——红军突破国民党军第四道封锁线，虽损失惨重但粉碎敌人围歼企图，为长征保留核心力量',
+            narrative: '1934年11月。湘江。86000人只剩30000。但战斗没有结束。'
         },
         2: {
-            “ground”: “#deb887”,
-            “hengxian”: 10,
-            “shuxian”: 9,
-            “pieces”: [
-                # 红方：沿桥突击（列4为桥身）
-                (“帅”, “red”, 4, 9),
-                (“兵”, “red”, 4, 7), (“兵”, “red”, 4, 8),  # 突击队员
-                (“兵”, “red”, 3, 9), (“军”, “red”, 5, 9),  # 掩护部队
-                # 黑方：桥对岸防御
-                (“将”, “black”, 4, 0),  # 桥头指挥
-                (“兵”, “black”, 4, 1), (“兵”, “black”, 4, 2),  # 桥上火力
-                (“炮”, “black”, 3, 0), (“炮”, “black”, 5, 0)  # 两侧封锁
+            ground: '#deb887',
+            hengxian: 10,
+            shuxian: 9,
+            pieces: [
+                ['帅', 'red', 4, 9],
+                ['兵', 'red', 4, 7], ['兵', 'red', 4, 8],
+                ['兵', 'red', 3, 9], ['军', 'red', 5, 9],
+                ['将', 'black', 4, 0],
+                ['兵', 'black', 4, 1], ['兵', 'black', 4, 2],
+                ['炮', 'black', 3, 0], ['炮', 'black', 5, 0]
             ],
-            “tips”: “飞夺泸定桥”,
-            “tit”: “1935年5月——红军昼夜奔袭240里，22名勇士攀爬铁索突破泸定桥，粉碎敌人火攻封锁，打开北上通道”,
-            “narrative”: “1935年5月。泸定桥。22个人，13根铁链，脚下是万丈深渊。”
+            tips: '飞夺泸定桥',
+            tit: '1935年5月——红军昼夜奔袭240里，22名勇士攀爬铁索突破泸定桥，粉碎敌人火攻封锁，打开北上通道',
+            narrative: '1935年5月。泸定桥。22个人，13根铁链，脚下是万丈深渊。'
         },
         3: {
-            “ground”: “#deb887”,
-            “hengxian”: 10,
-            “shuxian”: 9,
-            “pieces”: [
-                # 红方：多方向会师
-                (“帅”, “red”, 4, 9),  # 红一方面军
-                (“兵”, “red”, 1, 5),  # 红二方面军（需到4,4）
-                (“兵”, “red”, 7, 5),  # 红四方面军（需到4,4）
-                (“兵”, “red”, 2, 8), (“兵”, “red”, 6, 8),
-                # 黑方：最后的阻击
-                (“将”, “black”, 3, 3), (“将”, “black”, 5, 3),  # 残余敌军
-                (“兵”, “black”, 4, 6)  # 中路骚扰
+            ground: '#deb887',
+            hengxian: 10,
+            shuxian: 9,
+            pieces: [
+                ['帅', 'red', 4, 9],
+                ['兵', 'red', 1, 5],
+                ['兵', 'red', 7, 5],
+                ['兵', 'red', 2, 8], ['兵', 'red', 6, 8],
+                ['将', 'black', 3, 3], ['将', 'black', 5, 3],
+                ['兵', 'black', 4, 6]
             ],
-            “tips”: “会宁会师”,
-            “tit”: “1936年10月——红一、二、四方面军在甘肃会宁胜利会师，标志着长征胜利结束，开启中国革命新局面”,
-            “narrative”: “1936年10月。甘肃会宁。两年了，终于到了。”
+            tips: '会宁会师',
+            tit: '1936年10月——红一、二、四方面军在甘肃会宁胜利会师，标志着长征胜利结束，开启中国革命新局面',
+            narrative: '1936年10月。甘肃会宁。两年了，终于到了。'
+        }
+    };
+
+    // ========== 辅助函数 ==========
+
+    function get_piece_at(col, row) {
+        for (const piece of chess_pieces) {
+            if (piece.alive && piece.col === col && piece.row === row) {
+                return piece;
+            }
+        }
+        return null;
+    }
+
+    function check_flying_general() {
+        const red_generals = [];
+        const black_generals = [];
+        for (const piece of chess_pieces) {
+            if (!piece.alive) continue;
+            if (piece.color === 'red' && piece.name === '帅') red_generals.push(piece);
+            else if (piece.color === 'black' && piece.name === '将') black_generals.push(piece);
+        }
+        if (!red_generals.length || !black_generals.length) return false;
+        for (const rg of red_generals) {
+            for (const bg of black_generals) {
+                if (rg.col !== bg.col) continue;
+                const col = rg.col;
+                const min_row = Math.min(rg.row, bg.row);
+                const max_row = Math.max(rg.row, bg.row);
+                let blocked = false;
+                for (const piece of chess_pieces) {
+                    if (piece.alive && piece.col === col && piece.row > min_row && piece.row < max_row) {
+                        blocked = true;
+                        break;
+                    }
+                }
+                if (!blocked) return true;
+            }
+        }
+        return false;
+    }
+
+    function is_in_check(color) {
+        let general = null;
+        for (const piece of chess_pieces) {
+            if (piece.alive && piece.color === color && (piece.name === '帅' || piece.name === '将')) {
+                general = piece;
+                break;
+            }
+        }
+        if (!general) return false;
+        const opponent_color = color === 'red' ? 'black' : 'red';
+
+        for (const piece of chess_pieces) {
+            if (!piece.alive || piece.color !== opponent_color) continue;
+            const raw_moves = [];
+
+            if (['车', '俥', '军'].includes(piece.name)) {
+                const directions = [[0,1],[1,0],[0,-1],[-1,0]];
+                for (const [dx, dy] of directions) {
+                    for (let i = 1; i < Math.max(BOARD_WIDTH, BOARD_HEIGHT); i++) {
+                        const nc = piece.col + dx * i;
+                        const nr = piece.row + dy * i;
+                        if (nc < 0 || nc >= BOARD_WIDTH || nr < 0 || nr >= BOARD_HEIGHT) break;
+                        const target = get_piece_at(nc, nr);
+                        if (target) {
+                            if (target.color !== piece.color) raw_moves.push([nc, nr]);
+                            break;
+                        }
+                        raw_moves.push([nc, nr]);
+                    }
+                }
+            } else if (['马', '傌'].includes(piece.name)) {
+                const moves = [[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1],[-1,2]];
+                const blocks = [[0,1],[1,0],[1,0],[0,-1],[0,-1],[-1,0],[-1,0],[0,1]];
+                for (let i = 0; i < moves.length; i++) {
+                    const [dx, dy] = moves[i];
+                    const nc = piece.col + dx;
+                    const nr = piece.row + dy;
+                    if (nc < 0 || nc >= BOARD_WIDTH || nr < 0 || nr >= BOARD_HEIGHT) continue;
+                    const [bx, by] = blocks[i];
+                    if (get_piece_at(piece.col + bx, piece.row + by)) continue;
+                    const target = get_piece_at(nc, nr);
+                    if (!target || target.color !== piece.color) raw_moves.push([nc, nr]);
+                }
+            } else if (['炮', '砲'].includes(piece.name)) {
+                const directions = [[0,1],[1,0],[0,-1],[-1,0]];
+                for (const [dx, dy] of directions) {
+                    let found = false;
+                    for (let i = 1; i < Math.max(BOARD_WIDTH, BOARD_HEIGHT); i++) {
+                        const nc = piece.col + dx * i;
+                        const nr = piece.row + dy * i;
+                        if (nc < 0 || nc >= BOARD_WIDTH || nr < 0 || nr >= BOARD_HEIGHT) break;
+                        const target = get_piece_at(nc, nr);
+                        if (!found) {
+                            if (target) found = true;
+                        } else {
+                            if (target) {
+                                if (target.color !== piece.color) raw_moves.push([nc, nr]);
+                                break;
+                            }
+                        }
+                    }
+                }
+            } else if (['兵', '卒'].includes(piece.name)) {
+                let dirs;
+                if (piece.color === 'red') {
+                    dirs = [[0, -1]];
+                    if (piece.row < 5) dirs.push([1, 0], [-1, 0]);
+                } else {
+                    dirs = [[0, 1]];
+                    if (piece.row > 4) dirs.push([1, 0], [-1, 0]);
+                }
+                for (const [dx, dy] of dirs) {
+                    const nc = piece.col + dx;
+                    const nr = piece.row + dy;
+                    if (nc < 0 || nc >= BOARD_WIDTH || nr < 0 || nr >= BOARD_HEIGHT) continue;
+                    const target = get_piece_at(nc, nr);
+                    if (!target || target.color !== piece.color) raw_moves.push([nc, nr]);
+                }
+            }
+
+            if (raw_moves.some(([c, r]) => c === general.col && r === general.row)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ========== Chess 类 ==========
+
+    class Chess {
+        constructor(name, color, col, row, id) {
+            this.name = name;
+            this.color = color;
+            this.col = col;
+            this.row = row;
+            this.id = id;
+            this.alive = true;
+            this.element = null;
+            this.possible_moves = [];
+            this.create_element();
+        }
+
+        create_element() {
+            const board = document.getElementById('chess-board');
+            const piece = document.createElement('div');
+            piece.id = `piece-${this.id}`;
+            piece.className = `chess-piece ${this.color}-piece`;
+            piece.textContent = this.name;
+
+            const left = this.col * CELL_SIZE;
+            const top = this.row * CELL_SIZE;
+            piece.style.left = `${left}px`;
+            piece.style.top = `${top}px`;
+
+            piece.addEventListener('click', () => this.on_click());
+            this.element = piece;
+            board.appendChild(piece);
+        }
+
+        on_click() {
+            // 吃子
+            if (selected_piece && selected_piece.color !== this.color) {
+                if (selected_piece.color !== current_turn) {
+                    document.getElementById('status-msg').textContent = `现在是${current_turn === 'red' ? '红' : '黑'}方回合`;
+                    return;
+                }
+                for (const [col, row, is_capture] of selected_piece.possible_moves) {
+                    if (col === this.col && row === this.row && is_capture) {
+                        selected_piece.move_to(this.col, this.row);
+                        return;
+                    }
+                }
+            }
+
+            // 不是自己的棋子
+            if (this.color !== current_turn) {
+                document.getElementById('status-msg').textContent = `现在是${current_turn === 'red' ? '红' : '黑'}方回合`;
+                return;
+            }
+
+            // 取消选择
+            if (selected_piece === this) {
+                this.deselect();
+                selected_piece = null;
+                return;
+            }
+
+            if (selected_piece) selected_piece.deselect();
+
+            selected_piece = this;
+            this.select();
+            this.calculate_moves();
+            this.show_move_hints();
+
+            document.getElementById('status-msg').textContent = `已选中${this.color === 'red' ? '红' : '黑'}方${this.name}`;
+        }
+
+        select() {
+            this.element.classList.add('selected');
+        }
+
+        deselect() {
+            this.element.classList.remove('selected');
+            this.hide_move_hints();
+        }
+
+        calculate_moves() {
+            this.possible_moves = [];
+            if (['车', '俥'].includes(this.name)) this.calculate_rook_moves();
+            else if (['马', '傌'].includes(this.name)) this.calculate_knight_moves();
+            else if (['炮', '砲'].includes(this.name)) this.calculate_cannon_moves();
+            else if (['相', '象'].includes(this.name)) this.calculate_elephant_moves();
+            else if (['仕', '士'].includes(this.name)) this.calculate_advisor_moves();
+            else if (['帅', '将'].includes(this.name)) this.calculate_general_moves();
+            else if (['兵', '卒'].includes(this.name)) this.calculate_pawn_moves();
+            else if (this.name === '军') this.calculate_rook_moves();
+        }
+
+        calculate_rook_moves() {
+            const directions = [[0,1],[1,0],[0,-1],[-1,0]];
+            for (const [dx, dy] of directions) {
+                for (let i = 1; i < Math.max(BOARD_WIDTH, BOARD_HEIGHT); i++) {
+                    const new_col = this.col + dx * i;
+                    const new_row = this.row + dy * i;
+                    if (new_col < 0 || new_col >= BOARD_WIDTH || new_row < 0 || new_row >= BOARD_HEIGHT) break;
+                    const piece_at_pos = get_piece_at(new_col, new_row);
+                    if (piece_at_pos) {
+                        if (piece_at_pos.color !== this.color) this.possible_moves.push([new_col, new_row, true]);
+                        break;
+                    }
+                    this.possible_moves.push([new_col, new_row, false]);
+                }
+            }
+        }
+
+        calculate_knight_moves() {
+            const moves = [[1,2],[2,1],[2,-1],[1,-2],[-1,-2],[-2,-1],[-2,1],[-1,2]];
+            const block_positions = [[0,1],[1,0],[1,0],[0,-1],[0,-1],[-1,0],[-1,0],[0,1]];
+            for (let i = 0; i < moves.length; i++) {
+                const [dx, dy] = moves[i];
+                const new_col = this.col + dx;
+                const new_row = this.row + dy;
+                if (new_col < 0 || new_col >= BOARD_WIDTH || new_row < 0 || new_row >= BOARD_HEIGHT) continue;
+                const [block_dx, block_dy] = block_positions[i];
+                if (get_piece_at(this.col + block_dx, this.row + block_dy)) continue;
+                const piece_at_pos = get_piece_at(new_col, new_row);
+                if (piece_at_pos) {
+                    if (piece_at_pos.color !== this.color) this.possible_moves.push([new_col, new_row, true]);
+                } else {
+                    this.possible_moves.push([new_col, new_row, false]);
+                }
+            }
+        }
+
+        calculate_cannon_moves() {
+            const directions = [[0,1],[1,0],[0,-1],[-1,0]];
+            for (const [dx, dy] of directions) {
+                let found_piece = false;
+                for (let i = 1; i < Math.max(BOARD_WIDTH, BOARD_HEIGHT); i++) {
+                    const new_col = this.col + dx * i;
+                    const new_row = this.row + dy * i;
+                    if (new_col < 0 || new_col >= BOARD_WIDTH || new_row < 0 || new_row >= BOARD_HEIGHT) break;
+                    const piece_at_pos = get_piece_at(new_col, new_row);
+                    if (!found_piece) {
+                        if (!piece_at_pos) this.possible_moves.push([new_col, new_row, false]);
+                        else found_piece = true;
+                    } else {
+                        if (piece_at_pos) {
+                            if (piece_at_pos.color !== this.color) this.possible_moves.push([new_col, new_row, true]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        calculate_elephant_moves() {
+            const moves = [[2,2],[2,-2],[-2,-2],[-2,2]];
+            const block_positions = [[1,1],[1,-1],[-1,-1],[-1,1]];
+            for (let i = 0; i < moves.length; i++) {
+                const [dx, dy] = moves[i];
+                const new_col = this.col + dx;
+                const new_row = this.row + dy;
+                if (new_col < 0 || new_col >= BOARD_WIDTH || new_row < 0 || new_row >= BOARD_HEIGHT) continue;
+                if (this.color === 'red' && new_row < 5) continue;
+                if (this.color === 'black' && new_row > 4) continue;
+                const [block_dx, block_dy] = block_positions[i];
+                if (get_piece_at(this.col + block_dx, this.row + block_dy)) continue;
+                const piece_at_pos = get_piece_at(new_col, new_row);
+                if (piece_at_pos) {
+                    if (piece_at_pos.color !== this.color) this.possible_moves.push([new_col, new_row, true]);
+                } else {
+                    this.possible_moves.push([new_col, new_row, false]);
+                }
+            }
+        }
+
+        calculate_advisor_moves() {
+            const moves = [[1,1],[1,-1],[-1,-1],[-1,1]];
+            for (const [dx, dy] of moves) {
+                const new_col = this.col + dx;
+                const new_row = this.row + dy;
+                if (new_col < 3 || new_col > 5) continue;
+                if (this.color === 'red' && (new_row < 7 || new_row > 9)) continue;
+                if (this.color === 'black' && (new_row < 0 || new_row > 2)) continue;
+                const piece_at_pos = get_piece_at(new_col, new_row);
+                if (piece_at_pos) {
+                    if (piece_at_pos.color !== this.color) this.possible_moves.push([new_col, new_row, true]);
+                } else {
+                    this.possible_moves.push([new_col, new_row, false]);
+                }
+            }
+        }
+
+        calculate_general_moves() {
+            const moves = [[0,1],[1,0],[0,-1],[-1,0]];
+            for (const [dx, dy] of moves) {
+                const new_col = this.col + dx;
+                const new_row = this.row + dy;
+                if (new_col < 3 || new_col > 5) continue;
+                if (this.color === 'red' && (new_row < 7 || new_row > 9)) continue;
+                if (this.color === 'black' && (new_row < 0 || new_row > 2)) continue;
+                const piece_at_pos = get_piece_at(new_col, new_row);
+                if (piece_at_pos) {
+                    if (piece_at_pos.color !== this.color) this.possible_moves.push([new_col, new_row, true]);
+                } else {
+                    this.possible_moves.push([new_col, new_row, false]);
+                }
+            }
+        }
+
+        calculate_pawn_moves() {
+            let moves = [];
+            if (this.color === 'red') {
+                moves.push([0, -1]);
+                if (this.row < 5) moves.push([1, 0], [-1, 0]);
+            } else {
+                moves.push([0, 1]);
+                if (this.row > 4) moves.push([1, 0], [-1, 0]);
+            }
+            for (const [dx, dy] of moves) {
+                const new_col = this.col + dx;
+                const new_row = this.row + dy;
+                if (new_col < 0 || new_col >= BOARD_WIDTH || new_row < 0 || new_row >= BOARD_HEIGHT) continue;
+                const piece_at_pos = get_piece_at(new_col, new_row);
+                if (piece_at_pos) {
+                    if (piece_at_pos.color !== this.color) this.possible_moves.push([new_col, new_row, true]);
+                } else {
+                    this.possible_moves.push([new_col, new_row, false]);
+                }
+            }
+        }
+
+        show_move_hints() {
+            const board = document.getElementById('chess-board');
+            for (const [col, row, is_capture] of this.possible_moves) {
+                const hint = document.createElement('div');
+                hint.className = is_capture ? 'capture-hint' : 'move-hint';
+                hint.style.left = `${col * CELL_SIZE}px`;
+                hint.style.top = `${row * CELL_SIZE}px`;
+                hint.addEventListener('click', () => this.move_to(col, row));
+                hint.style.pointerEvents = 'auto';
+                hint.style.cursor = 'pointer';
+                board.appendChild(hint);
+                move_hints.push(hint);
+            }
+        }
+
+        hide_move_hints() {
+            for (const hint of move_hints) {
+                if (hint.parentNode) hint.parentNode.removeChild(hint);
+            }
+            move_hints.length = 0;
+        }
+
+        move_to(col, row) {
+            const old_col = this.col;
+            const old_row = this.row;
+            let captured_piece = get_piece_at(col, row);
+
+            // 模拟移动检查
+            const original_col = this.col;
+            const original_row = this.row;
+            this.col = col;
+            this.row = row;
+            let captured_alive = false;
+            if (captured_piece) {
+                captured_alive = captured_piece.alive;
+                captured_piece.alive = false;
+            }
+            if (is_in_check(this.color) || check_flying_general()) {
+                this.col = original_col;
+                this.row = original_row;
+                if (captured_piece) captured_piece.alive = captured_alive;
+                document.getElementById('status-msg').textContent = '违规！该走法会让将帅暴露或将帅对脸';
+                return;
+            }
+            this.col = original_col;
+            this.row = original_row;
+            if (captured_piece) captured_piece.alive = captured_alive;
+
+            // 移动
+            this.element.style.left = `${col * CELL_SIZE}px`;
+            this.element.style.top = `${row * CELL_SIZE}px`;
+
+            if (captured_piece) {
+                captured_piece.capture();
+                move_history.push({ piece: this, from: [old_col, old_row], to: [col, row], captured: captured_piece });
+            } else {
+                move_history.push({ piece: this, from: [old_col, old_row], to: [col, row], captured: null });
+            }
+
+            this.col = col;
+            this.row = row;
+            this.deselect();
+            selected_piece = null;
+
+            current_turn = current_turn === 'red' ? 'black' : 'red';
+            update_turn_indicator();
+            update_piece_counter();
+            check_game_end();
+
+            let status_text = `${this.color === 'red' ? '红' : '黑'}方${this.name}已移动`;
+            if (captured_piece) {
+                status_text += `，吃掉了${captured_piece.color === 'red' ? '红' : '黑'}方${captured_piece.name}`;
+            }
+            document.getElementById('status-msg').textContent = status_text;
+        }
+
+        capture() {
+            this.alive = false;
+            this.element.classList.add('capturing');
+            const handler = () => {
+                this.element.style.display = 'none';
+                this.element.classList.remove('capturing');
+            };
+            this.element.addEventListener('animationend', handler, { once: true });
+            document.getElementById('status-msg').textContent = `${this.color === 'red' ? '红' : '黑'}方${this.name}被吃`;
+        }
+
+        restore(col, row) {
+            this.alive = true;
+            this.element.style.display = 'flex';
+            this.col = col;
+            this.row = row;
+            this.element.style.left = `${col * CELL_SIZE}px`;
+            this.element.style.top = `${row * CELL_SIZE}px`;
         }
     }
-        
-    
 
-    class Chess:
-        def __init__(self, name, color, col, row, id):
-            self.name = name
-            self.color = color
-            self.col = col
-            self.row = row
-            self.id = id
-            self.alive = True
-            self.element = None
-            self.possible_moves = []
-            self.create_element()
-        
-        def create_element(self):
-            board = js.document.getElementById("chess-board")
-            piece = js.document.createElement("div")
-            piece.id = f"piece-{self.id}"
-            piece.className = f"chess-piece {self.color}-piece"
-            piece.textContent = self.name
-            
-            # 棋子位置在交叉点上
-            left = self.col * CELL_SIZE
-            top = self.row * CELL_SIZE
-            piece.style.left = f"{left}px"
-            piece.style.top = f"{top}px"
-            
-            click_proxy = create_proxy(lambda e: self.on_click())
-            piece_proxies.append(click_proxy)
-            piece.addEventListener("click", click_proxy)
-            self.element = piece
-            board.appendChild(piece)
-        
-        def on_click(self):
-            global selected_piece, current_turn
-            
-            # 检查是否轮到该颜色走棋（吃子前也要检查）
-            if selected_piece and selected_piece.color != self.color:
-                if selected_piece.color != current_turn:
-                    js.document.getElementById("status-msg").textContent = f"现在是{'红' if current_turn == 'red' else '黑'}方回合"
-                    return
-                for col, row, is_capture in selected_piece.possible_moves:
-                    if col == self.col and row == self.row and is_capture:
-                        selected_piece.move_to(self.col, self.row)
-                        return
+    // ========== Ground 类 ==========
 
-            # 检查是否轮到该颜色走棋
-            if self.color != current_turn:
-                js.document.getElementById("status-msg").textContent = f"现在是{'红' if current_turn == 'red' else '黑'}方回合"
-                return
-            
-            # 如果已经选中了这个棋子，取消选择
-            if selected_piece == self:
-                self.deselect()
-                selected_piece = None
-                return
-            
-            # 取消之前选中的棋子
-            if selected_piece:
-                selected_piece.deselect()
-            
-            # 选中当前棋子
-            selected_piece = self
-            self.select()
-            
-            # 计算并显示可能的移动位置
-            self.calculate_moves()
-            self.show_move_hints()
-            
-            js.document.getElementById("status-msg").textContent = f"已选中{'红' if self.color == 'red' else '黑'}方{self.name}"
-        
-        def select(self):
-            self.element.classList.add("selected")
-        
-        def deselect(self):
-            self.element.classList.remove("selected")
-            self.hide_move_hints()
-        
-        def calculate_moves(self):
-            self.possible_moves = []
-            
-            # 根据棋子类型计算可能的移动
-            if self.name in ["车", "俥"]:
-                self.calculate_rook_moves()
-            elif self.name in ["马", "傌"]:
-                self.calculate_knight_moves()
-            elif self.name in ["炮", "砲"]:
-                self.calculate_cannon_moves()
-            elif self.name in ["相", "象"]:
-                self.calculate_elephant_moves()
-            elif self.name in ["仕", "士"]:
-                self.calculate_advisor_moves()
-            elif self.name in ["帅", "将"]:
-                self.calculate_general_moves()
-            elif self.name in ["兵", "卒"]:
-                self.calculate_pawn_moves()
-            elif self.name == "军":
-                self.calculate_rook_moves()
-            # "障" is immovable obstacle — no moves
-        
-        def calculate_rook_moves(self):
-            # 车的移动规则：横向和纵向任意距离
-            directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # 下、右、上、左
-            
-            for dx, dy in directions:
-                for i in range(1, max(BOARD_WIDTH, BOARD_HEIGHT)):
-                    new_col = self.col + dx * i
-                    new_row = self.row + dy * i
-                    
-                    if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
-                        break
-                    
-                    # 检查目标位置是否有棋子
-                    piece_at_pos = get_piece_at(new_col, new_row)
-                    if piece_at_pos:
-                        if piece_at_pos.color != self.color:  # 可以吃子
-                            self.possible_moves.append((new_col, new_row, True))
-                        break
-                    else:
-                        self.possible_moves.append((new_col, new_row, False))
-        
-        def calculate_knight_moves(self):
-            # 马的移动规则：日字型，有蹩马腿限制
-            moves = [
-                (1, 2), (2, 1), (2, -1), (1, -2),
-                (-1, -2), (-2, -1), (-2, 1), (-1, 2)
-            ]
-            
-            block_positions = [
-                (0, 1), (1, 0), (1, 0), (0, -1),
-                (0, -1), (-1, 0), (-1, 0), (0, 1)
-            ]
-            
-            for i, (dx, dy) in enumerate(moves):
-                new_col = self.col + dx
-                new_row = self.row + dy
-                
-                # 检查是否在棋盘内
-                if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
-                    continue
-                
-                # 检查蹩马腿
-                block_dx, block_dy = block_positions[i]
-                block_col = self.col + block_dx
-                block_row = self.row + block_dy
-                
-                if get_piece_at(block_col, block_row):
-                    continue  # 马腿被蹩
-                
-                # 检查目标位置
-                piece_at_pos = get_piece_at(new_col, new_row)
-                if piece_at_pos:
-                    if piece_at_pos.color != self.color:  # 可以吃子
-                        self.possible_moves.append((new_col, new_row, True))
-                else:
-                    self.possible_moves.append((new_col, new_row, False))
-        
-        def calculate_cannon_moves(self):
-            # 炮的移动规则：横向和纵向移动，吃子需要隔一个棋子
-            directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # 下、右、上、左
-            
-            for dx, dy in directions:
-                found_piece = False
-                for i in range(1, max(BOARD_WIDTH, BOARD_HEIGHT)):
-                    new_col = self.col + dx * i
-                    new_row = self.row + dy * i
-                    
-                    if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
-                        break
-                    
-                    piece_at_pos = get_piece_at(new_col, new_row)
-                    
-                    if not found_piece:
-                        if not piece_at_pos:
-                            self.possible_moves.append((new_col, new_row, False))
-                        else:
-                            found_piece = True
-                    else:
-                        if piece_at_pos:
-                            if piece_at_pos.color != self.color:
-                                self.possible_moves.append((new_col, new_row, True))
-                            break
-        
-        def calculate_elephant_moves(self):
-            # 相/象的移动规则：田字型，不能过河，有塞象眼限制
-            moves = [(2, 2), (2, -2), (-2, -2), (-2, 2)]
-            block_positions = [(1, 1), (1, -1), (-1, -1), (-1, 1)]
-            
-            for i, (dx, dy) in enumerate(moves):
-                new_col = self.col + dx
-                new_row = self.row + dy
-                
-                # 检查是否在棋盘内
-                if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
-                    continue
-                
-                # 检查是否过河
-                if self.color == "red" and new_row < 5:
-                    continue
-                if self.color == "black" and new_row > 4:
-                    continue
-                
-                # 检查塞象眼
-                block_dx, block_dy = block_positions[i]
-                block_col = self.col + block_dx
-                block_row = self.row + block_dy
-                
-                if get_piece_at(block_col, block_row):
-                    continue  # 象眼被塞
-                
-                # 检查目标位置
-                piece_at_pos = get_piece_at(new_col, new_row)
-                if piece_at_pos:
-                    if piece_at_pos.color != self.color:  # 可以吃子
-                        self.possible_moves.append((new_col, new_row, True))
-                else:
-                    self.possible_moves.append((new_col, new_row, False))
-        
-        def calculate_advisor_moves(self):
-            # 仕/士的移动规则：九宫格内斜线移动
-            moves = [(1, 1), (1, -1), (-1, -1), (-1, 1)]
-            
-            for dx, dy in moves:
-                new_col = self.col + dx
-                new_row = self.row + dy
-                
-                # 检查是否在九宫格内
-                if not (3 <= new_col <= 5):
-                    continue
-                
-                if self.color == "red" and not (7 <= new_row <= 9):
-                    continue
-                if self.color == "black" and not (0 <= new_row <= 2):
-                    continue
-                
-                # 检查目标位置
-                piece_at_pos = get_piece_at(new_col, new_row)
-                if piece_at_pos:
-                    if piece_at_pos.color != self.color:  # 可以吃子
-                        self.possible_moves.append((new_col, new_row, True))
-                else:
-                    self.possible_moves.append((new_col, new_row, False))
-        
-        def calculate_general_moves(self):
-            # 帅/将的移动规则：九宫格内横竖移动
-            moves = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-            
-            for dx, dy in moves:
-                new_col = self.col + dx
-                new_row = self.row + dy
-                
-                # 检查是否在九宫格内
-                if not (3 <= new_col <= 5):
-                    continue
-                
-                if self.color == "red" and not (7 <= new_row <= 9):
-                    continue
-                if self.color == "black" and not (0 <= new_row <= 2):
-                    continue
-                
-                # 检查目标位置
-                piece_at_pos = get_piece_at(new_col, new_row)
-                if piece_at_pos:
-                    if piece_at_pos.color != self.color:  # 可以吃子
-                        self.possible_moves.append((new_col, new_row, True))
-                else:
-                    self.possible_moves.append((new_col, new_row, False))
-        
-        def calculate_pawn_moves(self):
-            # 兵/卒的移动规则：过河前只能前进，过河后可以左右移动
-            moves = []
-            
-            # 前进方向
-            if self.color == "red":
-                moves.append((0, -1))  # 红方向前是向上(行数减小)
-            else:
-                moves.append((0, 1))   # 黑方向前是向下(行数增加)
-            
-            # 如果已过河，可以左右移动
-            if (self.color == "red" and self.row < 5) or (self.color == "black" and self.row > 4):
-                moves.extend([(1, 0), (-1, 0)])
-            
-            for dx, dy in moves:
-                new_col = self.col + dx
-                new_row = self.row + dy
-                
-                # 检查是否在棋盘内
-                if not (0 <= new_col < BOARD_WIDTH and 0 <= new_row < BOARD_HEIGHT):
-                    continue
-                
-                # 检查目标位置
-                piece_at_pos = get_piece_at(new_col, new_row)
-                if piece_at_pos:
-                    if piece_at_pos.color != self.color:  # 可以吃子
-                        self.possible_moves.append((new_col, new_row, True))
-                else:
-                    self.possible_moves.append((new_col, new_row, False))
-        
-        def show_move_hints(self):
-            board = js.document.getElementById("chess-board")
-            
-            for col, row, is_capture in self.possible_moves:
-                if is_capture:
-                    hint = js.document.createElement("div")
-                    hint.className = "capture-hint"
-                else:
-                    hint = js.document.createElement("div")
-                    hint.className = "move-hint"
-                
-                left = col * CELL_SIZE
-                top = row * CELL_SIZE
-                hint.style.left = f"{left}px"
-                hint.style.top = f"{top}px"
-                
-                # 添加点击事件
-                proxy = create_proxy(lambda e, c=col, r=row: self.move_to(c, r))
-                move_hint_proxies.append(proxy)
-                hint.addEventListener("click", proxy)
-                hint.style.pointerEvents = "auto"
-                hint.style.cursor = "pointer"
-                
-                board.appendChild(hint)
-                move_hints.append(hint)
-        
-        def hide_move_hints(self):
-            for hint in move_hints:
-                if hint.parentNode:
-                    hint.parentNode.removeChild(hint)
-            move_hints.clear()
-            for proxy in move_hint_proxies:
-                proxy.destroy()
-            move_hint_proxies.clear()
-        
-        def move_to(self, col, row):
-            global selected_piece, current_turn, move_history
+    class Ground {
+        constructor(numx, coler, line, row, gap, block_length) {
+            this.line = line;
+            this.row = row;
+            this.ground = numx;
+            this.gap = gap;
+            this.ground_coler = coler;
+            this.block_length = block_length;
+        }
 
-            # 保存移动前的状态用于悔棋
-            old_col, old_row = self.col, self.row
-            captured_piece = get_piece_at(col, row)
+        draw() {
+            const board = document.getElementById('chess-board');
+            const board_width = (this.line - 1) * this.block_length;
+            const board_height = (this.row - 1) * this.block_length;
+            board.style.width = `${board_width}px`;
+            board.style.height = `${board_height}px`;
+            board.style.backgroundColor = this.ground_coler;
 
-            # 自查：模拟移动后检查己方将帅是否被将军或将帅对脸
-            original_col, original_row = self.col, self.row
-            self.col, self.row = col, row
-            captured_alive = False
-            if captured_piece:
-                captured_alive = captured_piece.alive
-                captured_piece.alive = False
-            if is_in_check(self.color) or check_flying_general():
-                # 撤销模拟
-                self.col, self.row = original_col, original_row
-                if captured_piece:
-                    captured_piece.alive = captured_alive
-                js.document.getElementById("status-msg").textContent = "违规！该走法会让将帅暴露或将帅对脸"
-                return
-            # 撤销模拟（正式走子逻辑下面再执行）
-            self.col, self.row = original_col, original_row
-            if captured_piece:
-                captured_piece.alive = captured_alive
+            // 横线
+            for (let i = 0; i < this.row; i++) {
+                const line = document.createElement('div');
+                line.className = 'board-line horizontal-line';
+                line.style.top = `${i * this.block_length}px`;
+                board.appendChild(line);
+            }
 
-            # 移动棋子到新位置
-            left = col * CELL_SIZE
-            top = row * CELL_SIZE
-            self.element.style.left = f"{left}px"
-            self.element.style.top = f"{top}px"
-            
-            # 检查是否需要吃子
-            if captured_piece:
-                captured_piece.capture()
-                move_history.append({
-                    "piece": self,
-                    "from": (old_col, old_row),
-                    "to": (col, row),
-                    "captured": captured_piece
-                })
-            else:
-                move_history.append({
-                    "piece": self,
-                    "from": (old_col, old_row),
-                    "to": (col, row),
-                    "captured": None
-                })
-            
-            # 更新棋子位置
-            self.col = col
-            self.row = row
-            
-            # 取消选择和隐藏提示
-            self.deselect()
-            selected_piece = None
-            
-            # 切换回合
-            current_turn = "black" if current_turn == "red" else "red"
-            update_turn_indicator()
-            
-            # 更新棋子统计
-            update_piece_counter()
-            
-            # 检查游戏是否结束
-            check_game_end()
-            
-            status_text = f"{'红' if self.color == 'red' else '黑'}方{self.name}已移动"
-            if captured_piece:
-                status_text += f"，吃掉了{'红' if captured_piece.color == 'red' else '黑'}方{captured_piece.name}"
-            js.document.getElementById("status-msg").textContent = status_text
-        
-        def capture(self):
-            self.alive = False
-            self.element.classList.add("capturing")
-            def hide_after_animation(e):
-                self.element.style.display = "none"
-                self.element.classList.remove("capturing")
-            anim_proxy = create_proxy(hide_after_animation)
-            piece_proxies.append(anim_proxy)
-            self.element.addEventListener("animationend", anim_proxy)
-            js.document.getElementById("status-msg").textContent = f"{'红' if self.color == 'red' else '黑'}方{self.name}被吃"
-        
-        def restore(self, col, row):
-            self.alive = True
-            self.element.style.display = "flex"
-            self.col = col
-            self.row = row
-            left = col * CELL_SIZE
-            top = row * CELL_SIZE
-            self.element.style.left = f"{left}px"
-            self.element.style.top = f"{top}px"
+            // 竖线
+            for (let i = 0; i < this.line; i++) {
+                const line_top = document.createElement('div');
+                line_top.className = 'board-line vertical-line';
+                line_top.style.left = `${i * this.block_length}px`;
+                line_top.style.height = '45%';
+                board.appendChild(line_top);
 
-    def get_piece_at(col, row):
-        for piece in chess_pieces:
-            if piece.alive and piece.col == col and piece.row == row:
-                return piece
-        return None
+                const line_bottom = document.createElement('div');
+                line_bottom.className = 'board-line vertical-line';
+                line_bottom.style.left = `${i * this.block_length}px`;
+                line_bottom.style.height = '45%';
+                line_bottom.style.bottom = '0px';
+                board.appendChild(line_bottom);
+            }
 
-    def setTimeout_once(callback, delay):
-        """创建一次性 setTimeout proxy，执行后自动销毁"""
-        def wrapper():
-            callback()
-            proxy.destroy()
-        proxy = create_proxy(wrapper)
-        js.setTimeout(proxy, delay)
-
-    def is_in_check(color):
-        """检查指定颜色的将/帅是否被将军（被敌方棋子攻击）"""
-        general = None
-        for piece in chess_pieces:
-            if piece.alive and piece.color == color and piece.name in ("帅", "将"):
-                general = piece
-                break
-        if not general:
-            return False
-        opponent_color = "black" if color == "red" else "red"
-        # 检查所有敌方棋子是否能攻击到将/帅
-        for piece in chess_pieces:
-            if not piece.alive or piece.color != opponent_color:
-                continue
-            # 计算该棋子的原始移动范围（不做递归过滤）
-            raw_moves = []
-            if piece.name in ("车", "俥", "军"):
-                directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-                for dx, dy in directions:
-                    for i in range(1, max(BOARD_WIDTH, BOARD_HEIGHT)):
-                        nc, nr = piece.col + dx * i, piece.row + dy * i
-                        if not (0 <= nc < BOARD_WIDTH and 0 <= nr < BOARD_HEIGHT):
-                            break
-                        target = get_piece_at(nc, nr)
-                        if target:
-                            if target.color != piece.color:
-                                raw_moves.append((nc, nr))
-                            break
-                        raw_moves.append((nc, nr))
-            elif piece.name in ("马", "傌"):
-                moves = [(1,2),(2,1),(2,-1),(1,-2),(-1,-2),(-2,-1),(-2,1),(-1,2)]
-                blocks = [(0,1),(1,0),(1,0),(0,-1),(0,-1),(-1,0),(-1,0),(0,1)]
-                for i, (dx, dy) in enumerate(moves):
-                    nc, nr = piece.col + dx, piece.row + dy
-                    if not (0 <= nc < BOARD_WIDTH and 0 <= nr < BOARD_HEIGHT):
-                        continue
-                    bx, by = blocks[i]
-                    if get_piece_at(piece.col + bx, piece.row + by):
-                        continue
-                    target = get_piece_at(nc, nr)
-                    if not target or target.color != piece.color:
-                        raw_moves.append((nc, nr))
-            elif piece.name in ("炮", "砲"):
-                directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-                for dx, dy in directions:
-                    found = False
-                    for i in range(1, max(BOARD_WIDTH, BOARD_HEIGHT)):
-                        nc, nr = piece.col + dx * i, piece.row + dy * i
-                        if not (0 <= nc < BOARD_WIDTH and 0 <= nr < BOARD_HEIGHT):
-                            break
-                        target = get_piece_at(nc, nr)
-                        if not found:
-                            if target:
-                                found = True
-                        else:
-                            if target:
-                                if target.color != piece.color:
-                                    raw_moves.append((nc, nr))
-                                break
-            elif piece.name in ("兵", "卒"):
-                if piece.color == "red":
-                    dirs = [(0, -1)]
-                    if piece.row < 5:
-                        dirs.extend([(1, 0), (-1, 0)])
-                else:
-                    dirs = [(0, 1)]
-                    if piece.row > 4:
-                        dirs.extend([(1, 0), (-1, 0)])
-                for dx, dy in dirs:
-                    nc, nr = piece.col + dx, piece.row + dy
-                    if 0 <= nc < BOARD_WIDTH and 0 <= nr < BOARD_HEIGHT:
-                        target = get_piece_at(nc, nr)
-                        if not target or target.color != piece.color:
-                            raw_moves.append((nc, nr))
-            # 将/帅和仕/士的攻击范围在九宫格内，对check影响较小，暂略
-            # 检查是否攻击到将/帅
-            if (general.col, general.row) in raw_moves:
-                return True
-        return False
-
-    def update_piece_counter():
-        counter_list = js.document.getElementById("piece-counter-list")
-        counter_list.replaceChildren()
-        
-        # 统计每种棋子的存活数量
-        piece_counts = {}
-        for piece in chess_pieces:
-            if piece.alive:
-                key = f"{piece.color}-{piece.name}"
-                if key not in piece_counts:
-                    piece_counts[key] = {"red": 0, "black": 0}
-                piece_counts[key][piece.color] += 1
-        
-        # 创建统计项
-        for key, counts in piece_counts.items():
-            color, name = key.split("-")
-            item = js.document.createElement("div")
-            item.className = "piece-item"
-            
-            name_span = js.document.createElement("span")
-            name_span.className = "piece-name"
-            name_span.textContent = name
-            
-            count_span = js.document.createElement("span")
-            if counts["red"] > 0:
-                red_text = js.document.createElement("span")
-                red_text.className = "red-count"
-                red_text.textContent = f"红:{counts['red']} "
-                count_span.appendChild(red_text)
-            if counts["black"] > 0:
-                black_text = js.document.createElement("span")
-                black_text.className = "black-count"
-                black_text.textContent = f"黑:{counts['black']}"
-                count_span.appendChild(black_text)
-            
-            item.appendChild(name_span)
-            item.appendChild(count_span)
-            counter_list.appendChild(item)
-
-    def update_turn_indicator():
-        indicator = js.document.getElementById("turn-indicator")
-        if current_turn == "red":
-            indicator.textContent = "红方回合"
-            indicator.className = "turn-indicator red-turn"
-        else:
-            indicator.textContent = "黑方回合"
-            indicator.className = "turn-indicator black-turn"
-    def next_level():
-        global current_level
-        # 隐藏胜利弹窗
-        victory_modal = js.document.getElementById("victory-modal")
-        victory_modal.style.display = "none"
-        
-        # 切换到下一关
-        if current_level < total_levels - 1:
-            current_level += 1
-            reset_board()  # 重置棋盘加载下一关
-        else:
-            # 如果是最后一关，显示通关提示
-            js.alert("恭喜完成所有关卡！")
-    def check_flying_general():
-        """检查将帅是否对脸（在同一列且中间无棋子）"""
-        red_generals = []
-        black_generals = []
-        for piece in chess_pieces:
-            if not piece.alive:
-                continue
-            if piece.color == "red" and piece.name == "帅":
-                red_generals.append(piece)
-            elif piece.color == "black" and piece.name == "将":
-                black_generals.append(piece)
-        if not red_generals or not black_generals:
-            return False
-        # 检查所有红帅-黑将组合
-        for rg in red_generals:
-            for bg in black_generals:
-                if rg.col != bg.col:
-                    continue
-                col = rg.col
-                min_row = min(rg.row, bg.row)
-                max_row = max(rg.row, bg.row)
-                blocked = False
-                for piece in chess_pieces:
-                    if piece.alive and piece.col == col and min_row < piece.row < max_row:
-                        blocked = True
-                        break
-                if not blocked:
-                    return True
-        return False
-
-    def check_game_end():
-        global user_max_level
-        # 检查是否有一方的将/帅被吃掉
-        red_general_exists = any(piece.alive and piece.color == "red" and piece.name == "帅" for piece in chess_pieces)
-        black_general_exists = any(piece.alive and piece.color == "black" and piece.name == "将" for piece in chess_pieces)
-
-        if not red_general_exists:
-            # 红方失败 - 显示终局冲击
-            ending = js.document.getElementById("endingLose")
-            ending.style.display = "flex"
-            setTimeout_once(lambda: ending.classList.add("active"), 50)
-        elif check_flying_general():
-            # 将帅对脸：当前回合方的将帅暴露，判负
-            violator = "红" if current_turn == "red" else "黑"
-            winner = "黑" if current_turn == "red" else "红"
-            js.document.getElementById("status-msg").textContent = f"将帅对脸！{violator}方违规判负"
-            if winner == "红":
-                ending = js.document.getElementById("endingWin")
-            else:
-                ending = js.document.getElementById("endingLose")
-            ending.style.display = "flex"
-            setTimeout_once(lambda: ending.classList.add("active"), 50)
-        elif not black_general_exists:
-            # 红方胜利 - 显示终局冲击
-            level_info = level_data[current_level]
-            tips = level_info.get("tips", "完成关卡")
-            tit = level_info.get("tit", "")
-
-            ending = js.document.getElementById("endingWin")
-            js.document.getElementById("endingWinText").textContent = tips
-            js.document.getElementById("endingWinSub").textContent = tit
-            ending.style.display = "flex"
-            setTimeout_once(lambda: ending.classList.add("active"), 50)
-
-            # 更新用户进度
-            if current_level >= user_max_level:
-                user_max_level = current_level + 1
-    def undo_move():
-        global current_turn, move_history
-        
-        if not move_history:
-            js.document.getElementById("status-msg").textContent = "没有可悔棋的步骤"
-            return
-        
-        last_move = move_history.pop()
-        piece = last_move["piece"]
-        from_col, from_row = last_move["from"]
-        captured = last_move["captured"]
-        
-        # 移动棋子回原位置
-        piece.col, piece.row = from_col, from_row
-        left = from_col * CELL_SIZE
-        top = from_row * CELL_SIZE
-        piece.element.style.left = f"{left}px"
-        piece.element.style.top = f"{top}px"
-        
-        # 恢复被吃的棋子
-        if captured:
-            to_col, to_row = last_move["to"]
-            captured.restore(to_col, to_row)
-        
-        # 切换回原来的回合
-        current_turn = "red" if current_turn == "black" else "red"
-        update_turn_indicator()
-        
-        # 更新棋子统计
-        update_piece_counter()
-        
-        js.document.getElementById("status-msg").textContent = "已悔棋"
-
-    class Ground:
-        def __init__(self, numx, coler, line, row, gap, block_length):
-            self.line = line
-            self.row = row
-            self.ground = numx
-            self.gap = gap
-            self.ground_coler = coler
-            self.block_length = block_length
-        
-        def draw(self):
-            board = js.document.getElementById("chess-board")
-            board_width = (self.line - 1) * self.block_length
-            board_height = (self.row - 1) * self.block_length
-            board.style.width = f"{board_width}px"
-            board.style.height = f"{board_height}px"
-            board.style.backgroundColor = self.ground_coler
-            
-            # 绘制横线
-            for i in range(self.row):
-                line = js.document.createElement("div")
-                line.className = "board-line horizontal-line"
-                line.style.top = f"{i * self.block_length}px"
-                board.appendChild(line)
-            
-            # 绘制竖线
-            for i in range(self.line):
-                # 创建上半部分竖线
-                line_top = js.document.createElement("div")
-                line_top.className = "board-line vertical-line"
-                line_top.style.left = f"{i * self.block_length}px"
-                line_top.style.height = "45%"
-                board.appendChild(line_top)
-                
-                # 创建下半部分竖线
-                line_bottom = js.document.createElement("div")
-                line_bottom.className = "board-line vertical-line"
-                line_bottom.style.left = f"{i * self.block_length}px"
-                line_bottom.style.height = "45%"
-                line_bottom.style.bottom = "0px"
-                board.appendChild(line_bottom)
-
-            # 楚河汉界装饰
-            river = js.document.createElement("div")
-            river.style.cssText = f"""
+            // 楚河汉界
+            const river = document.createElement('div');
+            river.style.cssText = `
                 position: absolute;
-                top: {(self.row - 1) * self.block_length * 0.45 - 15}px;
-                left: {1 * self.block_length}px;
-                right: {1 * self.block_length}px;
+                top: ${(this.row - 1) * this.block_length * 0.45 - 15}px;
+                left: ${1 * this.block_length}px;
+                right: ${1 * this.block_length}px;
                 height: 30px;
                 display: flex;
                 align-items: center;
@@ -962,255 +704,311 @@
                 z-index: 3;
                 font-size: 24px;
                 font-weight: bold;
-                color: rgba(139, 69, 19, 0.4);
+                color: rgba(201, 169, 110, 0.2);
                 font-family: 'KaiTi', 'STKaiti', serif;
                 letter-spacing: 8px;
-            """
-            river_left = js.document.createElement("span")
-            river_left.textContent = "楚  河"
-            river_right = js.document.createElement("span")
-            river_right.textContent = "汉  界"
-            river.appendChild(river_left)
-            river.appendChild(river_right)
-            board.appendChild(river)
+            `;
+            const river_left = document.createElement('span');
+            river_left.textContent = '楚  河';
+            const river_right = document.createElement('span');
+            river_right.textContent = '汉  界';
+            river.appendChild(river_left);
+            river.appendChild(river_right);
+            board.appendChild(river);
 
-            # 使用SVG绘制斜线
-            self.draw_diagonal_lines()
-        
-        def draw_diagonal_lines(self):
-            # 获取SVG容器
-            svg = js.document.getElementById("diagonal-lines")
-            svg.setAttribute("width", f"{(self.line - 1) * self.block_length}px")
-            svg.setAttribute("height", f"{(self.row - 1) * self.block_length}px")
-            
-            # 红方九宫格斜线坐标 (x1, y1, x2, y2)
-            red_palace = [
-                (3, 7, 5, 9),  # 第一条对角线：从(3,7)到(5,9)
-                (5, 7, 3, 9)   # 第二条对角线：从(5,7)到(3,9)
-            ]
-            
-            # 黑方九宫格斜线坐标
-            black_palace = [
-                (3, 0, 5, 2),  # 第一条对角线：从(3,0)到(5,2)
-                (5, 0, 3, 2)   # 第二条对角线：从(5,0)到(3,2)
-            ]
-            
-            # 遍历所有斜线坐标（红方+黑方共4条斜线）
-            for (x1, y1, x2, y2) in red_palace + black_palace:
-                # 创建SVG线段元素
-                line = js.document.createElementNS("http://www.w3.org/2000/svg", "line")
-                
-                # 计算起点像素坐标：格子索引 × 格子大小
-                start_x = x1 * self.block_length
-                start_y = y1 * self.block_length
-                
-                # 计算终点像素坐标
-                end_x = x2 * self.block_length
-                end_y = y2 * self.block_length
-                
-                # 设置线段起点和终点属性
-                line.setAttribute("x1", f"{start_x}")
-                line.setAttribute("y1", f"{start_y}")
-                line.setAttribute("x2", f"{end_x}")
-                line.setAttribute("y2", f"{end_y}")
-                
-                # 设置线段样式
-                line.setAttribute("stroke", "#000")
-                line.setAttribute("stroke-width", "1")
-                
-                # 将线段添加到SVG容器中
-                svg.appendChild(line)
+            this.draw_diagonal_lines();
+        }
 
-    def init_pieces(pieces_layout):
-        global chess_pieces, move_history
-        
-        # 清除现有棋子
-        board = js.document.getElementById("chess-board")
-        pieces = board.querySelectorAll(".chess-piece")
-        for piece in pieces:
-            board.removeChild(piece)
-        
-        # 清除移动历史和proxy（避免内存泄漏）
-        move_history.clear()
-        for proxy in piece_proxies:
-            proxy.destroy()
-        piece_proxies.clear()
-        for proxy in move_hint_proxies:
-            proxy.destroy()
-        move_hint_proxies.clear()
-        chess_pieces.clear()
-        
-        # 创建棋子对象
-        for i, (name, color, col, row) in enumerate(pieces_layout):
-            chess_pieces.append(Chess(name, color, col, row, i))
-        
-        # 更新棋子统计
-        update_piece_counter()
-        
-        # 重置回合
-        global current_turn
-        current_turn = "red"
-        update_turn_indicator()
-        
-        js.document.getElementById("loading").classList.add("fade-out")
-        def _remove_loading(_):
-            js.document.getElementById("loading").style.display = "none"
-        js.setTimeout(create_proxy(_remove_loading), 800)
+        draw_diagonal_lines() {
+            const svg = document.getElementById('diagonal-lines');
+            svg.setAttribute('width', `${(this.line - 1) * this.block_length}px`);
+            svg.setAttribute('height', `${(this.row - 1) * this.block_length}px`);
 
-    def change_level(direction):
-        global current_level
+            const red_palace = [[3,7,5,9],[5,7,3,9]];
+            const black_palace = [[3,0,5,2],[5,0,3,2]];
 
-        if direction == "next" and current_level < total_levels - 1:
-            current_level += 1
-        elif direction == "prev" and current_level > 0:
-            current_level -= 1
-        else:
-            return
-        
-        # 更新界面显示
-        js.document.getElementById("level-number").textContent = str(current_level)
-        js.document.getElementById("level-display").textContent = f"第 {current_level} 关"
-        
-        # 初始化棋盘和棋子
-        reset_board()
-        
-        js.document.getElementById("status-msg").textContent = f"已切换到第 {current_level} 关"
+            for (const [x1, y1, x2, y2] of [...red_palace, ...black_palace]) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', `${x1 * this.block_length}`);
+                line.setAttribute('y1', `${y1 * this.block_length}`);
+                line.setAttribute('x2', `${x2 * this.block_length}`);
+                line.setAttribute('y2', `${y2 * this.block_length}`);
+                line.setAttribute('stroke', 'rgba(201, 169, 110, 0.4)');
+                line.setAttribute('stroke-width', '1');
+                svg.appendChild(line);
+            }
+        }
+    }
 
-    def show_chess_narrative(text):
-        """显示关卡叙事文字 — 黑屏+白字，2.5s后自动消失"""
-        overlay = js.document.createElement("div")
-        overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99998;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 1s ease;"
-        text_el = js.document.createElement("div")
-        text_el.style.cssText = "font-family:'Microsoft YaHei',sans-serif;font-size:1.3rem;color:rgba(255,255,255,0.85);letter-spacing:3px;line-height:2;text-align:center;max-width:80%;opacity:0;transform:translateY(20px);transition:opacity 1s ease 0.3s,transform 1s ease 0.3s;"
-        text_el.textContent = text
-        overlay.appendChild(text_el)
-        js.document.body.appendChild(overlay)
-        # 淡入
-        def show(_):
-            overlay.style.opacity = "1"
-            text_el.style.opacity = "1"
-            text_el.style.transform = "translateY(0)"
-        js.setTimeout(create_proxy(show), 50)
-        # 2.5s后淡出
-        def hide(_):
-            overlay.style.opacity = "0"
-            def remove(_):
-                overlay.remove()
-            js.setTimeout(create_proxy(remove), 800)
-        js.setTimeout(create_proxy(hide), 2500)
+    // ========== UI 更新函数 ==========
 
-    def reset_board():
-        # 使用当前关卡数据初始化棋子
-        if current_level in level_data:
-            level_info = level_data[current_level]
-            init_pieces(level_info["pieces"])
-            js.document.getElementById("status-msg").textContent = "棋盘已重置"
-            tips = level_info.get("tips", "")
-            js.document.getElementById("level_name").textContent = str(tips)
-            # 显示叙事文字
-            narrative = level_info.get("narrative", "")
-            if narrative:
-                show_chess_narrative(narrative)
-        else:
-            js.document.getElementById("status-msg").textContent = "关卡数据不存在"
+    function update_turn_indicator() {
+        const indicator = document.getElementById('turn-indicator');
+        if (current_turn === 'red') {
+            indicator.textContent = '红方回合';
+            indicator.className = 'turn-indicator red-turn';
+        } else {
+            indicator.textContent = '黑方回合';
+            indicator.className = 'turn-indicator black-turn';
+        }
+    }
 
-    level_select_proxies = []
+    function update_piece_counter() {
+        const counter_list = document.getElementById('piece-counter-list');
+        counter_list.replaceChildren();
 
-    def show_level_select():
-        modal = js.document.getElementById("level-select-modal")
-        modal.style.display = "flex"
+        const piece_counts = {};
+        for (const piece of chess_pieces) {
+            if (!piece.alive) continue;
+            const key = `${piece.color}-${piece.name}`;
+            if (!piece_counts[key]) piece_counts[key] = { red: 0, black: 0 };
+            piece_counts[key][piece.color]++;
+        }
 
-        # 清理旧 proxy
-        for proxy in level_select_proxies:
-            proxy.destroy()
-        level_select_proxies.clear()
+        for (const [key, counts] of Object.entries(piece_counts)) {
+            const [color, name] = key.split('-');
+            const item = document.createElement('div');
+            item.className = 'piece-item';
 
-        # 生成关卡按钮
-        levels_grid = js.document.getElementById("levels-grid")
-        levels_grid.innerHTML = ""
+            const name_span = document.createElement('span');
+            name_span.className = 'piece-name';
+            name_span.textContent = name;
 
-        for i in range(total_levels):
-            btn = js.document.createElement("button")
-            btn.className = "level-btn"
-            btn.textContent = str(i)
+            const count_span = document.createElement('span');
+            if (counts.red > 0) {
+                const red_text = document.createElement('span');
+                red_text.className = 'red-count';
+                red_text.textContent = `红:${counts.red} `;
+                count_span.appendChild(red_text);
+            }
+            if (counts.black > 0) {
+                const black_text = document.createElement('span');
+                black_text.className = 'black-count';
+                black_text.textContent = `黑:${counts.black}`;
+                count_span.appendChild(black_text);
+            }
 
-            # 检查关卡是否解锁
-            if i <= user_max_level:
-                btn.classList.add("unlocked")
-                proxy = create_proxy(lambda e, level=i: select_level(level))
-                level_select_proxies.append(proxy)
-                btn.addEventListener("click", proxy)
-            else:
-                btn.classList.add("locked")
-                btn.title = "请先通过前置关卡"
-            
-            levels_grid.appendChild(btn)
+            item.appendChild(name_span);
+            item.appendChild(count_span);
+            counter_list.appendChild(item);
+        }
+    }
 
-    def hide_level_select():
-        js.document.getElementById("level-select-modal").style.display = "none"
+    function show_chess_narrative(text) {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:99998;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 1s ease;';
+        const text_el = document.createElement('div');
+        text_el.style.cssText = "font-family:'Microsoft YaHei',sans-serif;font-size:1.3rem;color:rgba(255,255,255,0.85);letter-spacing:3px;line-height:2;text-align:center;max-width:80%;opacity:0;transform:translateY(20px);transition:opacity 1s ease 0.3s,transform 1s ease 0.3s;";
+        text_el.textContent = text;
+        overlay.appendChild(text_el);
+        document.body.appendChild(overlay);
 
-    def select_level(level):
-        global current_level
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            text_el.style.opacity = '1';
+            text_el.style.transform = 'translateY(0)';
+        }, 50);
 
-        # 检查是否有权限选择该关卡
-        if level > user_max_level:
-            js.document.getElementById("status-msg").textContent = "请先通过前置关卡"
-            hide_level_select()
-            return
-        
-        current_level = level
-        
-        # 更新界面显示
-        js.document.getElementById("level-number").textContent = str(current_level)
-        js.document.getElementById("level-display").textContent = f"第 {current_level} 关"
-        
-        # 初始化棋盘和棋子
-        reset_board()
-        
-        js.document.getElementById("status-msg").textContent = f"已切换到第 {current_level} 关"
-        hide_level_select()
+        setTimeout(() => {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.remove(), 800);
+        }, 2500);
+    }
 
-    # 初始化游戏
-    if __name__ == "__main__":
-        # 创建棋盘
-        ground = Ground(1, "#deb887", 9, 10, 0, CELL_SIZE)
-        ground.draw()
-        
-        # 绑定按钮事件
-        js.document.getElementById("prev-btn").addEventListener("click", create_proxy(lambda e: change_level("prev")))
-        js.document.getElementById("next-btn").addEventListener("click", create_proxy(lambda e: change_level("next")))
-        js.document.getElementById("reset-btn").addEventListener("click", create_proxy(lambda e: reset_board()))
-        js.document.getElementById("undo-btn").addEventListener("click", create_proxy(lambda e: undo_move()))
-        js.document.getElementById("select-level-btn").addEventListener("click", create_proxy(lambda e: show_level_select()))
-        js.document.getElementById("close-level-select").addEventListener("click", create_proxy(lambda e: hide_level_select()))
-        js.document.getElementById("next-level-btn").addEventListener("click", create_proxy(lambda e: next_level()))
+    // ========== 游戏逻辑 ==========
 
-        # 终局冲击按钮
-        def close_ending_win(e):
-            ending = js.document.getElementById("endingWin")
-            ending.classList.remove("active")
-            ending.style.display = "none"
-            # 显示原来的胜利弹窗（带下一关按钮）
-            victory_modal = js.document.getElementById("victory-modal")
-            level_info = level_data[current_level]
-            js.document.getElementById("victory-level").textContent = str(current_level)
-            js.document.getElementById("victory-tips").textContent = level_info.get("tips", "完成关卡")
-            js.document.getElementById("victory-tit").textContent = level_info.get("tit", "")
-            victory_modal.style.display = "flex"
+    function init_pieces(pieces_layout) {
+        const board = document.getElementById('chess-board');
+        const pieces = board.querySelectorAll('.chess-piece');
+        for (const piece of pieces) board.removeChild(piece);
 
-        def close_ending_lose(e):
-            ending = js.document.getElementById("endingLose")
-            ending.classList.remove("active")
-            ending.style.display = "none"
-            reset_board()
+        move_history.length = 0;
+        chess_pieces.length = 0;
 
-        js.document.getElementById("endingWinBtn").addEventListener("click", create_proxy(close_ending_win))
-        js.document.getElementById("endingLoseBtn").addEventListener("click", create_proxy(close_ending_lose))
-        # 自动初始化游戏
-        js.document.getElementById("status-msg").textContent = "欢迎来到象棋之战！"
-        js.document.getElementById("level-display").textContent = f"第 {current_level} 关"
-        reset_board()
-</py-script>
+        for (let i = 0; i < pieces_layout.length; i++) {
+            const [name, color, col, row] = pieces_layout[i];
+            chess_pieces.push(new Chess(name, color, col, row, i));
+        }
+
+        update_piece_counter();
+        current_turn = 'red';
+        update_turn_indicator();
+
+        document.getElementById('loading').classList.add('fade-out');
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+        }, 800);
+    }
+
+    function reset_board() {
+        if (level_data[current_level]) {
+            const level_info = level_data[current_level];
+            init_pieces(level_info.pieces);
+            document.getElementById('status-msg').textContent = '棋盘已重置';
+            document.getElementById('level_name').textContent = level_info.tips || '';
+            if (level_info.narrative) show_chess_narrative(level_info.narrative);
+        } else {
+            document.getElementById('status-msg').textContent = '关卡数据不存在';
+        }
+    }
+
+    function change_level(direction) {
+        if (direction === 'next' && current_level < total_levels - 1) current_level++;
+        else if (direction === 'prev' && current_level > 0) current_level--;
+        else return;
+
+        document.getElementById('level-number').textContent = current_level;
+        document.getElementById('level-display').textContent = `第 ${current_level} 关`;
+        reset_board();
+        document.getElementById('status-msg').textContent = `已切换到第 ${current_level} 关`;
+    }
+
+    function next_level() {
+        document.getElementById('victory-modal').style.display = 'none';
+        if (current_level < total_levels - 1) {
+            current_level++;
+            reset_board();
+        } else {
+            alert('恭喜完成所有关卡！');
+        }
+    }
+
+    function undo_move() {
+        if (!move_history.length) {
+            document.getElementById('status-msg').textContent = '没有可悔棋的步骤';
+            return;
+        }
+        const last_move = move_history.pop();
+        const piece = last_move.piece;
+        const [from_col, from_row] = last_move.from;
+        const captured = last_move.captured;
+
+        piece.col = from_col;
+        piece.row = from_row;
+        piece.element.style.left = `${from_col * CELL_SIZE}px`;
+        piece.element.style.top = `${from_row * CELL_SIZE}px`;
+
+        if (captured) {
+            const [to_col, to_row] = last_move.to;
+            captured.restore(to_col, to_row);
+        }
+
+        current_turn = current_turn === 'red' ? 'black' : 'red';
+        update_turn_indicator();
+        update_piece_counter();
+        document.getElementById('status-msg').textContent = '已悔棋';
+    }
+
+    function check_game_end() {
+        const red_general_exists = chess_pieces.some(p => p.alive && p.color === 'red' && p.name === '帅');
+        const black_general_exists = chess_pieces.some(p => p.alive && p.color === 'black' && p.name === '将');
+
+        if (!red_general_exists) {
+            const ending = document.getElementById('endingLose');
+            ending.style.display = 'flex';
+            setTimeout(() => ending.classList.add('active'), 50);
+        } else if (check_flying_general()) {
+            const violator = current_turn === 'red' ? '红' : '黑';
+            const winner = current_turn === 'red' ? '黑' : '红';
+            document.getElementById('status-msg').textContent = `将帅对脸！${violator}方违规判负`;
+            const ending = document.getElementById(winner === '红' ? 'endingWin' : 'endingLose');
+            ending.style.display = 'flex';
+            setTimeout(() => ending.classList.add('active'), 50);
+        } else if (!black_general_exists) {
+            const level_info = level_data[current_level];
+            document.getElementById('endingWinText').textContent = level_info.tips || '完成关卡';
+            document.getElementById('endingWinSub').textContent = level_info.tit || '';
+            const ending = document.getElementById('endingWin');
+            ending.style.display = 'flex';
+            setTimeout(() => ending.classList.add('active'), 50);
+            if (current_level >= user_max_level) user_max_level = current_level + 1;
+        }
+    }
+
+    // ========== 关卡选择 ==========
+
+    function show_level_select() {
+        const modal = document.getElementById('level-select-modal');
+        modal.style.display = 'flex';
+
+        const levels_grid = document.getElementById('levels-grid');
+        levels_grid.innerHTML = '';
+
+        for (let i = 0; i < total_levels; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'level-btn';
+            btn.textContent = i;
+
+            if (i <= user_max_level) {
+                btn.classList.add('unlocked');
+                btn.addEventListener('click', () => select_level(i));
+            } else {
+                btn.classList.add('locked');
+                btn.title = '请先通过前置关卡';
+            }
+            levels_grid.appendChild(btn);
+        }
+    }
+
+    function hide_level_select() {
+        document.getElementById('level-select-modal').style.display = 'none';
+    }
+
+    function select_level(level) {
+        if (level > user_max_level) {
+            document.getElementById('status-msg').textContent = '请先通过前置关卡';
+            hide_level_select();
+            return;
+        }
+        current_level = level;
+        document.getElementById('level-number').textContent = current_level;
+        document.getElementById('level-display').textContent = `第 ${current_level} 关`;
+        reset_board();
+        document.getElementById('status-msg').textContent = `已切换到第 ${current_level} 关`;
+        hide_level_select();
+    }
+
+    // ========== 初始化 ==========
+
+    function init() {
+        const ground = new Ground(1, '#deb887', 9, 10, 0, CELL_SIZE);
+        ground.draw();
+
+        document.getElementById('prev-btn').addEventListener('click', () => change_level('prev'));
+        document.getElementById('next-btn').addEventListener('click', () => change_level('next'));
+        document.getElementById('reset-btn').addEventListener('click', () => reset_board());
+        document.getElementById('undo-btn').addEventListener('click', () => undo_move());
+        document.getElementById('select-level-btn').addEventListener('click', () => show_level_select());
+        document.getElementById('close-level-select').addEventListener('click', () => hide_level_select());
+        document.getElementById('next-level-btn').addEventListener('click', () => next_level());
+
+        document.getElementById('endingWinBtn').addEventListener('click', () => {
+            const ending = document.getElementById('endingWin');
+            ending.classList.remove('active');
+            ending.style.display = 'none';
+            const victory_modal = document.getElementById('victory-modal');
+            const level_info = level_data[current_level];
+            document.getElementById('victory-level').textContent = current_level;
+            document.getElementById('victory-tips').textContent = level_info.tips || '完成关卡';
+            document.getElementById('victory-tit').textContent = level_info.tit || '';
+            victory_modal.style.display = 'flex';
+        });
+
+        document.getElementById('endingLoseBtn').addEventListener('click', () => {
+            const ending = document.getElementById('endingLose');
+            ending.classList.remove('active');
+            ending.style.display = 'none';
+            reset_board();
+        });
+
+        document.getElementById('status-msg').textContent = '欢迎来到象棋之战！';
+        document.getElementById('level-display').textContent = `第 ${current_level} 关`;
+        reset_board();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
 
     <!-- 模块导航 -->
     <div style="display:flex; justify-content:center; gap:15px; margin:20px 0; flex-wrap:wrap; padding:0 20px;">
