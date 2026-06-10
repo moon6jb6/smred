@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>赓续红色血脉，传承奋斗精神</title>
-    <meta name="description" content="赓续红色血脉，传承奋斗精神 — 红色文化数字媒体互动体验网站，六次穿越，一段不能忘却的记忆">
+    <meta name="description" content="赓续红色血脉，传承奋斗精神 — 红色文化数字媒体互动体验网站，15个模块，一段不能忘却的记忆">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⭐</text></svg>">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -385,6 +385,60 @@
         .marker-5 { left: 66%; bottom: 50%; }
         .marker-6 { left: 80%; bottom: 56%; }
 
+        /* ========== 模块卡片网格（mod7-15） ========== */
+        .modules-grid {
+            position: absolute;
+            top: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            z-index: 10;
+            width: 85%;
+            max-width: 700px;
+        }
+
+        .mod-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(201, 169, 110, 0.15);
+            border-radius: 8px;
+            padding: 12px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+        }
+
+        .mod-card:hover, .mod-card:focus {
+            background: rgba(201, 169, 110, 0.1);
+            border-color: rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+            transform: translateY(-3px);
+            outline: none;
+        }
+
+        .mod-card .card-icon {
+            font-size: 1.3rem;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .mod-card .card-name {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
+        }
+
+        .mod-card .card-preview {
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.35);
+            line-height: 1.3;
+        }
+
         /* ========== 底部寄语 ========== */
         .scene-footer {
             position: absolute;
@@ -454,6 +508,16 @@
             .marker-5 { left: 64%; bottom: 46%; }
             .marker-6 { left: 78%; bottom: 52%; }
 
+            .modules-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                width: 92%;
+                top: 15%;
+            }
+            .mod-card { padding: 10px 6px; }
+            .mod-card .card-icon { font-size: 1.1rem; }
+            .mod-card .card-name { font-size: 0.7rem; }
+
             .year-label {
                 font-size: 0.9rem;
             }
@@ -507,6 +571,17 @@
             .marker-4 { left: 46%; bottom: 38%; }
             .marker-5 { left: 62%; bottom: 44%; }
             .marker-6 { left: 76%; bottom: 50%; }
+
+            .modules-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+                width: 95%;
+                top: 12%;
+            }
+            .mod-card { padding: 8px 4px; }
+            .mod-card .card-icon { font-size: 1rem; }
+            .mod-card .card-name { font-size: 0.65rem; }
+            .mod-card .card-preview { display: none; }
         }
     </style>
 </head>
@@ -529,7 +604,7 @@
         <!-- 题目 -->
         <header class="scene-title">
             <h1>赓续红色血脉，传承奋斗精神</h1>
-            <p>六次穿越，一段不能忘却的记忆</p>
+            <p>15个模块，一段不能忘却的记忆</p>
         </header>
 
         <!-- 道路 -->
@@ -603,6 +678,55 @@
             <div class="marker-post"></div>
             <div class="marker-glow"></div>
         </div>
+        </nav>
+
+        <!-- mod7-15 模块卡片 -->
+        <nav aria-label="更多历史模块" class="modules-grid">
+            <a class="mod-card" href="page/mod7/mod7.html" tabindex="0" aria-label="电报战士">
+                <div class="card-icon"><i class="fas fa-broadcast-tower"></i></div>
+                <div class="card-name">电报战士</div>
+                <div class="card-preview">电台旋钮调频，解密6封历史电报</div>
+            </a>
+            <a class="mod-card" href="page/mod8/mod8.html" tabindex="0" aria-label="暗线">
+                <div class="card-icon"><i class="fas fa-user-secret"></i></div>
+                <div class="card-name">暗线</div>
+                <div class="card-preview">黑暗潜伏，三层元游戏揭示真相</div>
+            </a>
+            <a class="mod-card" href="page/mod9/mod9.html" tabindex="0" aria-label="抉择电台">
+                <div class="card-icon"><i class="fas fa-radio"></i></div>
+                <div class="card-name">抉择电台</div>
+                <div class="card-preview">先看后果，再做选择</div>
+            </a>
+            <a class="mod-card" href="page/mod10/mod10.html" tabindex="0" aria-label="历史显影">
+                <div class="card-icon"><i class="fas fa-camera-retro"></i></div>
+                <div class="card-name">历史显影</div>
+                <div class="card-preview">拍立得摩擦，历史照片逐秒显影</div>
+            </a>
+            <a class="mod-card" href="page/mod11/mod11.html" tabindex="0" aria-label="历史星图">
+                <div class="card-icon"><i class="fas fa-project-diagram"></i></div>
+                <div class="card-name">历史星图</div>
+                <div class="card-preview">地铁线路图式因果链，探索14个节点</div>
+            </a>
+            <a class="mod-card" href="page/mod12/mod12.html" tabindex="0" aria-label="觉醒纪念碑">
+                <div class="card-icon"><i class="fas fa-monument"></i></div>
+                <div class="card-name">觉醒纪念碑</div>
+                <div class="card-preview">献花刻名，花瓣飘落纪念碑生长</div>
+            </a>
+            <a class="mod-card" href="page/mod13/mod13.html" tabindex="0" aria-label="节拍革命">
+                <div class="card-icon"><i class="fas fa-drum"></i></div>
+                <div class="card-name">节拍革命</div>
+                <div class="card-preview">跟着节拍敲击，揭示15个历史节点</div>
+            </a>
+            <a class="mod-card" href="page/mod14/mod14.html" tabindex="0" aria-label="最后一步">
+                <div class="card-icon"><i class="fas fa-running"></i></div>
+                <div class="card-name">最后一步</div>
+                <div class="card-preview">冲锋、倒下、纪念，循环往复</div>
+            </a>
+            <a class="mod-card" href="page/mod15/mod15.html" tabindex="0" aria-label="审判席">
+                <div class="card-icon"><i class="fas fa-gavel"></i></div>
+                <div class="card-name">审判席</div>
+                <div class="card-preview">历史审判庭，4种结局等你解锁</div>
+            </a>
         </nav>
 
         <!-- 底部 -->
@@ -706,11 +830,20 @@
         // 路标点击 → 胶片转场（带叙事文字）
         const narratives = {
             'page/longfight_rouit_mod1/mod1.html': '1934年10月。江西瑞金。86000人出发了。',
+            'page/chess_mod2/mod2.html': '在你指挥战斗之前，先理解战争的代价。',
             'page/timeriver_museum_mod3/mod3.html': '湘江之后，他们开始思考：这一切到底是为了什么。',
             'page/sacrifice_mod4/mod4.html': '有些名字被记住了。更多的，连名字都没有留下。',
             'page/greatman_mod5/mod5.html': '但有一个人，他的选择改变了一切。',
             'page/china_power_mod6/mod6.html': '他选择的路，通向了今天。',
-            'page/chess_mod2/mod2.html': '而今天的中国，需要你理解——什么是胜利。'
+            'page/mod7/mod7.html': '无线电波穿越黑暗，每一道信号都是生与死的边界。',
+            'page/mod8/mod8.html': '有些战场，看不见硝烟。有些英雄，没有名字。',
+            'page/mod9/mod9.html': '如果让你重新选择，你会怎么做？',
+            'page/mod10/mod10.html': '历史的真相，需要你亲手让它显现。',
+            'page/mod11/mod11.html': '每一个事件，都不是孤立的。因因果果，环环相扣。',
+            'page/mod12/mod12.html': '献一朵花，刻一个名字。记住，就是最好的纪念。',
+            'page/mod13/mod13.html': '跟着历史的节拍，一步一步走下去。',
+            'page/mod14/mod14.html': '他们冲锋，他们倒下。但他们的名字，不应该被忘记。',
+            'page/mod15/mod15.html': '历史的审判席，等你入座。'
         };
         document.querySelectorAll('.marker').forEach(marker => {
             marker.addEventListener('click', () => {
@@ -722,6 +855,24 @@
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     const url = marker.dataset.url;
+                    const narrative = narratives[url] || '';
+                    filmstripTransition(url, narrative);
+                }
+            });
+        });
+
+        // mod7-15 卡片点击 → 胶片转场
+        document.querySelectorAll('.mod-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = card.getAttribute('href');
+                const narrative = narratives[url] || '';
+                filmstripTransition(url, narrative);
+            });
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const url = card.getAttribute('href');
                     const narrative = narratives[url] || '';
                     filmstripTransition(url, narrative);
                 }
