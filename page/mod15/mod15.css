@@ -110,6 +110,7 @@ body {
     font-size: 1rem; color: var(--text-primary);
     line-height: 2; margin-bottom: 1.5rem;
     min-height: 60px;
+    white-space: pre-line;
 }
 
 .dialogue-options { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -173,6 +174,7 @@ body {
 .verdict-text {
     font-size: 0.95rem; color: var(--text-primary);
     line-height: 2; margin-bottom: 1.5rem;
+    white-space: pre-line;
 }
 .verdict-icon {
     font-size: 3rem; margin-bottom: 1.5rem;
@@ -237,6 +239,17 @@ body {
     .judge, .dialogue { transform: none; }
     .countdown.urgent { animation: none; }
     .dialogue, .verdict-overlay, .stats { transition: none; }
+}
+
+/* 焦点样式 */
+.option-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+.verdict-btn:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--gold);
 }
 
 @media (max-width: 768px) {

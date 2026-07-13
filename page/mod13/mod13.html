@@ -30,23 +30,23 @@
 
     <!-- 主节拍区域 -->
     <main id="beat-area" class="beat-area">
-        <div class="beat-ring" id="beat-ring">
+        <div class="beat-ring" id="beat-ring" role="button" tabindex="0" aria-label="敲击节拍，揭示历史事件">
             <div class="beat-center" id="beat-center">
-                <span class="beat-label">敲</span>
+                <span class="beat-label" aria-hidden="true">敲</span>
             </div>
         </div>
-        <div class="beat-hint">点击或按空格键，跟着节拍敲击</div>
+        <p class="beat-hint">点击或按空格键，跟着节拍敲击</p>
     </main>
 
     <!-- 当前事件 -->
-    <div id="event-display" class="event-display">
+    <div id="event-display" class="event-display" role="status" aria-live="assertive">
         <div id="event-year" class="event-year"></div>
         <div id="event-title" class="event-title"></div>
         <div id="event-detail" class="event-detail"></div>
     </div>
 
     <!-- 结尾 -->
-    <div id="ending" class="ending" aria-label="结束">
+    <section id="ending" class="ending" aria-label="节拍革命完成" tabindex="-1">
         <h2 class="ending-title">脉搏</h2>
         <p class="ending-text">
             你敲击了 <span id="total-taps">0</span> 次。<br>
@@ -54,8 +54,8 @@
             每一次敲击，都是一次心跳。<br>
             每一次心跳，都连接着那段岁月。
         </p>
-        <div class="ending-events" id="ending-events"></div>
-    </div>
+        <div class="ending-events" id="ending-events" role="list" aria-label="历史事件回顾"></div>
+    </section>
 
     <!-- Howler.js CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>

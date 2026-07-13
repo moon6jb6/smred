@@ -19,7 +19,7 @@
 
     <!-- 光源跟随层 -->
     <div id="dark-layer" class="dark-layer" aria-label="黑暗探索区域，移动鼠标或手指发现隐藏内容">
-        <div id="light-circle" class="light-circle"></div>
+        <div id="light-circle" class="light-circle" aria-hidden="true"></div>
     </div>
 
     <!-- 发现计数 -->
@@ -33,13 +33,13 @@
     </main>
 
     <!-- 故事面板 -->
-    <div id="story-panel" class="story-panel" role="dialog" aria-modal="true">
+    <div id="story-panel" class="story-panel" role="dialog" aria-modal="true" aria-labelledby="story-text" tabindex="-1">
         <div id="story-text" class="story-text"></div>
         <button id="story-close" class="story-close-btn">继续探索</button>
     </div>
 
     <!-- 第二层：系统故障覆盖 -->
-    <div id="glitch-overlay" class="glitch-overlay" aria-live="assertive">
+    <div id="glitch-overlay" class="glitch-overlay" role="alert" aria-live="assertive">
         <div class="glitch-text">
             <span class="glitch-line">系统检测到异常访问...</span>
             <span class="glitch-line">正在清除浏览记录...</span>
@@ -49,9 +49,9 @@
     </div>
 
     <!-- 第三层：真相揭示 -->
-    <div id="truth-overlay" class="truth-overlay" role="dialog" aria-modal="true">
+    <div id="truth-overlay" class="truth-overlay" role="dialog" aria-modal="true" aria-labelledby="truth-title" tabindex="-1">
         <div class="truth-content">
-            <h2 class="truth-title">你通过了考验</h2>
+            <h2 id="truth-title" class="truth-title">你通过了考验</h2>
             <p class="truth-text">
                 那些在黑暗中潜伏的人，<br>
                 他们的一生都在"故障"中度过。<br><br>
@@ -70,11 +70,11 @@
     </div>
 
     <!-- 结尾纪念碑 -->
-    <div id="memorial-end" class="memorial-end" aria-label="纪念">
+    <section id="memorial-end" class="memorial-end" aria-label="暗线英雄纪念">
         <h2 class="memorial-title">暗线英雄</h2>
         <div class="memorial-grid" id="memorial-grid"></div>
         <p class="memorial-quote">他们没有站在阳光下，却照亮了整个时代。</p>
-    </div>
+    </section>
 
     <script src="../../page/filmstrip.js"></script>
     <script src="../../shared/js/storage.js"></script>

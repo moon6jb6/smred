@@ -295,12 +295,19 @@ class Mod6ChinaPower {
         const year = parseInt(input);
 
         if (isNaN(year) || year < 1949 || year > 2026) {
-            this.personalResult.innerHTML = '<span style="color:var(--text-secondary)">请输入1949-2026之间的年份</span>';
+            this.personalResult.textContent = '请输入1949-2026之间的年份';
+            this.personalResult.style.color = 'var(--text-secondary)';
             return;
         }
 
         const event = getPersonalEvent(year);
-        this.personalResult.innerHTML = `<span class="highlight">${year}年</span>，${event}`;
+        this.personalResult.innerHTML = '';
+        const span = document.createElement('span');
+        span.className = 'highlight';
+        span.textContent = year + '年';
+        this.personalResult.appendChild(span);
+        this.personalResult.appendChild(document.createTextNode('，' + event));
+        this.personalResult.style.color = '';
     }
 
     /** 渲染70年一屏 */

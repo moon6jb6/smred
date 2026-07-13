@@ -76,9 +76,16 @@ class Mod10PhotoDevelop {
 
     init() {
         this.createPhotos();
+        document.getElementById('detail-close').addEventListener('click', () => {
+            this.detailPanel.classList.remove('active');
+            if (this._trapFocus) this.detailPanel.removeEventListener('keydown', this._trapFocus);
+            if (this._previousFocus) this._previousFocus.focus();
+        });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.detailPanel.classList.contains('active')) {
                 this.detailPanel.classList.remove('active');
+                if (this._trapFocus) this.detailPanel.removeEventListener('keydown', this._trapFocus);
+                if (this._previousFocus) this._previousFocus.focus();
             }
         });
     }
@@ -155,6 +162,7 @@ class Mod10PhotoDevelop {
         let erasedPixels = 0;
         const totalPixels = w * h;
         const threshold = 0.55; // 55%擦除即显影
+        let eraseCount = 0;
 
         const erase = (x, y) => {
             ctx.globalCompositeOperation = 'destination-out';
@@ -162,13 +170,20 @@ class Mod10PhotoDevelop {
             ctx.arc(x, y, 20, 0, Math.PI * 2);
             ctx.fill();
 
-            // 计算擦除比例
-            const imageData = ctx.getImageData(0, 0, w, h);
-            let transparent = 0;
-            for (let i = 3; i < imageData.data.length; i += 4) {
-                if (imageData.data[i] < 128) transparent++;
+            // 用笔刷面积近似估算擦除比例，避免每帧 getImageData
+            eraseCount++;
+            const brushArea = Math.PI * 20 * 20;
+            erasedPixels = Math.min(1, erasedPixels + brushArea / totalPixels);
+
+            // 每10次擦除做一次精确检查
+            if (eraseCount % 10 === 0) {
+                const imageData = ctx.getImageData(0, 0, w, h);
+                let transparent = 0;
+                for (let i = 3; i < imageData.data.length; i += 4) {
+                    if (imageData.data[i] < 128) transparent++;
+                }
+                erasedPixels = transparent / totalPixels;
             }
-            erasedPixels = transparent / totalPixels;
 
             // 更新进度
             const pct = Math.min(100, Math.round(erasedPixels * 100));
@@ -275,11 +290,23 @@ class Mod10PhotoDevelop {
         // SVG手写动画
         this.animateHandwriting(photo.handwriting);
 
+        this._previousFocus = document.activeElement;
         this.detailPanel.classList.add('active');
+        document.getElementById('detail-close').focus();
 
-        document.getElementById('detail-close').onclick = () => {
-            this.detailPanel.classList.remove('active');
+        // Focus trap
+        this._trapFocus = (e) => {
+            if (e.key !== 'Tab') return;
+            const focusable = this.detailPanel.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault(); last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault(); first.focus();
+            }
         };
+        this.detailPanel.addEventListener('keydown', this._trapFocus);
     }
 
     /** SVG手写动画 */
@@ -323,10 +350,13 @@ class Mod10PhotoDevelop {
         PHOTOS.forEach(photo => {
             const thumb = document.createElement('div');
             thumb.className = 'ending-thumb';
-            thumb.innerHTML = `
-                ${photo.icon}
-                <div class="thumb-caption">${photo.date}</div>
-            `;
+            const icon = document.createElement('span');
+            icon.textContent = photo.icon;
+            const caption = document.createElement('div');
+            caption.className = 'thumb-caption';
+            caption.textContent = photo.date;
+            thumb.appendChild(icon);
+            thumb.appendChild(caption);
             grid.appendChild(thumb);
         });
 
@@ -334,7 +364,7 @@ class Mod10PhotoDevelop {
         this.ending.scrollIntoView({ behavior: 'smooth' });
 
         // 保存
-        if (typeof Storage !== 'undefined') {
+        if (typeof Storage !== 'undefined' && typeof Storage.setModuleProgress === 'function') {
             Storage.setModuleProgress('mod10', { completed: true, photos: this.developed.length });
         }
     }
@@ -342,7 +372,12 @@ class Mod10PhotoDevelop {
 
 // 启动
 document.addEventListener('DOMContentLoaded', function() {
-    checkNarrativeTransition(function() {
+    const init = function() {
         new Mod10PhotoDevelop();
-    });
+    };
+    if (typeof checkNarrativeTransition === 'function') {
+        checkNarrativeTransition(init);
+    } else {
+        init();
+    }
 });

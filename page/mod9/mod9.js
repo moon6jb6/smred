@@ -112,6 +112,7 @@ class Mod9ChoiceRadio {
         this.currentScene = 0;
         this.totalCost = 0;
         this.choices = [];
+        this._noChoiceTimer = null;
 
         this.costNumber = document.getElementById('cost-number');
         this.sceneContainer = document.getElementById('scene-container');
@@ -130,6 +131,10 @@ class Mod9ChoiceRadio {
     }
 
     renderScene(index) {
+        if (this._noChoiceTimer) {
+            clearInterval(this._noChoiceTimer);
+            this._noChoiceTimer = null;
+        }
         if (index >= SCENES.length) {
             this.showJudgment();
             return;
@@ -227,10 +232,24 @@ class Mod9ChoiceRadio {
 
         const btn = document.getElementById('aftermath-btn');
         btn.textContent = '继续';
-        btn.onclick = () => {
+
+        let called = false;
+        const close = () => {
+            if (called) return;
+            called = true;
             this.aftermathOverlay.classList.remove('active');
+            this.aftermathOverlay.removeEventListener('keydown', onKeyDown);
+            btn.removeEventListener('click', close);
             callback();
         };
+
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape') close();
+        };
+
+        btn.addEventListener('click', close);
+        this.aftermathOverlay.addEventListener('keydown', onKeyDown);
+        btn.focus();
     }
 
     showComparison(scene, choiceIndex, callback) {
@@ -268,17 +287,21 @@ class Mod9ChoiceRadio {
         noChoiceDiv.className = 'no-choice';
         noChoiceDiv.innerHTML = `
             <p class="no-choice-text">有些时刻，你什么都做不了。<br>只能看着。</p>
-            <div class="no-choice-timer" id="no-choice-timer">10</div>
+            <div class="no-choice-timer" id="no-choice-timer" aria-live="assertive" aria-atomic="true">10</div>
         `;
         this.sceneContainer.appendChild(noChoiceDiv);
 
         let countdown = 10;
         const timerEl = document.getElementById('no-choice-timer');
-        const timer = setInterval(() => {
+        if (this._noChoiceTimer) {
+            clearInterval(this._noChoiceTimer);
+        }
+        this._noChoiceTimer = setInterval(() => {
             countdown--;
             timerEl.textContent = countdown;
             if (countdown <= 0) {
-                clearInterval(timer);
+                clearInterval(this._noChoiceTimer);
+                this._noChoiceTimer = null;
                 this.totalCost += SCENES[sceneIndex].choices[0].cost;
                 this.updateCost();
                 this.renderScene(sceneIndex + 1);
@@ -307,10 +330,10 @@ class Mod9ChoiceRadio {
                 <div class="chart-row">
                     <div class="chart-label">${b.title}</div>
                     <div class="chart-bars">
-                        <div class="chart-bar chart-bar-user" style="width:${userW}%">
+                        <div class="chart-bar chart-bar-user" data-width="${userW}" style="width:0">
                             <span>${b.userCost.toLocaleString()}</span>
                         </div>
-                        <div class="chart-bar chart-bar-hist" style="width:${histW}%">
+                        <div class="chart-bar chart-bar-hist" data-width="${histW}" style="width:0">
                             <span>${b.histCost.toLocaleString()}</span>
                         </div>
                     </div>
@@ -348,16 +371,28 @@ class Mod9ChoiceRadio {
         this.sceneContainer.appendChild(judgment);
 
         // 条形图动画
-        setTimeout(() => {
+        if (typeof Motion !== 'undefined' && Motion.reduced) {
             judgment.querySelectorAll('.chart-bar').forEach(bar => {
-                bar.style.transition = 'width 1s ease';
+                bar.style.width = bar.dataset.width + '%';
             });
-        }, 100);
+        } else {
+            requestAnimationFrame(() => {
+                judgment.querySelectorAll('.chart-bar').forEach(bar => {
+                    bar.style.transition = 'width 1s ease';
+                    bar.style.width = bar.dataset.width + '%';
+                });
+            });
+        }
     }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    checkNarrativeTransition(function() {
+    const init = function() {
         new Mod9ChoiceRadio();
-    });
+    };
+    if (typeof checkNarrativeTransition === 'function') {
+        checkNarrativeTransition(init);
+    } else {
+        init();
+    }
 });

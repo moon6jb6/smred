@@ -105,7 +105,6 @@ body {
 }
 .link-line.discovered {
     stroke: rgba(201, 169, 110, 0.5);
-    stroke-dasharray: none;
     stroke-width: 2.5;
 }
 
@@ -206,6 +205,13 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .link-animated { animation: none; stroke-dasharray: none; }
     .node-circle, .node-label { transition: none; }
+}
+
+/* 焦点样式 */
+.node-circle:focus-visible,
+.detail-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
 }
 
 @media (max-width: 768px) {

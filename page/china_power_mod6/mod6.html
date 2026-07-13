@@ -781,10 +781,15 @@
 
             const gap = val - timelineYears[closestIdx];
             const label = timelineLabels[closestIdx];
+            birthResult.innerHTML = '';
             if (gap === 0) {
-                birthResult.innerHTML = `你出生的那年，${label}。<br>你是这段历史的一部分。`;
+                birthResult.textContent = '你出生的那年，' + label + '。';
+                birthResult.appendChild(document.createElement('br'));
+                birthResult.appendChild(document.createTextNode('你是这段历史的一部分。'));
             } else {
-                birthResult.innerHTML = `你出生时，距离${label}已过去 ${gap} 年。<br>你继承了这段历史的全部重量。`;
+                birthResult.textContent = '你出生时，距离' + label + '已过去 ' + gap + ' 年。';
+                birthResult.appendChild(document.createElement('br'));
+                birthResult.appendChild(document.createTextNode('你继承了这段历史的全部重量。'));
             }
 
             // 粒子爆发

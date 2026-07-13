@@ -18,7 +18,7 @@
     </div>
 
     <!-- 倒计时 -->
-    <div id="countdown" class="countdown" aria-live="assertive">
+    <div id="countdown" class="countdown" role="timer" aria-live="assertive" aria-label="倒计时">
         <span id="countdown-num">30</span>
     </div>
 
@@ -26,19 +26,19 @@
     <main id="courtroom" class="courtroom" aria-label="审判庭">
         <div class="court-3d">
             <!-- 法台 -->
-            <div class="bench">
+            <div class="bench" aria-hidden="true">
                 <div class="bench-top">审判席</div>
                 <div class="bench-front"></div>
             </div>
 
             <!-- 审判者 -->
             <div id="judge" class="judge">
-                <div class="judge-figure">⚖️</div>
+                <div class="judge-figure" aria-hidden="true">⚖️</div>
                 <div class="judge-name" id="judge-name">历史</div>
             </div>
 
             <!-- 对话框 -->
-            <div id="dialogue" class="dialogue" role="dialog" aria-modal="true">
+            <div id="dialogue" class="dialogue" role="dialog" aria-modal="true" aria-labelledby="dialogue-speaker" aria-describedby="dialogue-text">
                 <div class="dialogue-speaker" id="dialogue-speaker"></div>
                 <div class="dialogue-text" id="dialogue-text"></div>
                 <div class="dialogue-options" id="dialogue-options"></div>
@@ -48,16 +48,16 @@
 
     <!-- 隐藏线索提示 -->
     <div id="clue-hint" class="clue-hint" aria-live="polite">
-        <span class="clue-icon">🔍</span>
+        <span class="clue-icon" aria-hidden="true">🔍</span>
         <span id="clue-text"></span>
     </div>
 
     <!-- 判决覆盖 -->
-    <div id="verdict-overlay" class="verdict-overlay" role="dialog" aria-modal="true">
+    <div id="verdict-overlay" class="verdict-overlay" role="dialog" aria-modal="true" aria-labelledby="verdict-title" tabindex="-1">
         <div class="verdict-content">
             <h2 id="verdict-title" class="verdict-title"></h2>
             <p id="verdict-text" class="verdict-text"></p>
-            <div id="verdict-icon" class="verdict-icon"></div>
+            <div id="verdict-icon" class="verdict-icon" aria-hidden="true"></div>
             <p id="verdict-quote" class="verdict-quote"></p>
             <p id="verdict-location" class="verdict-location" style="display:none"></p>
             <button id="verdict-btn" class="verdict-btn">接受判决</button>
@@ -65,7 +65,7 @@
     </div>
 
     <!-- 统计 -->
-    <div id="stats" class="stats" aria-label="统计">
+    <section id="stats" class="stats" aria-label="审判统计">
         <h2 class="stats-title">审判记录</h2>
         <div class="stats-grid" id="stats-grid"></div>
         <p class="stats-ending">
@@ -73,7 +73,7 @@
             但每个人心中都有一个。<br><br>
             你的选择，就是你的审判。
         </p>
-    </div>
+    </section>
 
     <script src="../../page/filmstrip.js"></script>
     <script src="../../shared/js/storage.js"></script>

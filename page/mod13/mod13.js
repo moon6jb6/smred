@@ -86,7 +86,15 @@ class Mod13BeatRevolution {
         // 点击
         this.beatRing.addEventListener('click', () => this.onTap());
 
-        // 键盘
+        // 键盘（Enter/Space）
+        this.beatRing.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.onTap();
+            }
+        });
+
+        // 全局空格键
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space' || e.key === ' ') {
                 e.preventDefault();
@@ -168,8 +176,9 @@ class Mod13BeatRevolution {
         if (detailEl) detailEl.textContent = event.detail || event.desc;
         this.eventDisplay.classList.add('visible');
 
-        // 3秒后隐藏（给detail更多阅读时间）
-        setTimeout(() => {
+        // 3秒后隐藏（清除之前的定时器防止堆叠）
+        if (this._hideEventTimer) clearTimeout(this._hideEventTimer);
+        this._hideEventTimer = setTimeout(() => {
             this.eventDisplay.classList.remove('visible');
         }, 3000);
 
@@ -260,7 +269,7 @@ class Mod13BeatRevolution {
         this.ending.classList.add('active');
         this.ending.scrollIntoView({ behavior: 'smooth' });
 
-        if (typeof Storage !== 'undefined') {
+        if (typeof Storage !== 'undefined' && typeof Storage.setModuleProgress === 'function') {
             Storage.setModuleProgress('mod13', { completed: true, taps: this.tapCount });
         }
     }
@@ -268,7 +277,12 @@ class Mod13BeatRevolution {
 
 // 启动
 document.addEventListener('DOMContentLoaded', function() {
-    checkNarrativeTransition(function() {
+    const init = function() {
         new Mod13BeatRevolution();
-    });
+    };
+    if (typeof checkNarrativeTransition === 'function') {
+        checkNarrativeTransition(init);
+    } else {
+        init();
+    }
 });

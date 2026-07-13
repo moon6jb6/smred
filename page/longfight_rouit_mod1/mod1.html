@@ -558,12 +558,26 @@
                 padding: 30px 15px;
             }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .shake { animation: none; }
+            .scroll-hint { animation: none; }
+            .stage-inner { transition: none; }
+            .choice-btn:hover { transform: none; }
+            html { scroll-behavior: auto; }
+        }
+
+        .choice-btn:focus-visible,
+        .indicator-dot:focus-visible {
+            outline: 2px solid #ffd700;
+            outline-offset: 2px;
+        }
     </style>
 </head>
 
 <body>
     <!-- 进度条 -->
-    <div class="progress-bar" id="progressBar"></div>
+    <div class="progress-bar" id="progressBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="阅读进度"></div>
 
     <!-- 导航 -->
     <div class="nav-buttons">
@@ -713,7 +727,7 @@
     <div class="blood-wash" id="bloodWash"></div>
 
     <!-- 湘江分支：选择界面 -->
-    <div class="choice-overlay" id="choiceOverlay">
+    <div class="choice-overlay" id="choiceOverlay" role="dialog" aria-modal="true" aria-label="湘江抉择" tabindex="-1">
         <div class="choice-backdrop"></div>
         <div class="choice-content">
             <div class="choice-year">1934年11月</div>
@@ -742,7 +756,7 @@
     </div>
 
     <!-- 湘江分支：后果展示 -->
-    <div class="consequence-overlay" id="consequenceOverlay">
+    <div class="consequence-overlay" id="consequenceOverlay" role="dialog" aria-modal="true" aria-label="后果展示" tabindex="-1">
         <div class="consequence-content" id="consequenceContent">
             <div class="consequence-number" id="consequenceFrom">86000</div>
             <div class="consequence-arrow">↓</div>
@@ -772,7 +786,7 @@
     <!-- 86000→7000 光点层 -->
     <canvas id="particleLayer" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:50;pointer-events:none;"></canvas>
     <!-- 出生年关联 -->
-    <div id="personalSection" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:3000;background:rgba(0,0,0,0.95);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;">
+    <div id="personalSection" role="dialog" aria-modal="true" aria-label="长征与你的关联" tabindex="-1" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:3000;background:rgba(0,0,0,0.95);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;">
         <div style="font-size:0.8rem;color:rgba(255,255,255,0.4);letter-spacing:3px;margin-bottom:1rem;">长征与你</div>
         <div style="font-size:1.1rem;color:rgba(255,255,255,0.8);line-height:2;margin-bottom:2rem;">你出生在哪一年？</div>
         <input id="birthYearInput" type="number" min="1949" max="2026" placeholder="如：2003" style="width:160px;padding:0.8rem;font-size:1.2rem;text-align:center;background:transparent;border:1px solid rgba(255,215,0,0.3);color:#ffd700;border-radius:6px;outline:none;font-family:inherit;">
@@ -885,6 +899,7 @@
                 link.textContent = '→ 这段历史，与你何干？';
                 link.addEventListener('click', () => {
                     section.style.display = 'flex';
+                    section.focus();
                 });
                 lastStage.querySelector('.stage-inner')?.appendChild(link);
             }
@@ -914,23 +929,35 @@
                     2021: '建党百年'
                 };
                 let eventText = '';
-                // 找最近的事件
                 const eventYears = Object.keys(events).map(Number).sort();
                 for (const ey of eventYears) {
                     if (ey <= year) eventText = events[ey];
                 }
 
-                result.innerHTML = `
-                    你出生于 <span style="color:#ffd700;font-size:1.3rem;font-weight:700;">${year}</span> 年。<br>
-                    距离长征结束，已经过去了 <span style="color:#ffd700;font-size:1.3rem;font-weight:700;">${yearsDiff}</span> 年。<br><br>
-                    那一年的中国：${eventText || '正在建设中'}。<br><br>
-                    <span style="color:rgba(255,255,255,0.7);font-size:0.9rem;line-height:2;">
-                    86000人走过的路，换来了你出生时的中国。<br>
-                    79000人倒下的地方，长出了你脚下的土地。<br>
-                    他们没有活到看见今天，<br>
-                    但他们的每一步，都是为了今天。
-                    </span>
-                `;
+                result.innerHTML = '';
+                const makeSpan = (text, style) => {
+                    const s = document.createElement('span');
+                    s.textContent = text;
+                    if (style) s.style.cssText = style;
+                    return s;
+                };
+                result.appendChild(document.createTextNode('你出生于 '));
+                result.appendChild(makeSpan(String(year), 'color:#ffd700;font-size:1.3rem;font-weight:700'));
+                result.appendChild(document.createTextNode(' 年。'));
+                result.appendChild(document.createElement('br'));
+                result.appendChild(document.createTextNode('距离长征结束，已经过去了 '));
+                result.appendChild(makeSpan(String(yearsDiff), 'color:#ffd700;font-size:1.3rem;font-weight:700'));
+                result.appendChild(document.createTextNode(' 年。'));
+                result.appendChild(document.createElement('br'));
+                result.appendChild(document.createElement('br'));
+                result.appendChild(document.createTextNode('那一年的中国：' + (eventText || '正在建设中') + '。'));
+                result.appendChild(document.createElement('br'));
+                result.appendChild(document.createElement('br'));
+                const bottom = document.createElement('span');
+                bottom.style.cssText = 'color:rgba(255,255,255,0.7);font-size:0.9rem;line-height:2;';
+                bottom.textContent = '86000人走过的路，换来了你出生时的中国。\n79000人倒下的地方，长出了你脚下的土地。\n他们没有活到看见今天，\n但他们的每一步，都是为了今天。';
+                bottom.style.whiteSpace = 'pre-line';
+                result.appendChild(bottom);
                 closeBtn.style.display = 'inline-block';
             }
 
@@ -1000,6 +1027,7 @@
 
             const progress = ((index + 1) / stages.length) * 100;
             progressBar.style.width = progress + '%';
+            progressBar.setAttribute('aria-valuenow', Math.round(progress));
 
             // 湘江阶段：检查是否已做过选择
             if (index === 1 && !xiangAnimated) {
@@ -1052,6 +1080,7 @@
             choiceOverlay.style.display = 'flex';
             requestAnimationFrame(() => {
                 choiceOverlay.classList.add('active');
+                choiceOverlay.focus();
             });
         }
 
@@ -1108,6 +1137,7 @@
 
             // 显示后果遮罩
             consequenceOverlay.classList.add('active');
+            consequenceOverlay.focus();
 
             // 重置状态
             consequenceFrom.textContent = config.from.toLocaleString();
@@ -1263,9 +1293,16 @@
 
         // 指示器点击跳转
         indicators.forEach(dot => {
-            dot.addEventListener('click', () => {
+            dot.setAttribute('role', 'button');
+            dot.setAttribute('tabindex', '0');
+            dot.setAttribute('aria-label', '跳转到阶段 ' + (parseInt(dot.dataset.stage) + 1));
+            const goTo = () => {
                 const index = parseInt(dot.dataset.stage);
                 stages[index].scrollIntoView({ behavior: 'smooth' });
+            };
+            dot.addEventListener('click', goTo);
+            dot.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goTo(); }
             });
         });
 

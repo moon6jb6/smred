@@ -88,7 +88,6 @@ class Mod7Telegraph {
     init() {
         this.initKnob();
         this.initEmergency();
-        this.loadDiary();
         this.renderDiary();
         this.initSpectrum();
         // 随机延迟后触发紧急电报
@@ -105,6 +104,7 @@ class Mod7Telegraph {
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width * (window.devicePixelRatio || 1);
             canvas.height = rect.height * (window.devicePixelRatio || 1);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
         };
         resize();
@@ -204,6 +204,21 @@ class Mod7Telegraph {
         document.addEventListener('mouseup', onEnd);
         document.addEventListener('touchend', onEnd);
 
+        // 键盘支持
+        this.knob.addEventListener('keydown', (e) => {
+            const step = 0.3;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.currentFreq = Math.min(10.0, this.currentFreq + step);
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.currentFreq = Math.max(4.0, this.currentFreq - step);
+            } else { return; }
+            this.knobAngle = ((this.currentFreq - 4.0) / 6.0) * 360;
+            this.knob.style.transform = `rotate(${this.knobAngle}deg)`;
+            this.updateFrequency();
+        });
+
         // 滑块辅助
         const slider = document.getElementById('freq-slider');
         if (slider) {
@@ -226,6 +241,13 @@ class Mod7Telegraph {
             this.freqDisplay.textContent = freq;
         }
 
+        // 更新旋钮 ARIA
+        this.knob.setAttribute('aria-valuenow', freq);
+
+        // 更新滑块
+        const slider = document.getElementById('freq-slider');
+        if (slider) slider.value = freq;
+
         // 检查是否接近某个电报频率
         let closest = null;
         let minDist = Infinity;
@@ -241,6 +263,7 @@ class Mod7Telegraph {
         // 信号强度
         const signal = Math.max(0, 1 - minDist / 2);
         this.signalFill.style.width = (signal * 100) + '%';
+        this.signalFill.parentElement.setAttribute('aria-valuenow', Math.round(signal * 100));
 
         // 干扰音效
         if (typeof AudioEngine !== 'undefined' && AudioEngine._initialized) {
@@ -279,6 +302,7 @@ class Mod7Telegraph {
 
         // 显示电报面板
         this.telegramPanel.classList.add('visible');
+        this.telegramPanel.setAttribute('aria-hidden', 'false');
         document.getElementById('tg-date').textContent = telegram.date;
         document.getElementById('tg-sender').textContent = telegram.sender;
 
@@ -363,6 +387,7 @@ class Mod7Telegraph {
 
         this.emergencyActive = true;
         this.emergencyOverlay.classList.add('active');
+        this.emergencyOverlay.focus();
 
         // 10秒倒计时
         let countdown = 10;
@@ -399,22 +424,27 @@ class Mod7Telegraph {
         } catch (e) { return []; }
     }
 
-    loadDiary() {}
-
     renderDiary() {
         const diary = this.loadDiaryData();
         this.diaryList.innerHTML = '';
         if (diary.length === 0) {
-            this.diaryList.innerHTML = '<div class="diary-empty">还没有收到任何电报...</div>';
+            const empty = document.createElement('div');
+            empty.className = 'diary-empty';
+            empty.textContent = '还没有收到任何电报...';
+            this.diaryList.appendChild(empty);
             return;
         }
         diary.forEach(entry => {
             const el = document.createElement('div');
             el.className = 'diary-entry';
-            el.innerHTML = `
-                <div class="entry-date">${entry.date} | ${entry.sender} | ${entry.freq}MHz</div>
-                <div class="entry-text">${entry.text}</div>
-            `;
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'entry-date';
+            dateDiv.textContent = entry.date + ' | ' + entry.sender + ' | ' + entry.freq + 'MHz';
+            const textDiv = document.createElement('div');
+            textDiv.className = 'entry-text';
+            textDiv.textContent = entry.text;
+            el.appendChild(dateDiv);
+            el.appendChild(textDiv);
             this.diaryList.appendChild(el);
         });
     }
@@ -422,12 +452,17 @@ class Mod7Telegraph {
 
 // 启动
 document.addEventListener('DOMContentLoaded', function() {
-    checkNarrativeTransition(function() {
+    const init = function() {
         // 初始化音频
         document.addEventListener('click', function initAudio() {
             if (typeof AudioEngine !== 'undefined') AudioEngine.init();
             document.removeEventListener('click', initAudio);
         }, { once: true });
         new Mod7Telegraph();
-    });
+    };
+    if (typeof checkNarrativeTransition === 'function') {
+        checkNarrativeTransition(init);
+    } else {
+        init();
+    }
 });

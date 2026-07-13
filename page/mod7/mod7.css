@@ -180,11 +180,13 @@ body {
     min-height: 150px;
     opacity: 0;
     transform: translateY(10px);
+    pointer-events: none;
     transition: opacity 0.5s, transform 0.5s;
 }
 .telegram-panel.visible {
     opacity: 1;
     transform: translateY(0);
+    pointer-events: auto;
 }
 
 .telegram-header {
@@ -276,12 +278,12 @@ body {
     padding: 2rem;
     opacity: 0;
     visibility: hidden;
-    animation: emergency-flash 0.5s infinite;
     transition: opacity 0.3s, visibility 0.3s;
 }
 .emergency-overlay.active {
     opacity: 1;
     visibility: visible;
+    animation: emergency-flash 0.5s infinite;
 }
 @keyframes emergency-flash {
     0%, 100% { background: rgba(139, 0, 0, 0.05); }
@@ -364,4 +366,14 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
     .emergency-overlay { animation: none; }
+    .telegram-panel, .signal-fill, .tuning-knob { transition: none; }
+}
+
+/* 焦点样式 */
+.tuning-knob:focus-visible,
+.freq-slider:focus-visible,
+.decode-option:focus-visible,
+.emergency-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
 }

@@ -582,6 +582,24 @@
                 font-size: 1.4rem;
             }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .history-object { transition: none; }
+            .history-object:hover { transform: none; }
+            .history-object:hover .object-icon .artifact-shape { animation: none; }
+            .discovery-beam { transition: none; }
+            .discovery-particle { animation: none; }
+        }
+
+        .history-object:focus-visible {
+            outline: 2px solid #ffd700;
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+        .overlay-close:focus-visible {
+            outline: 2px solid #ffd700;
+            outline-offset: 2px;
+        }
     </style>
 </head>
 
@@ -619,7 +637,7 @@
 
     <!-- 出生年关联 -->
     <div class="birth-section">
-        <label>输入你的出生年，找到属于你的历史坐标</label><br>
+        <label for="birthInput">输入你的出生年，找到属于你的历史坐标</label><br>
         <input type="number" class="birth-input" id="birthInput" min="1920" max="2026" placeholder="2004">
         <div class="birth-result" id="birthResult"></div>
     </div>
@@ -635,7 +653,7 @@
     </div>
 
     <!-- 浮层 -->
-    <div class="overlay" id="overlay">
+    <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlayTitle" tabindex="-1">
         <button class="overlay-close" id="overlayClose"><i class="fas fa-times"></i></button>
         <div class="overlay-card">
             <div class="overlay-icon" id="overlayIcon"></div>
@@ -804,7 +822,14 @@
                 el.style.transition = 'none';
                 el.style.transform = `rotate(${obj.rotate}deg) translate(${dir.x}px, ${dir.y}px) scale(0.3)`;
 
-                el.addEventListener('click', () => openOverlay(i));
+                el.setAttribute('role', 'button');
+                el.setAttribute('tabindex', '0');
+                el.setAttribute('aria-label', obj.name + ' ' + obj.year);
+                const openFn = () => openOverlay(i);
+                el.addEventListener('click', openFn);
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFn(); }
+                });
                 container.appendChild(el);
 
                 // 延迟后飞入到最终位置
@@ -830,6 +855,7 @@
             overlay.style.display = 'flex';
             requestAnimationFrame(() => {
                 overlay.classList.add('active');
+                overlay.focus();
             });
 
             // 标记已探索（首次发现时播放光柱效果）
@@ -924,7 +950,7 @@
                         不再被动地打，而是主动地打。"
                     </div>
                     <div class="manuscript-source">—— 周恩来</div>
-                    <div class="manuscript-close" onclick="this.closest('.manuscript-overlay').remove()">×</div>
+                    <div class="manuscript-close" onclick="this.closest('.hidden-manuscript').remove()">×</div>
                 </div>
             `;
             document.body.appendChild(hidden);

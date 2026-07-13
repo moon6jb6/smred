@@ -66,6 +66,12 @@ class Mod14LastStep {
 
         this.startBtn.addEventListener('click', () => this.startCharge());
         this.riseDot.addEventListener('click', () => this.riseAgainHandler());
+        this.riseDot.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.riseAgainHandler();
+            }
+        });
 
         // 纪念碑返回
         document.getElementById('monument-return').addEventListener('click', () => {
@@ -367,7 +373,13 @@ class Mod14LastStep {
 
 // 启动
 document.addEventListener('DOMContentLoaded', function() {
-    new Mod14LastStep();
+    if (typeof checkNarrativeTransition === 'function') {
+        checkNarrativeTransition(function() {
+            new Mod14LastStep();
+        });
+    } else {
+        new Mod14LastStep();
+    }
 });
 
 // 充电shake动画注入

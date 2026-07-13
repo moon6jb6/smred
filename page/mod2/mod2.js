@@ -871,7 +871,7 @@ class ChessGame {
         document.body.appendChild(canvas);
 
         const ctx = canvas.getContext('2d');
-        const isRed = piece.color === 'red';
+        const isRedPiece = isRed(piece);
         const particles = [];
 
         for (let i = 0; i < 20; i++) {
@@ -884,7 +884,7 @@ class ChessGame {
                 size: 3 + Math.random() * 4,
                 life: 1,
                 decay: 0.025 + Math.random() * 0.015,
-                color: isRed
+                color: isRedPiece
                     ? `hsl(${5 + Math.random() * 10}, 80%, ${50 + Math.random() * 20}%)`
                     : `hsl(${40 + Math.random() * 10}, 70%, ${55 + Math.random() * 20}%)`
             });

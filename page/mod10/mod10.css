@@ -254,6 +254,13 @@ body {
     .handwriting-path { transition: none; stroke-dashoffset: 0; }
 }
 
+/* 焦点样式 */
+.polaroid:focus-visible,
+.detail-close-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+}
+
 @media (max-width: 768px) {
     .photo-area {
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

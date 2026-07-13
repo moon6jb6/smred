@@ -318,16 +318,25 @@ class Mod8DarkLine {
     showStory(text) {
         this.storyText.textContent = text;
         this.storyPanel.classList.add('active');
+        this._previousFocus = document.activeElement;
+        this.storyCloseBtn.focus();
 
-        document.getElementById('story-close').onclick = () => {
-            this.storyPanel.classList.remove('active');
+        // Escape 关闭
+        this._storyEscHandler = (e) => {
+            if (e.key === 'Escape') {
+                this.storyPanel.classList.remove('active');
+                document.removeEventListener('keydown', this._storyEscHandler);
+                if (this._previousFocus) this._previousFocus.focus();
+            }
         };
+        document.addEventListener('keydown', this._storyEscHandler);
     }
 
     /** 第二层：系统故障 + CSS逐步被删除 */
     startGlitch() {
         this.phase = 'glitch';
         this.storyPanel.classList.remove('active');
+        if (this._storyEscHandler) document.removeEventListener('keydown', this._storyEscHandler);
         this.darkLayer.style.display = 'none';
         this.foundCounter.style.display = 'none';
         this.lightCircle.style.display = 'none';
@@ -389,32 +398,55 @@ class Mod8DarkLine {
         document.body.style.filter = '';
 
         this.truthOverlay.classList.add('active');
+        this.truthOverlay.focus();
 
-        document.getElementById('truth-btn').onclick = () => {
+        const truthBtn = document.getElementById('truth-btn');
+        truthBtn.onclick = () => {
             this.truthOverlay.classList.remove('active');
+            if (this._truthEscHandler) document.removeEventListener('keydown', this._truthEscHandler);
             this.showMemorial();
         };
+
+        // Escape 关闭
+        this._truthEscHandler = (e) => {
+            if (e.key === 'Escape') {
+                this.truthOverlay.classList.remove('active');
+                document.removeEventListener('keydown', this._truthEscHandler);
+                this.showMemorial();
+            }
+        };
+        document.addEventListener('keydown', this._truthEscHandler);
     }
 
     /** 结尾纪念碑 */
     showMemorial() {
         this.phase = 'memorial';
 
-        this.memorialGrid.innerHTML = HEROES.map(h => `
-            <div class="memorial-card">
-                <div class="card-name">${h.name}</div>
-                <div class="card-role">${h.role}</div>
-                <div class="card-years">${h.years}</div>
-                <div class="card-detail">${h.detail}</div>
-                <div class="card-quote">${h.quote}</div>
-            </div>
-        `).join('');
+        this.memorialGrid.innerHTML = '';
+        HEROES.forEach(h => {
+            const card = document.createElement('div');
+            card.className = 'memorial-card';
+            const fields = [
+                { cls: 'card-name', text: h.name },
+                { cls: 'card-role', text: h.role },
+                { cls: 'card-years', text: h.years },
+                { cls: 'card-detail', text: h.detail },
+                { cls: 'card-quote', text: h.quote }
+            ];
+            fields.forEach(f => {
+                const el = document.createElement('div');
+                el.className = f.cls;
+                el.textContent = f.text;
+                card.appendChild(el);
+            });
+            this.memorialGrid.appendChild(card);
+        });
 
         this.memorialEnd.classList.add('active');
         this.memorialEnd.scrollIntoView({ behavior: 'smooth' });
 
         // 保存进度
-        if (typeof Storage !== 'undefined') {
+        if (typeof Storage !== 'undefined' && typeof Storage.setModuleProgress === 'function') {
             Storage.setModuleProgress('mod8', { completed: true, cluesFound: this.foundClues.length });
         }
     }
@@ -422,7 +454,7 @@ class Mod8DarkLine {
 
 // 启动
 document.addEventListener('DOMContentLoaded', function() {
-    checkNarrativeTransition(function() {
+    const init = function() {
         // 初始化音频（需要用户交互）
         document.addEventListener('click', function initAudio() {
             if (typeof AudioEngine !== 'undefined') AudioEngine.init();
@@ -430,5 +462,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }, { once: true });
 
         new Mod8DarkLine();
-    });
+    };
+    if (typeof checkNarrativeTransition === 'function') {
+        checkNarrativeTransition(init);
+    } else {
+        init();
+    }
 });

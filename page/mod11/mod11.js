@@ -281,11 +281,33 @@ class Mod11StarMap {
             causesDiv.appendChild(tag);
         });
 
+        this._previousFocus = document.activeElement;
         this.nodeDetail.classList.add('active');
+        document.getElementById('detail-btn').focus();
 
-        document.getElementById('detail-btn').onclick = () => {
-            this.nodeDetail.classList.remove('active');
+        // Focus trap
+        this._trapFocus = (e) => {
+            if (e.key !== 'Tab') return;
+            const focusable = this.nodeDetail.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault(); last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault(); first.focus();
+            }
         };
+        this.nodeDetail.addEventListener('keydown', this._trapFocus);
+
+        this._escHandler = (e) => {
+            if (e.key === 'Escape') {
+                this.nodeDetail.classList.remove('active');
+                this.nodeDetail.removeEventListener('keydown', this._trapFocus);
+                document.removeEventListener('keydown', this._escHandler);
+                if (this._previousFocus) this._previousFocus.focus();
+            }
+        };
+        document.addEventListener('keydown', this._escHandler);
     }
 
     /** 结尾 */
@@ -309,7 +331,7 @@ class Mod11StarMap {
         this.ending.classList.add('active');
         this.ending.scrollIntoView({ behavior: 'smooth' });
 
-        if (typeof Storage !== 'undefined') {
+        if (typeof Storage !== 'undefined' && typeof Storage.setModuleProgress === 'function') {
             Storage.setModuleProgress('mod11', {
                 completed: true,
                 nodes: this.exploredNodes.size,
@@ -321,7 +343,12 @@ class Mod11StarMap {
 
 // 启动
 document.addEventListener('DOMContentLoaded', function() {
-    checkNarrativeTransition(function() {
+    const init = function() {
         new Mod11StarMap();
-    });
+    };
+    if (typeof checkNarrativeTransition === 'function') {
+        checkNarrativeTransition(init);
+    } else {
+        init();
+    }
 });

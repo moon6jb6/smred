@@ -467,6 +467,22 @@
             .quote-float .qf-text { font-size: 0.95rem; }
             .final-message .fm-text { font-size: 1.2rem; }
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            .silhouette { transition: none; }
+            .silhouette.discovered { animation: none; }
+            .mini-flame.on { animation: none; }
+            .mini-flame.on.wind { animation: none; }
+            .glow-outer, .glow-mid, .glow-inner { transition: none; }
+            .quote-float { transition: none; }
+            .mod4-intro-text { animation: none; opacity: 1; }
+        }
+
+        .silhouette:focus-visible {
+            outline: 2px solid #ffd700;
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
@@ -495,7 +511,7 @@
     <div class="silhouettes-container" id="silContainer"></div>
 
     <!-- 浮现语录 -->
-    <div class="quote-float" id="quoteFloat">
+    <div class="quote-float" id="quoteFloat" role="status" aria-live="polite">
         <div class="qf-title" id="qfTitle"></div>
         <div class="qf-text" id="qfText"></div>
         <div class="qf-detail" id="qfDetail"></div>
@@ -784,9 +800,13 @@
                     </div>
                 `;
 
-                el.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    revealQuote(i);
+                el.setAttribute('role', 'button');
+                el.setAttribute('tabindex', '0');
+                el.setAttribute('aria-label', hero.name + ' — ' + (hero.title || hero.role));
+                const revealFn = (e) => { e.stopPropagation(); revealQuote(i); };
+                el.addEventListener('click', revealFn);
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); revealFn(e); }
                 });
 
                 container.appendChild(el);

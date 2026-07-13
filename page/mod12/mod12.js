@@ -203,27 +203,39 @@ class Mod12Monument {
 
     /** 名字输入弹窗 */
     showNameModal() {
+        this._previousFocus = document.activeElement;
         this.nameModal.classList.add('active');
         this.nameInput.value = '';
         this.nameInput.focus();
+    }
+
+    /** 关闭弹窗并返回焦点 */
+    _closeModal(returnFocus) {
+        this.nameModal.classList.remove('active');
+        if (this._modalTrapFocus) {
+            this.nameModal.removeEventListener('keydown', this._modalTrapFocus);
+        }
+        if (returnFocus && this._previousFocus) {
+            this._previousFocus.focus();
+        }
     }
 
     initModal() {
         document.getElementById('modal-confirm').addEventListener('click', () => {
             const name = this.nameInput.value.trim() || '匿名';
             this.addName(name);
-            this.nameModal.classList.remove('active');
+            this._closeModal(true);
         });
 
         document.getElementById('modal-skip').addEventListener('click', () => {
             this.addName('匿名');
-            this.nameModal.classList.remove('active');
+            this._closeModal(true);
         });
 
+        // Escape 关闭（不添加名字）
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.nameModal.classList.contains('active')) {
-                this.addName('匿名');
-                this.nameModal.classList.remove('active');
+                this._closeModal(true);
             }
         });
 
@@ -231,9 +243,30 @@ class Mod12Monument {
             if (e.key === 'Enter') {
                 const name = this.nameInput.value.trim() || '匿名';
                 this.addName(name);
-                this.nameModal.classList.remove('active');
+                this._closeModal(true);
             }
         });
+
+        // Focus trap
+        this._modalTrapFocus = (e) => {
+            if (e.key !== 'Tab') return;
+            const focusable = this.nameModal.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])');
+            if (focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey) {
+                if (document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            } else {
+                if (document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        };
+        this.nameModal.addEventListener('keydown', this._modalTrapFocus);
     }
 
     /** 添加名字 */
@@ -267,6 +300,7 @@ class Mod12Monument {
         recent.forEach(name => {
             const stone = document.createElement('span');
             stone.className = 'stone';
+            stone.setAttribute('role', 'listitem');
             stone.textContent = name;
             // 历史人物显示title
             const hero = this.getHeroDetail(name);
@@ -296,6 +330,7 @@ class Mod12Monument {
         unique.forEach(name => {
             const el = document.createElement('span');
             el.className = 'flower-name';
+            el.setAttribute('role', 'listitem');
             el.textContent = name;
             this.flowerNames.appendChild(el);
         });
@@ -306,7 +341,7 @@ class Mod12Monument {
         this.endingNumber.textContent = this.flowerCount;
         this.ending.classList.add('active');
 
-        if (typeof Storage !== 'undefined') {
+        if (typeof Storage !== 'undefined' && typeof Storage.setModuleProgress === 'function') {
             Storage.setModuleProgress('mod12', { completed: true, flowers: this.flowerCount });
         }
     }
@@ -314,7 +349,7 @@ class Mod12Monument {
 
 // 启动
 document.addEventListener('DOMContentLoaded', function() {
-    checkNarrativeTransition(function() {
+    const init = function() {
         const mod = new Mod12Monument();
 
         // 30秒后如果还没操作，显示结尾
@@ -323,5 +358,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 mod.showEnding();
             }
         }, 30000);
-    });
+    };
+    if (typeof checkNarrativeTransition === 'function') {
+        checkNarrativeTransition(init);
+    } else {
+        init();
+    }
 });

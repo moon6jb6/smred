@@ -31,11 +31,11 @@
 
     <!-- SVG星图 -->
     <main id="star-map" class="star-map" aria-label="历史因果星图">
-        <svg id="map-svg" class="map-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet"></svg>
+        <svg id="map-svg" class="map-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="1840年至1978年中国历史事件因果星图"></svg>
     </main>
 
     <!-- 节点详情 -->
-    <div id="node-detail" class="node-detail" role="dialog" aria-modal="true">
+    <div id="node-detail" class="node-detail" role="dialog" aria-modal="true" aria-labelledby="detail-title" tabindex="-1">
         <div class="detail-inner">
             <div class="detail-year" id="detail-year"></div>
             <h2 class="detail-title" id="detail-title"></h2>
@@ -47,13 +47,13 @@
 
     <!-- 个人历史图谱 -->
     <div class="personal-section">
-        <label class="personal-label">输入你的出生年，看看哪些历史在你的时代</label><br>
+        <label for="birth-year-input" class="personal-label">输入你的出生年，看看哪些历史在你的时代</label><br>
         <input type="number" id="birth-year-input" class="personal-input" min="1840" max="2026" placeholder="2004">
         <div id="personal-result" class="personal-result"></div>
     </div>
 
     <!-- 结尾 -->
-    <div id="ending" class="ending" aria-label="总结">
+    <section id="ending" class="ending" aria-label="因果之网总结">
         <h2 class="ending-title">因果之网</h2>
         <p class="ending-text">
             每一个事件都不是偶然。<br>
@@ -61,7 +61,7 @@
             历史是一条链，我们每个人都是其中的一环。
         </p>
         <div class="ending-stats" id="ending-stats"></div>
-    </div>
+    </section>
 
     <script src="../../page/filmstrip.js"></script>
     <script src="../../shared/js/storage.js"></script>

@@ -62,7 +62,7 @@
             <svg id="diagonal-lines" xmlns="http://www.w3.org/2000/svg"></svg>
         </div>
 
-        <div id="victory-modal" class="victory-modal">
+        <div id="victory-modal" class="victory-modal" role="dialog" aria-modal="true" aria-labelledby="victory-tips" tabindex="-1">
             <div class="modal-content victory-content">
                 <div class="victory-header">
                     <h2>胜利！</h2>
@@ -82,7 +82,7 @@
     </div>
 
     <!-- 终局冲击：胜利 -->
-    <div class="ending-overlay" id="endingWin">
+    <div class="ending-overlay" id="endingWin" role="dialog" aria-modal="true" aria-label="胜利" tabindex="-1">
         <div class="ending-text" id="endingWinText"></div>
         <div class="ending-sub" id="endingWinSub"></div>
         <button class="ending-btn" id="endingWinBtn">继续</button>
@@ -105,7 +105,7 @@
         <div class="loading-text">正在加载象棋引擎...</div>
     </div>
 
-    <div class="level-select-modal" id="level-select-modal">
+    <div class="level-select-modal" id="level-select-modal" role="dialog" aria-modal="true" aria-label="选择关卡" tabindex="-1">
         <div class="level-select-content">
             <button class="close-level-select" id="close-level-select">&times;</button>
             <h2>选择关卡</h2>
@@ -906,21 +906,21 @@
         if (!red_general_exists) {
             const ending = document.getElementById('endingLose');
             ending.style.display = 'flex';
-            setTimeout(() => ending.classList.add('active'), 50);
+            setTimeout(() => { ending.classList.add('active'); ending.focus(); }, 50);
         } else if (check_flying_general()) {
             const violator = current_turn === 'red' ? '红' : '黑';
             const winner = current_turn === 'red' ? '黑' : '红';
             document.getElementById('status-msg').textContent = `将帅对脸！${violator}方违规判负`;
             const ending = document.getElementById(winner === '红' ? 'endingWin' : 'endingLose');
             ending.style.display = 'flex';
-            setTimeout(() => ending.classList.add('active'), 50);
+            setTimeout(() => { ending.classList.add('active'); ending.focus(); }, 50);
         } else if (!black_general_exists) {
             const level_info = level_data[current_level];
             document.getElementById('endingWinText').textContent = level_info.tips || '完成关卡';
             document.getElementById('endingWinSub').textContent = level_info.tit || '';
             const ending = document.getElementById('endingWin');
             ending.style.display = 'flex';
-            setTimeout(() => ending.classList.add('active'), 50);
+            setTimeout(() => { ending.classList.add('active'); ending.focus(); }, 50);
             if (current_level >= user_max_level) user_max_level = current_level + 1;
         }
     }
@@ -930,6 +930,7 @@
     function show_level_select() {
         const modal = document.getElementById('level-select-modal');
         modal.style.display = 'flex';
+        modal.focus();
 
         const levels_grid = document.getElementById('levels-grid');
         levels_grid.innerHTML = '';

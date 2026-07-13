@@ -30,7 +30,7 @@
     <main id="scene-container" class="scene-container" aria-label="历史抉择场景"></main>
 
     <!-- 后果覆盖层 -->
-    <div id="aftermath-overlay" class="aftermath-overlay" role="dialog" aria-modal="true">
+    <div id="aftermath-overlay" class="aftermath-overlay" role="dialog" aria-modal="true" aria-labelledby="aftermath-title">
         <h2 id="aftermath-title" class="aftermath-title"></h2>
         <p id="aftermath-desc" class="aftermath-desc"></p>
         <div id="aftermath-cost" class="aftermath-cost"></div>
@@ -38,7 +38,7 @@
     </div>
 
     <!-- 历史对比 -->
-    <div id="comparison-section" class="comparison" aria-label="选择对比"></div>
+    <div id="comparison-section" class="comparison" aria-label="选择对比" aria-live="polite"></div>
 
     <script src="../../page/filmstrip.js"></script>
     <script src="../../shared/js/storage.js"></script>

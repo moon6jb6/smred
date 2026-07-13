@@ -27,18 +27,18 @@
         <!-- 电台界面 -->
         <section id="radio-station" class="radio-station" aria-label="电台调频">
             <div id="freq-display" class="frequency-display">5.0<span class="frequency-unit">MHz</span></div>
-            <div class="signal-bar"><div id="signal-fill" class="signal-fill"></div></div>
+            <div class="signal-bar" role="meter" aria-label="信号强度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="signal-fill" class="signal-fill"></div></div>
             <canvas id="spectrum-canvas" class="spectrum-canvas" aria-hidden="true"></canvas>
             <input type="range" id="freq-slider" class="freq-slider" min="4.0" max="10.0" step="0.1" value="5.0"
                    aria-label="频率调节，从4.0到10.0MHz">
-            <div id="tuning-knob" class="tuning-knob" role="slider" aria-label="调频旋钮" aria-valuenow="5.0" tabindex="0">
+            <div id="tuning-knob" class="tuning-knob" role="slider" aria-label="调频旋钮" aria-valuenow="5.0" aria-valuemin="4.0" aria-valuemax="10.0" tabindex="0">
                 <div class="knob-indicator"></div>
             </div>
             <div id="radio-status" class="radio-status">搜索信号中...</div>
         </section>
 
         <!-- 电报内容 -->
-        <section id="telegram-panel" class="telegram-panel" aria-label="电报内容">
+        <section id="telegram-panel" class="telegram-panel" aria-label="电报内容" aria-hidden="true">
             <div class="telegram-header">
                 <span id="tg-date" class="telegram-date"></span>
                 <span id="tg-sender" class="telegram-sender"></span>
@@ -54,7 +54,7 @@
     </main>
 
     <!-- 紧急电报 -->
-    <div id="emergency-overlay" class="emergency-overlay" role="alertdialog" aria-modal="true" aria-label="紧急电报">
+    <div id="emergency-overlay" class="emergency-overlay" role="alertdialog" aria-modal="true" aria-label="紧急电报" tabindex="-1">
         <div class="emergency-text">紧急电报</div>
         <div id="emergency-countdown" class="emergency-countdown">10</div>
         <button id="emergency-recv" class="emergency-btn" aria-label="接收紧急电报">接收</button>

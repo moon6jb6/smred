@@ -189,17 +189,23 @@ class Mod5ThreeChoices {
 
         const resize = () => {
             const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            startX = canvas.width * 0.72;
-            startY = canvas.height * 0.6;
-            endX = canvas.width * 0.35;
-            endY = canvas.height * 0.25;
-            this.drawMapBase(ctx, canvas.width, canvas.height);
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            startX = rect.width * 0.72;
+            startY = rect.height * 0.6;
+            endX = rect.width * 0.35;
+            endY = rect.height * 0.25;
+            this.drawMapBase(ctx, rect.width, rect.height);
             this.drawEndpoints(ctx, startX, startY, endX, endY);
         };
         resize();
-        window.addEventListener('resize', resize);
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(resize, 100);
+        });
 
         let isDrawing = false;
         let userPath = [];
@@ -250,17 +256,21 @@ class Mod5ThreeChoices {
         // 清除
         clearBtn.addEventListener('click', () => {
             userPath = [];
+            const rect = canvas.getBoundingClientRect();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            this.drawMapBase(ctx, canvas.width, canvas.height);
+            const dpr = window.devicePixelRatio || 1;
+            ctx.scale(dpr, dpr);
+            this.drawMapBase(ctx, rect.width, rect.height);
             this.drawEndpoints(ctx, startX, startY, endX, endY);
         });
 
         // 完成
         doneBtn.addEventListener('click', () => {
-            // 绘制实际长征路线（简化）
-            this.drawActualRoute(ctx, canvas.width, canvas.height);
+            const rect = canvas.getBoundingClientRect();
+            this.drawActualRoute(ctx, rect.width, rect.height);
             const pathLength = this.calculatePathLength(userPath);
-            const canvasDiag = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height);
+            const canvasDiag = Math.sqrt(rect.width * rect.width + rect.height * rect.height);
             const estimatedLi = Math.round((pathLength / canvasDiag) * 25000);
 
             setTimeout(() => {
@@ -378,6 +388,8 @@ class Mod5ThreeChoices {
         btnEl.textContent = '继续';
 
         overlay.classList.add('active');
+        overlay.setAttribute('tabindex', '-1');
+        overlay.focus();
         btnEl.onclick = () => {
             overlay.classList.remove('active');
             // 滚动到下一个场景

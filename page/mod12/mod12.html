@@ -13,7 +13,7 @@
     <a href="#monument-area" class="skip-link">跳转到纪念碑</a>
 
     <!-- 叙事文字 -->
-    <div id="narrative-text" class="narrative-text" role="status" aria-live="polite">
+    <div id="narrative-text" class="narrative-text">
         有些名字，我们永远不会知道。<br>但他们值得被记住。<br>献上一朵花，纪念那些觉醒者。
     </div>
 
@@ -23,7 +23,7 @@
     <!-- 献花按钮 -->
     <div class="offer-area">
         <button id="offer-btn" class="offer-btn" aria-label="献上一朵花">
-            <span class="offer-icon">🌸</span>
+            <span class="offer-icon" aria-hidden="true">🌸</span>
             <span class="offer-text">献花</span>
         </button>
         <div class="offer-count" aria-live="polite">
@@ -34,28 +34,30 @@
     <!-- 纪念碑区域 -->
     <main id="monument-area" class="monument-area" aria-label="觉醒纪念碑">
         <!-- SVG书法标题 -->
-        <svg id="title-svg" class="title-svg" viewBox="0 0 400 60">
+        <svg id="title-svg" class="title-svg" viewBox="0 0 400 60" aria-hidden="true" role="img">
+            <title>觉醒纪念碑</title>
             <text x="200" y="45" text-anchor="middle" class="title-text-path">觉醒纪念碑</text>
         </svg>
 
         <!-- 纪念碑主体 -->
         <div id="monument" class="monument">
-            <div class="monument-top">碑</div>
-            <div id="monument-body" class="monument-body"></div>
+            <div class="monument-top" aria-hidden="true">碑</div>
+            <div id="monument-body" class="monument-body" role="list" aria-label="纪念碑名字"></div>
         </div>
 
         <!-- 献花记录 -->
-        <div class="flower-record">
+        <section class="flower-record" aria-label="献花记录">
             <h2 class="record-title">献花者</h2>
-            <div id="flower-names" class="flower-names"></div>
-        </div>
+            <div id="flower-names" class="flower-names" role="list"></div>
+        </section>
     </main>
 
     <!-- 名字输入弹窗 -->
-    <div id="name-modal" class="name-modal" role="dialog" aria-modal="true">
+    <div id="name-modal" class="name-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc" tabindex="-1">
         <div class="modal-inner">
-            <h2 class="modal-title">留下你的名字</h2>
-            <p class="modal-desc">你的名字将刻在纪念碑上</p>
+            <h2 id="modal-title" class="modal-title">留下你的名字</h2>
+            <p id="modal-desc" class="modal-desc">你的名字将刻在纪念碑上</p>
+            <label for="name-input" class="visually-hidden">你的名字</label>
             <input id="name-input" class="name-input" type="text" placeholder="你的名字" maxlength="10" autocomplete="off">
             <div class="modal-btns">
                 <button id="modal-skip" class="modal-btn secondary">匿名</button>
@@ -65,7 +67,7 @@
     </div>
 
     <!-- 结尾 -->
-    <div id="ending" class="ending" aria-label="结束">
+    <section id="ending" class="ending" aria-label="纪念统计">
         <h2 class="ending-title">觉醒</h2>
         <p class="ending-text">
             每一朵花，都是一份纪念。<br>
@@ -75,7 +77,7 @@
         </p>
         <div class="ending-number" id="ending-number">0</div>
         <div class="ending-label">朵花，献给觉醒年代</div>
-    </div>
+    </section>
 
     <script src="../../page/filmstrip.js"></script>
     <script src="../../shared/js/storage.js"></script>

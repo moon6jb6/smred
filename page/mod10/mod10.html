@@ -18,7 +18,7 @@
     </div>
 
     <!-- 进度 -->
-    <div class="progress-bar" aria-label="显影进度">
+    <div class="progress-bar" role="progressbar" aria-label="显影进度" aria-valuenow="0" aria-valuemin="0" aria-valuemax="6">
         <div id="progress-fill" class="progress-fill"></div>
         <span id="progress-text" class="progress-text">0 / 6</span>
     </div>
@@ -27,23 +27,23 @@
     <main id="photo-area" class="photo-area" aria-label="历史照片显影"></main>
 
     <!-- 照片详情面板 -->
-    <div id="detail-panel" class="detail-panel" role="dialog" aria-modal="true">
+    <div id="detail-panel" class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detail-title" tabindex="-1">
         <div class="detail-inner">
-            <div id="detail-photo" class="detail-photo"></div>
+            <div id="detail-photo" class="detail-photo" aria-hidden="true"></div>
             <h2 id="detail-title" class="detail-title"></h2>
             <p id="detail-date" class="detail-date"></p>
             <p id="detail-desc" class="detail-desc"></p>
             <p id="detail-detail" class="detail-detail"></p>
             <blockquote id="detail-quote" class="detail-quote"></blockquote>
             <div id="detail-handwriting" class="detail-handwriting">
-                <svg id="handwriting-svg" viewBox="0 0 300 80" class="handwriting-svg"></svg>
+                <svg id="handwriting-svg" viewBox="0 0 300 80" class="handwriting-svg" role="img" aria-label="手写动画"></svg>
             </div>
             <button id="detail-close" class="detail-close-btn">继续显影</button>
         </div>
     </div>
 
     <!-- 结尾 -->
-    <div id="ending" class="ending" aria-label="结束">
+    <section id="ending" class="ending" aria-label="历史显影完成">
         <h2 class="ending-title">历史已经显影</h2>
         <p class="ending-text">
             6张照片，6个瞬间。<br>
@@ -52,7 +52,7 @@
             因为有人记得。
         </p>
         <div class="ending-grid" id="ending-grid"></div>
-    </div>
+    </section>
 
     <script src="../../page/filmstrip.js"></script>
     <script src="../../shared/js/storage.js"></script>

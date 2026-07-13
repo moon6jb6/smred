@@ -311,6 +311,8 @@ class Mod15Judgment {
 
         // 显示对话框
         this.dialogue.classList.add('active');
+        this.dialogue.setAttribute('tabindex', '-1');
+        this.dialogue.focus({ preventScroll: true });
 
         // 倒计时
         if (scene.timer > 0) {
@@ -353,20 +355,21 @@ class Mod15Judgment {
 
         this.timer = setInterval(() => {
             this.timeLeft--;
-            this.countdownNum.textContent = this.timeLeft;
 
             if (this.timeLeft <= 10) {
                 this.countdown.classList.add('urgent');
             }
 
             if (this.timeLeft <= 0) {
+                this.countdownNum.textContent = '0';
                 clearInterval(this.timer);
                 this.timer = null;
-                // 时间到，自动选择第一个选项
                 const scene = SCENES[this.currentScene];
                 if (scene && scene.options.length > 0) {
                     this.makeChoice(this.currentScene, scene.options[0]);
                 }
+            } else {
+                this.countdownNum.textContent = this.timeLeft;
             }
         }, 1000);
     }
@@ -410,6 +413,7 @@ class Mod15Judgment {
         document.getElementById('verdict-quote').textContent = v.quote;
 
         this.verdictOverlay.classList.add('active');
+        this.verdictOverlay.focus();
 
         // 环境声加强
         if (this.ambientGain) {
@@ -450,24 +454,26 @@ class Mod15Judgment {
     /** 显示统计 */
     showStats() {
         const grid = document.getElementById('stats-grid');
-        grid.innerHTML = `
-            <div class="stat-card">
-                <div class="stat-value">${this.verdictType ? VERDICTS[this.verdictType].title : '无罪'}</div>
-                <div class="stat-label">判决结果</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">${this.choices.length}</div>
-                <div class="stat-label">做出选择</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">${this.hiddenCluesFound}</div>
-                <div class="stat-label">发现隐藏线索</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">${this.scores.insight || 0}</div>
-                <div class="stat-label">洞察力</div>
-            </div>
-        `;
+        grid.innerHTML = '';
+        const statsData = [
+            { value: this.verdictType ? VERDICTS[this.verdictType].title : '无罪', label: '判决结果' },
+            { value: this.choices.length, label: '做出选择' },
+            { value: this.hiddenCluesFound, label: '发现隐藏线索' },
+            { value: this.scores.insight || 0, label: '洞察力' }
+        ];
+        statsData.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'stat-card';
+            const val = document.createElement('div');
+            val.className = 'stat-value';
+            val.textContent = item.value;
+            const lbl = document.createElement('div');
+            lbl.className = 'stat-label';
+            lbl.textContent = item.label;
+            card.appendChild(val);
+            card.appendChild(lbl);
+            grid.appendChild(card);
+        });
 
         this.stats.classList.add('active');
         this.stats.scrollIntoView({ behavior: 'smooth' });
